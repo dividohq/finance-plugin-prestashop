@@ -1,0 +1,13 @@
+
+{
+    "require": {
+        "divido/merchant-sdk": "dev-master"
+        },
+        "repositories": [
+            {
+                "type": "vcs",
+                "url":  "git@github.com:DividoFinancialServices/php-merchant-sdk.git"
+            }
+        ],
+        "minimum-stability": "dev"
+    }
