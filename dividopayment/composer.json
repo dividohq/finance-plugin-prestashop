@@ -1,13 +1,16 @@
-
 {
-    "require": {
-        "divido/merchant-sdk": "dev-master"
+    "repositories": [
+        {
+            "type": "vcs",
+            "url":  "git@github.com:DividoFinancialServices/php-merchant-sdk.git"
         },
-        "repositories": [
-            {
-                "type": "vcs",
-                "url":  "git@github.com:DividoFinancialServices/php-merchant-sdk.git"
-            }
-        ],
-        "minimum-stability": "dev"
+        {
+            "type": "vcs",
+            "url":  "git@github.com:DividoFinancialServices/php-merchant-sdk-guzzle-5.git"
+        }
+    ],
+    "require": {
+        "divido/merchant-sdk": "dev-feature/remove-guzzle",
+        "divido/merchant-sdk-guzzle-5": "dev-master"
     }
+}

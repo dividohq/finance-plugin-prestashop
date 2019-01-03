@@ -24,6 +24,12 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
+use Divido\MerchantSDK\Client;
+use Divido\MerchantSDK\Environment;
+use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
+use GuzzleHttp\Client as Guzzle;
+
 class DividoApi
 {
     public function getGlobalSelectedPlans()
@@ -51,37 +57,52 @@ class DividoApi
 
     public function getAllPlans()
     {
+        // Decide the env set by admin somehow...
+        $env = Environment::TESTING;
+
         $api_key = Configuration::get('DIVIDO_API_KEY');
         if (!$api_key) {
             return array();
         }
 
-        Divido::setMerchant($api_key);
+        $client = new Guzzle();
 
-        $response = Divido_Finances::all();
-        if ($response->status != 'ok') {
-            return array();
+        $httpClientWrapper = new HttpClientWrapper(
+            new GuzzleAdapter($client),
+            Environment::CONFIGURATION[$env]['base_uri'],
+            $api_key
+        );
+
+        $sdk = new Client($httpClientWrapper, $env);
+
+        $requestOptions = (new \Divido\MerchantSDK\Handlers\ApiRequestOptions());
+
+        try {
+            $plans = $sdk->finances()->yieldAllPlans($requestOptions);
+
+            $plans_plain = array();
+            foreach ($plans as $plan) {
+                $plan_copy = new stdClass();
+                $plan_copy->id = $plan->id;
+                $plan_copy->text = $plan->description;
+                $plan_copy->country = $plan->country;
+                $plan_copy->min_amount = $plan->credit_amount->minimum_amount;
+                $plan_copy->min_deposit = $plan->deposit->minimum_percentage;
+                $plan_copy->max_deposit = $plan->deposit->maximum_percentage;
+                $plan_copy->interest_rate = $plan->interest_rate_percentage;
+                $plan_copy->deferral_period = $plan->deferral_period_months;
+                $plan_copy->agreement_duration = $plan->agreement_duration_months;
+
+                $plans_plain[$plan->id] = $plan_copy;
+            }
+
+            return $plans_plain;
+        } catch (\Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException $e) {
+            // Handle exception how you like...
+            // $e->getCode() | eg 400401
+            // $e->getMessage() | eg resource not found
+            // $e->getContext()
         }
-
-        $plans = $response->finances;
-
-        $plans_plain = array();
-        foreach ($plans as $plan) {
-            $plan_copy = new stdClass();
-            $plan_copy->id                 = $plan->id;
-            $plan_copy->text               = $plan->text;
-            $plan_copy->country            = $plan->country;
-            $plan_copy->min_amount         = $plan->min_amount;
-            $plan_copy->min_deposit        = $plan->min_deposit;
-            $plan_copy->max_deposit        = $plan->max_deposit;
-            $plan_copy->interest_rate      = $plan->interest_rate;
-            $plan_copy->deferral_period    = $plan->deferral_period;
-            $plan_copy->agreement_duration = $plan->agreement_duration;
-
-            $plans_plain[$plan->id] = $plan_copy;
-        }
-
-        return $plans_plain;
     }
 
     public function getCartPlans($cart)
