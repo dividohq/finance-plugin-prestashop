@@ -58,7 +58,7 @@ class DividoApi
     public function getAllPlans()
     {
         // Decide the env set by admin somehow...
-        $env = Environment::TESTING;
+        $env = Environment::SANDBOX;
 
         $api_key = Configuration::get('DIVIDO_API_KEY');
         if (!$api_key) {

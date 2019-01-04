@@ -24,6 +24,13 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
+use Divido\MerchantSDK\Client;
+use Divido\MerchantSDK\Environment;
+use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
+use GuzzleHttp\Client as Guzzle;
+
+
 class DividoPaymentValidationModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = false;
@@ -48,10 +55,11 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
         if ($this->module->active == false) {
             echo Tools::jsonEncode($response);
             die;
+
         }
         
         $cart = $this->context->cart;
-
+        
         if ($cart->getOrderTotal(true, Cart::BOTH) != Tools::getValue('total')) {
             $response = array(
                 'status' => true,
@@ -85,10 +93,12 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
             echo json_encode($response);
             die;
         }
-
+        
         $response = $this->getConfirmation();
+        //var_dump($response); die;
         echo Tools::jsonEncode($response);
         die;
+        
     }
 
     public function getConfirmation()
@@ -133,7 +143,6 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
         }
 
         $sub_total = $cart->getOrderTotal(true, Cart::BOTH);
-
         $shiphandle = $cart->getOrderTotal(true, Cart::ONLY_SHIPPING);
         $disounts = $cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS);
 
@@ -163,47 +172,86 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
 
         $salt = uniqid('', true);
         $hash = hash('sha256', $cart_id.$salt);
-
+        
         $this->saveHash($cart_id, $salt, $sub_total);
 
-        $request_data = array(
-            'merchant' => $api_key,
-            'deposit'  => $deposit_amount,
-            'finance'  => $finance,
-            'country'  => $country,
-            'language' => $language,
-            'currency' => $currency,
-            'metadata' => array(
-                'cart_id' => $cart_id,
-                'cart_hash' => $hash,
-            ),
-            'customer' => array(
-                'title'         => '',
-                'first_name'    => $firstname,
-                'middle_name'   => '',
-                'last_name'     => $lastname,
-                'country'       => $country,
-                'postcode'      => $postcode,
-                'email'         => $email,
-                'mobile_number' => '',
-                'phone_number'  => $telephone,
-                'address' => array(
-                    'text' => $address->address1." ".$address->address2.
-                        " ".$address->city." ".$address->postcode,
-                ),
-            ),
-            'products' => $products,
-            'response_url' => $response_url,
-            'redirect_url' => $redirect_url,
-            'checkout_url' => $checkout_url,
+        
+
+
+
+
+        
+        $application               = ( new \Divido\MerchantSDK\Models\Application() )
+        ->withCountryId( 'GB' )
+        ->withCurrencyId( 'GBP' )
+        ->withLanguageId( 'en' )
+        ->withFinancePlanId( $finance )
+        ->withApplicants(
+            [
+                [
+                    'firstName'   => $firstname,
+                    'lastName'    => $lastname,
+                    'phoneNumber' => $telephone,
+                    'email'       => $email,
+                    'addresses'   => array(
+                        [
+                            'postcode' => 'SW15 3EF',
+                            'street'   => 'Test Road ',
+                            'town'     => 'London',
+                        ],
+                    ),
+                ],
+            ]
+        )
+        ->withOrderItems([
+            [
+            'name' => 'Sofa',
+            'quantity' => 1,
+            'price' => 50000,
+            ],
+        ])
+        ->withDepositPercentage(0.02)
+        ->withFinalisationRequired( false )
+        ->withMerchantReference( '' )
+        ->withUrls(
+            [
+                'merchant_redirect_url' => $redirect_url,
+                'merchant_checkout_url' => $checkout_url,
+                'merchant_response_url' => $response_url,
+            ]
+        )
+        ->withMetadata(
+            [
+                'order_number' => 'foo-oos',
+            ]
         );
 
-        $response = Divido_CreditRequest::create($request_data);
 
-        if ($response->status == 'ok') {
+
+
+// Note: If creating an appliclation (credit request) on a merchant with a shared secret, you will have to pass in a correct hmac
+$env = Environment::SANDBOX;
+
+$client = new Guzzle();
+$httpClientWrapper = new HttpClientWrapper(
+    new GuzzleAdapter($client),
+    Environment::CONFIGURATION[$env]['base_uri'],
+    $api_key
+);
+
+$sdk = new Client($httpClientWrapper, $env);
+
+
+$response = $sdk->applications()->createApplication($application);
+$application_response_body = $response->getBody()->getContents();
+$decode                    = json_decode( $application_response_body );
+$result_id                 = $decode->data->id;
+$result_redirect           = $decode->data->urls->application_url;
+
+ if (true) {
             $data = array(
                 'status' => true,
-                'url'    => $response->url,
+                'url'    => $result_redirect,
             );
             $customer = new Customer($cart->id_customer);
             $this->validatOrder(
@@ -224,7 +272,66 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
             );
         }
 
-        return $data;
+
+        // $request_data = array(
+        //     'merchant' => $api_key,
+        //     'deposit'  => $deposit_amount,
+        //     'finance'  => $finance,
+        //     'country'  => $country,
+        //     'language' => $language,
+        //     'currency' => $currency,
+        //     'metadata' => array(
+        //         'cart_id' => $cart_id,
+        //         'cart_hash' => $hash,
+        //     ),
+        //     'customer' => array(
+        //         'title'         => '',
+        //         'first_name'    => $firstname,
+        //         'middle_name'   => '',
+        //         'last_name'     => $lastname,
+        //         'country'       => $country,
+        //         'postcode'      => $postcode,
+        //         'email'         => $email,
+        //         'mobile_number' => '',
+        //         'phone_number'  => $telephone,
+        //         'address' => array(
+        //             'text' => $address->address1." ".$address->address2.
+        //                 " ".$address->city." ".$address->postcode,
+        //         ),
+        //     ),
+        //     'products' => $products,
+        //     'response_url' => $response_url,
+        //     'redirect_url' => $redirect_url,
+        //     'checkout_url' => $checkout_url,
+        // );
+
+        // $response = Divido_CreditRequest::create($request_data);
+
+        // if ($response->status == 'ok') {
+        //     $data = array(
+        //         'status' => true,
+        //         'url'    => $response->url,
+        //     );
+        //     $customer = new Customer($cart->id_customer);
+        //     $this->validatOrder(
+        //         $cart_id,
+        //         Configuration::get('DIVIDO_AWAITING_STATUS'),
+        //         $sub_total,
+        //         $this->module->displayName,
+        //         null,
+        //         array('transaction_id' => $response->id),
+        //         (int)$cart->id_currency,
+        //         false,
+        //         $customer->secure_key
+        //     );
+        // } else {
+        //     $data = array(
+        //         'status'  => false,
+        //         'message' => Tools::displayError($response->error),
+        //     );
+        // }
+
+         return $data;
     }
 
     public function saveHash($cart_id, $salt, $total)

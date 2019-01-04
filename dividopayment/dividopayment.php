@@ -32,6 +32,7 @@ require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/lib/divido/Divido.php';
 require_once dirname(__FILE__) . '/classes/divido.class.php';
 
+
 class DividoPayment extends PaymentModule
 {
     public $ps_below_7;
@@ -303,7 +304,7 @@ class DividoPayment extends PaymentModule
             ),
         );
 
-        /*----------------------Display form only after key is inserted-----------------------------*/
+        /*----------------------Display form only after key is inserted----------------------------*/
         if (Configuration::get('DIVIDO_API_KEY')) {
             $api = new DividoApi();
             $dividoPlans = $api->getAllPlans();
