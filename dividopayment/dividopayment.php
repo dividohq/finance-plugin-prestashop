@@ -743,11 +743,15 @@ class DividoPayment extends PaymentModule
         return $this->getWidgetData($params, 'calculator.tpl');
     }
 
+
     public function hookActionOrderStatusUpdate($params)
     {
         $orderStatus = $params['newOrderStatus'];
         $id_order = $params['id_order'];
+
         $order = new Order((int)$id_order);
+        $total_price = $order->total_paid;
+
         if ($order->module != $this->name) {
             return;
         }
@@ -757,6 +761,7 @@ class DividoPayment extends PaymentModule
             WHERE `order_reference` = "'.pSQL($order->reference).'"
             AND transaction_id != "" ORDER BY `date_add` ASC'
         );
+
         if ($orderStatus->id == Configuration::get('DIVIDO_ACTIVATION_STATUS') && $orderPaymanet) {
             $api_key   = Configuration::get('DIVIDO_API_KEY');
 
@@ -766,9 +771,12 @@ class DividoPayment extends PaymentModule
                 'deliveryMethod' => $order->shipping_number ? $order->shipping_number : 'not entered',
                 'trackingNumber' => $carrier->name,
             );
+
             Divido::setMerchant($api_key);
 
-            $response = Divido_Activation::activate($request_data);
+            //$response = Divido_Activation::activate($request_data);
+
+            $response = $this->set_fulfilled($orderPaymanet['transaction_id'], $total_price, $id_order);
 
             if (isset($response->status) && $response->status == 'ok') {
                 return true;
@@ -780,6 +788,7 @@ class DividoPayment extends PaymentModule
             }
             PrestaShopLogger::addLog('Divido Activation Error: '.$error, 1, null, 'Order', (int)$id_order, true);
         }
+
     }
 
     public function getWidgetData($params, $template)
@@ -811,4 +820,31 @@ class DividoPayment extends PaymentModule
 
         return $this->display(__FILE__, $template);
     }
+
+ 
+    function set_fulfilled( $application_id, $order_total, $order_id, $shipping_method = null, $tracking_numbers = null ) {
+
+        // First get the application you wish to create an activation for.
+        $application = ( new \Divido\MerchantSDK\Models\Application() )
+        ->withId( $application_id );
+        $items       = [
+            [
+                'name'     => "Order id: $order_id",
+                'quantity' => 1,
+                'price'    => $order_total * 100,
+            ],
+        ];
+        // Create a new application activation model.
+        $application_activation = ( new \Divido\MerchantSDK\Models\ApplicationActivation() )
+            ->withOrderItems( $items )
+            ->withDeliveryMethod( $shipping_method )
+            ->withTrackingNumber( $tracking_numbers );
+        // Create a new activation for the application.
+        $env                      = DividoApi::getEnvironment($api_key);;
+        $sdk                      = new \Divido\MerchantSDK\Client( $api_key, $env );
+        $response                 = $sdk->applicationActivations()->createApplicationActivation( $application, $application_activation );
+        $activation_response_body = $response->getBody()->getContents();
+        return $activation_response_body;
+    }   
+
 }

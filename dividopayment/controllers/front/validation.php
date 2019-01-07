@@ -103,10 +103,9 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
     public function getConfirmation()
     {
         $api_key   = Configuration::get('DIVIDO_API_KEY');
-        Divido::setApiKey($api_key);
+        //$set_api_key = Divido::setApiKey($api_key);
         $deposit = Tools::getValue('deposit');
         $finance = Tools::getValue('finance');
-
         $cart = $this->context->cart;
         $customer = new Customer($cart->id_customer);
         $address = new Address($cart->id_address_invoice);
@@ -175,8 +174,6 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
         
         $this->saveHash($cart_id, $salt, $sub_total);
 
-        //var_dump($language);die;
-
         $application               = ( new \Divido\MerchantSDK\Models\Application() )
         ->withCountryId( $country )
         ->withCurrencyId( $currency )
@@ -222,8 +219,8 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
 
 
 // Note: If creating an appliclation (credit request) on a merchant with a shared secret, you will have to pass in a correct hmac
-$env = Environment::SANDBOX;
 
+$env = DividoApi::getEnvironment($api_key);
 $client = new Guzzle();
 $httpClientWrapper = new HttpClientWrapper(
     new GuzzleAdapter($client),

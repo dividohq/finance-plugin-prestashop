@@ -187,4 +187,29 @@ class DividoApi
 
         return Db::getInstance()->getRow($query);
     }
+
+    public static function getEnvironment( $key ) {
+        $array       = explode( '_', $key );
+        $environment = strtoupper( $array[0] );
+        switch ($environment) {
+            case 'LIVE':
+                return constant( 'Divido\MerchantSDK\Environment::' . $environment );
+                break;
+
+            case 'SANDBOX':
+                return constant( "Divido\MerchantSDK\Environment::$environment" );
+                break;
+            
+            default:
+                return constant( "Divido\MerchantSDK\Environment::SANDBOX" );
+                break;
+        }
+
+    }
+
+
+
 }
+
+
+    
