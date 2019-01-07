@@ -95,7 +95,6 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
         }
         
         $response = $this->getConfirmation();
-        //var_dump($response); die;
         echo Tools::jsonEncode($response);
         die;
         
@@ -113,7 +112,7 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
         $address = new Address($cart->id_address_invoice);
         $country = Country::getIsoById($address->id_country);
 
-        $language = Tools::strtoupper(Language::getIsoById($this->context->language->id));
+        $language = Language::getIsoById($this->context->language->id);
 
         $currencyObj = new Currency($cart->id_currency);
         $currency = $currencyObj->iso_code;
@@ -135,29 +134,30 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
         $products  = array();
         foreach ($cart->getProducts() as $product) {
             $products[] = array(
-                'type' => 'product',
-                'text' => $product['name'],
+             
+                'name' => $product['name'],
                 'quantity' => $product['quantity'],
-                'value' => $product['price_wt'],
+                'price' => $product['price_wt']*100,
             );
         }
 
         $sub_total = $cart->getOrderTotal(true, Cart::BOTH);
         $shiphandle = $cart->getOrderTotal(true, Cart::ONLY_SHIPPING);
         $disounts = $cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS);
+        $discount = (float)$disounts;
 
         $products[] = array(
-            'type'     => 'product',
-            'text'     => 'Shipping & Handling',
+            
+            'name'     => 'Shipping & Handling',
             'quantity' => 1,
-            'value'    => $shiphandle,
+            'price'    => $shiphandle*100,
         );
 
         $products[] = array(
-            'type'     => 'product',
-            'text'     => 'Discount',
+        
+            'name'     => 'Discount',
             'quantity' => 1,
-            'value'    => "-".$disounts,
+            'price'    => -$discount*100,
         );
 
         $deposit_amount = Tools::ps_round(($deposit / 100) * $sub_total, 2);
@@ -175,16 +175,12 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
         
         $this->saveHash($cart_id, $salt, $sub_total);
 
-        
+        //var_dump($language);die;
 
-
-
-
-        
         $application               = ( new \Divido\MerchantSDK\Models\Application() )
-        ->withCountryId( 'GB' )
-        ->withCurrencyId( 'GBP' )
-        ->withLanguageId( 'en' )
+        ->withCountryId( $country )
+        ->withCurrencyId( $currency )
+        ->withLanguageId( $language )
         ->withFinancePlanId( $finance )
         ->withApplicants(
             [
@@ -195,22 +191,16 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
                     'email'       => $email,
                     'addresses'   => array(
                         [
-                            'postcode' => 'SW15 3EF',
-                            'street'   => 'Test Road ',
-                            'town'     => 'London',
+                            'postcode' => $postcode,
+                            'street'   => $address->address1,
+                            'town'     => $address->city,
                         ],
                     ),
                 ],
             ]
         )
-        ->withOrderItems([
-            [
-            'name' => 'Sofa',
-            'quantity' => 1,
-            'price' => 50000,
-            ],
-        ])
-        ->withDepositPercentage(0.02)
+        ->withOrderItems($products)
+        ->withDepositPercentage($deposit/100)
         ->withFinalisationRequired( false )
         ->withMerchantReference( '' )
         ->withUrls(
@@ -222,7 +212,9 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
         )
         ->withMetadata(
             [
-                'order_number' => 'foo-oos',
+                'cart_id'      => $cart_id,
+                'cart_hash'    => $hash,
+
             ]
         );
 
@@ -242,7 +234,7 @@ $httpClientWrapper = new HttpClientWrapper(
 $sdk = new Client($httpClientWrapper, $env);
 
 
-$response = $sdk->applications()->createApplication($application);
+$response                  = $sdk->applications()->createApplication($application);
 $application_response_body = $response->getBody()->getContents();
 $decode                    = json_decode( $application_response_body );
 $result_id                 = $decode->data->id;
@@ -271,66 +263,6 @@ $result_redirect           = $decode->data->urls->application_url;
                 'message' => Tools::displayError($response->error),
             );
         }
-
-
-        // $request_data = array(
-        //     'merchant' => $api_key,
-        //     'deposit'  => $deposit_amount,
-        //     'finance'  => $finance,
-        //     'country'  => $country,
-        //     'language' => $language,
-        //     'currency' => $currency,
-        //     'metadata' => array(
-        //         'cart_id' => $cart_id,
-        //         'cart_hash' => $hash,
-        //     ),
-        //     'customer' => array(
-        //         'title'         => '',
-        //         'first_name'    => $firstname,
-        //         'middle_name'   => '',
-        //         'last_name'     => $lastname,
-        //         'country'       => $country,
-        //         'postcode'      => $postcode,
-        //         'email'         => $email,
-        //         'mobile_number' => '',
-        //         'phone_number'  => $telephone,
-        //         'address' => array(
-        //             'text' => $address->address1." ".$address->address2.
-        //                 " ".$address->city." ".$address->postcode,
-        //         ),
-        //     ),
-        //     'products' => $products,
-        //     'response_url' => $response_url,
-        //     'redirect_url' => $redirect_url,
-        //     'checkout_url' => $checkout_url,
-        // );
-
-        // $response = Divido_CreditRequest::create($request_data);
-
-        // if ($response->status == 'ok') {
-        //     $data = array(
-        //         'status' => true,
-        //         'url'    => $response->url,
-        //     );
-        //     $customer = new Customer($cart->id_customer);
-        //     $this->validatOrder(
-        //         $cart_id,
-        //         Configuration::get('DIVIDO_AWAITING_STATUS'),
-        //         $sub_total,
-        //         $this->module->displayName,
-        //         null,
-        //         array('transaction_id' => $response->id),
-        //         (int)$cart->id_currency,
-        //         false,
-        //         $customer->secure_key
-        //     );
-        // } else {
-        //     $data = array(
-        //         'status'  => false,
-        //         'message' => Tools::displayError($response->error),
-        //     );
-        // }
-
          return $data;
     }
 
