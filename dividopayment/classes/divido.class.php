@@ -30,7 +30,7 @@ use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 use GuzzleHttp\Client as Guzzle;
 
-class DividoApi
+class FinanceApi
 {
     public function getGlobalSelectedPlans()
     {

@@ -220,7 +220,7 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
 
 // Note: If creating an appliclation (credit request) on a merchant with a shared secret, you will have to pass in a correct hmac
 
-$env = DividoApi::getEnvironment($api_key);
+$env = FinanceApi::getEnvironment($api_key);
 $client = new Guzzle();
 $httpClientWrapper = new HttpClientWrapper(
     new GuzzleAdapter($client),

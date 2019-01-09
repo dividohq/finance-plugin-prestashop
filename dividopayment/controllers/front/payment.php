@@ -58,7 +58,7 @@ class DividoPaymentPaymentModuleFrontController extends ModuleFrontController
 
         $js_key    = $this->module->getJsKey();
 
-        $api = new DividoApi();
+        $api = new FinanceApi();
         $plans = $api->getCartPlans($cart);
 
         if (!$plans) {

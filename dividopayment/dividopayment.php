@@ -77,16 +77,16 @@ class DividoPayment extends PaymentModule
         $this->name = 'dividopayment';
         $this->tab = 'payments_gateways';
         $this->version = '1.0.0';
-        $this->author = 'Divido Financial Services';
+        $this->author = 'Enter Author Here';
         $this->need_instance = 0;
 
         $this->bootstrap = true;
 
         parent::__construct();
 
-        $this->displayName = $this->l('Divido');
+        $this->displayName = $this->l('Finance');
         $this->description = $this->l(
-            'The Divido Retail Finance extension allows you to accept finance payments in your Prestashop store.'
+            'The Finance extension allows you to accept finance payments in your Prestashop store.'
         );
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall this module?');
@@ -306,7 +306,7 @@ class DividoPayment extends PaymentModule
 
         /*----------------------Display form only after key is inserted----------------------------*/
         if (Configuration::get('DIVIDO_API_KEY')) {
-            $api = new DividoApi();
+            $api = new FinanceApi();
             $dividoPlans = $api->getAllPlans();
             $orderStatus = OrderState::getOrderStates($this->context->language->id);
             $product_options = array(
@@ -588,7 +588,7 @@ class DividoPayment extends PaymentModule
             return;
         }
 
-        $api = new DividoApi();
+        $api = new FinanceApi();
         $plans = $api->getCartPlans($this->context->cart);
 
         if (!$plans) {
@@ -618,7 +618,7 @@ class DividoPayment extends PaymentModule
             return;
         }
 
-        $api = new DividoApi();
+        $api = new FinanceApi();
         $plans = $api->getCartPlans($cart);
 
         if (!$plans) {
@@ -691,10 +691,10 @@ class DividoPayment extends PaymentModule
 
     public function hookDisplayAdminProductsExtra($params)
     {
-        $settings = DividoApi::getProductSettings($params['id_product']);
+        $settings = FinanceApi::getProductSettings($params['id_product']);
 
-        $DividoApi = new DividoApi();
-        $plans = $DividoApi->getPlans();
+        $FinanceApi = new FinanceApi();
+        $plans = $FinanceApi->getPlans();
 
         if (!$plans) {
             return;
@@ -746,6 +746,7 @@ class DividoPayment extends PaymentModule
 
     public function hookActionOrderStatusUpdate($params)
     {
+
         $orderStatus = $params['newOrderStatus'];
         $id_order = $params['id_order'];
 
@@ -755,6 +756,7 @@ class DividoPayment extends PaymentModule
         if ($order->module != $this->name) {
             return;
         }
+       
         $carrier = new Carrier($order->id_carrier);
         $orderPaymanet = Db::getInstance()->getRow(
             'SELECT * FROM `'._DB_PREFIX_.'order_payment`
@@ -762,7 +764,9 @@ class DividoPayment extends PaymentModule
             AND transaction_id != "" ORDER BY `date_add` ASC'
         );
 
+
         if ($orderStatus->id == Configuration::get('DIVIDO_ACTIVATION_STATUS') && $orderPaymanet) {
+            
             $api_key   = Configuration::get('DIVIDO_API_KEY');
 
             $request_data = array(
@@ -771,8 +775,11 @@ class DividoPayment extends PaymentModule
                 'deliveryMethod' => $order->shipping_number ? $order->shipping_number : 'not entered',
                 'trackingNumber' => $carrier->name,
             );
+           
 
             Divido::setMerchant($api_key);
+
+        
 
             //$response = Divido_Activation::activate($request_data);
 
@@ -786,7 +793,17 @@ class DividoPayment extends PaymentModule
             } else {
                 $error = $this->l('There was some error during activation api call');
             }
-            PrestaShopLogger::addLog('Divido Activation Error: '.$error, 1, null, 'Order', (int)$id_order, true);
+
+            // try {
+            //     $response = $this->set_fulfilled($orderPaymanet['transaction_id'], $total_price, $id_order);
+            //     return true;
+            // } 
+    
+            // catch(Exception $e) {
+            //     return $e->message;
+            // }
+
+            PrestaShopLogger::addLog('Divido Activation Error: '.$e->message, 1, null, 'Order', (int)$id_order, true);
         }
 
     }
@@ -794,7 +811,7 @@ class DividoPayment extends PaymentModule
     public function getWidgetData($params, $template)
     {
         $product = $params['product'];
-        $divido = new DividoApi();
+        $divido = new FinanceApi();
 
         if ($this->ps_below_7 && is_object($product)) {
             $product_price = $product->price;
@@ -840,7 +857,7 @@ class DividoPayment extends PaymentModule
             ->withDeliveryMethod( $shipping_method )
             ->withTrackingNumber( $tracking_numbers );
         // Create a new activation for the application.
-        $env                      = DividoApi::getEnvironment($api_key);;
+        $env                      = FinanceApi::getEnvironment($api_key);;
         $sdk                      = new \Divido\MerchantSDK\Client( $api_key, $env );
         $response                 = $sdk->applicationActivations()->createApplicationActivation( $application, $application_activation );
         $activation_response_body = $response->getBody()->getContents();
