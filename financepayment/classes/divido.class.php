@@ -183,7 +183,7 @@ class FinanceApi
 
     public static function getProductSettings($id_product)
     {
-        $query = "select * from `"._DB_PREFIX_."divido_product` where id_product = '".(int)$id_product."'";
+        $query = "select * from `"._DB_PREFIX_."finance_product` where id_product = '".(int)$id_product."'";
 
         return Db::getInstance()->getRow($query);
     }

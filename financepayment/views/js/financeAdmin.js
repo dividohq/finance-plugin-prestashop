@@ -33,14 +33,14 @@ $(document).ready(function(){
 	if ($('select[name="FINANCE_PRODUCTS_OPTIONS"]').length > 0) {
 		updateProductOptions();
 	}
-	if ($('select[name="DIVIDO_display"]').length > 0) {
+	if ($('select[name="FINANCE_display"]').length > 0) {
 		updateProductPlans();
 	}
 });
 
 $(document).on('change', 'input[name="FINANCE_ALL_PLAN_SELECTION"]', updatePlansDiv);
 $(document).on('change', 'select[name="FINANCE_PRODUCTS_OPTIONS"]', updateProductOptions);
-$(document).on('change', 'select[name="DIVIDO_display"]', updateProductPlans);
+$(document).on('change', 'select[name="FINANCE_display"]', updateProductPlans);
 
 function updatePlansDiv() {
 	val = $('input[name="FINANCE_ALL_PLAN_SELECTION"]:checked').val();
@@ -61,9 +61,9 @@ function updateProductOptions() {
 }
 
 function updateProductPlans() {
-	val = $('select[name="DIVIDO_display"]').val();
+	val = $('select[name="FINANCE_display"]').val();
 
-	if ($('select[name="DIVIDO_display"]').val() == 'custom') {
+	if ($('select[name="FINANCE_display"]').val() == 'custom') {
 		$('.divido_plans_wrapper').slideDown();
 	} else {
 		$('.divido_plans_wrapper').slideUp();

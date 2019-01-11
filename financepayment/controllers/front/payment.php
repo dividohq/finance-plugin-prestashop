@@ -76,12 +76,12 @@ class DividoPaymentPaymentModuleFrontController extends ModuleFrontController
                 'total' => Tools::displayPrice($cart->getOrderTotal(true, Cart::BOTH), $currency),
                 'merchant_script' => "//cdn.divido.com/calculator/".$js_key.".js",
                 'plans' => implode(',', array_keys($plans)),
-                'validationLink' => $this->context->link->getModuleLink('financepayment', 'validation'),
+                'validationLink' => $this->context->link->getModuleLink('dividopayment', 'validation'),
             )
         );
         Media::addJsDef(array(
             'merchant_script' => "//cdn.divido.com/calculator/".$js_key.".js",
-            'validationLink' => $this->context->link->getModuleLink('financepayment', 'validation'),
+            'validationLink' => $this->context->link->getModuleLink('dividopayment', 'validation'),
         ));
 
         if (!$this->module->ps_below_7) {
@@ -101,6 +101,6 @@ class DividoPaymentPaymentModuleFrontController extends ModuleFrontController
     public function setMedia()
     {
         parent::setMedia();
-        $this->addJS(_PS_MODULE_DIR_.$this->module->name.'/views/js/divido.js');
+        $this->addJS(_PS_MODULE_DIR_.$this->module->name.'/views/js/finance.js');
     }
 }
