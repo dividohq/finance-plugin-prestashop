@@ -35,9 +35,9 @@ class FinanceApi
     public function getGlobalSelectedPlans()
     {
         $all_plans     = $this->getAllPlans();
-        $selected_plans = explode(',', Configuration::get('DIVIDO_PLAN_SELECTION'));
+        $selected_plans = explode(',', Configuration::get('FINANCE_PLAN_SELECTION'));
 
-        if (Configuration::get('DIVIDO_ALL_PLAN_SELECTION')) {
+        if (Configuration::get('FINANCE_ALL_PLAN_SELECTION')) {
             return $all_plans;
         }
 
@@ -60,7 +60,7 @@ class FinanceApi
         // Decide the env set by admin somehow...
         $env = Environment::SANDBOX;
 
-        $api_key = Configuration::get('DIVIDO_API_KEY');
+        $api_key = Configuration::get('FINANCE_API_KEY');
         if (!$api_key) {
             return array();
         }
@@ -107,7 +107,7 @@ class FinanceApi
 
     public function getCartPlans($cart)
     {
-        $exclusive = Configuration::get('DIVIDO_WHOLE_CART');
+        $exclusive = Configuration::get('FINANCE_WHOLE_CART');
         $plans     = array();
         $products  = $cart->getProducts();
         foreach ($products as $product) {
@@ -135,8 +135,8 @@ class FinanceApi
     public function getProductPlans($product_price, $id_product)
     {
         $settings = $this->getProductSettings($id_product);
-        $product_selection = Configuration::get('DIVIDO_PRODUCTS_OPTIONS');
-        $price_threshold   = Configuration::get('DIVIDO_PRODUCTS_MINIMUM');
+        $product_selection = Configuration::get('FINANCE_PRODUCTS_OPTIONS');
+        $price_threshold   = Configuration::get('FINANCE_PRODUCTS_MINIMUM');
 
         $plans = $this->getPlans(true);
 

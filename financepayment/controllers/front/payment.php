@@ -39,7 +39,7 @@ class DividoPaymentPaymentModuleFrontController extends ModuleFrontController
         if (!$this->module->checkCurrency($cart)) {
             Tools::redirect('index.php?controller=order');
         }
-        if ($cart->getOrderTotal() < Configuration::get('DIVIDO_CART_MINIMUM')) {
+        if ($cart->getOrderTotal() < Configuration::get('FINANCE_CART_MINIMUM')) {
             Tools::redirect('index.php?controller=order');
         }
 
@@ -76,12 +76,12 @@ class DividoPaymentPaymentModuleFrontController extends ModuleFrontController
                 'total' => Tools::displayPrice($cart->getOrderTotal(true, Cart::BOTH), $currency),
                 'merchant_script' => "//cdn.divido.com/calculator/".$js_key.".js",
                 'plans' => implode(',', array_keys($plans)),
-                'validationLink' => $this->context->link->getModuleLink('dividopayment', 'validation'),
+                'validationLink' => $this->context->link->getModuleLink('financepayment', 'validation'),
             )
         );
         Media::addJsDef(array(
             'merchant_script' => "//cdn.divido.com/calculator/".$js_key.".js",
-            'validationLink' => $this->context->link->getModuleLink('dividopayment', 'validation'),
+            'validationLink' => $this->context->link->getModuleLink('financepayment', 'validation'),
         ));
 
         if (!$this->module->ps_below_7) {

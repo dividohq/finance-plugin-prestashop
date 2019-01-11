@@ -98,19 +98,19 @@ class DividoPayment extends PaymentModule
 
     public function install()
     {
-        Configuration::updateValue('DIVIDO_API_KEY', null);
-        Configuration::updateValue('DIVIDO_PAYMENT_TITLE', $this->displayName);
-        Configuration::updateValue('DIVIDO_ACTIVATION_STATUS', Configuration::get('PS_OS_DELIVERED'));
-        Configuration::updateValue('DIVIDO_PRODUCT_WIDGET', null);
-        Configuration::updateValue('DIVIDO_PRODUCT_CALCULATOR', null);
-        Configuration::updateValue('DIVIDO_PRODUCT_WIDGET_PREFIX', 'Finance From');
-        Configuration::updateValue('DIVIDO_PRODUCT_WIDGET_SUFFIX', 'with');
-        Configuration::updateValue('DIVIDO_ALL_PLAN_SELECTION', true);
-        Configuration::updateValue('DIVIDO_PLAN_SELECTION', null);
-        Configuration::updateValue('DIVIDO_WHOLE_CART', false);
-        Configuration::updateValue('DIVIDO_CART_MINIMUM', '0');
-        Configuration::updateValue('DIVIDO_PRODUCTS_OPTIONS', 'All');
-        Configuration::updateValue('DIVIDO_PRODUCTS_MINIMUM', '0');
+        Configuration::updateValue('FINANCE_API_KEY', null);
+        Configuration::updateValue('FINANCE_PAYMENT_TITLE', $this->displayName);
+        Configuration::updateValue('FINANCE_ACTIVATION_STATUS', Configuration::get('PS_OS_DELIVERED'));
+        Configuration::updateValue('FINANCE_PRODUCT_WIDGET', null);
+        Configuration::updateValue('FINANCE_PRODUCT_CALCULATOR', null);
+        Configuration::updateValue('FINANCE_PRODUCT_WIDGET_PREFIX', 'Finance From');
+        Configuration::updateValue('FINANCE_PRODUCT_WIDGET_SUFFIX', 'with');
+        Configuration::updateValue('FINANCE_ALL_PLAN_SELECTION', true);
+        Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
+        Configuration::updateValue('FINANCE_WHOLE_CART', false);
+        Configuration::updateValue('FINANCE_CART_MINIMUM', '0');
+        Configuration::updateValue('FINANCE_PRODUCTS_OPTIONS', 'All');
+        Configuration::updateValue('FINANCE_PRODUCTS_MINIMUM', '0');
 
         foreach ($this->ApiOrderStatus as $ApiStatus) {
             switch ($ApiStatus['code']) {
@@ -140,7 +140,7 @@ class DividoPayment extends PaymentModule
                     $status = Configuration::get('PS_OS_PREPARATION');
                     break;
             }
-            Configuration::updateValue('DIVIDO_STATUS_'.$ApiStatus['code'], $status);
+            Configuration::updateValue('FINANCE_STATUS_'.$ApiStatus['code'], $status);
         }
 
         require_once(dirname(__FILE__).'/sql/install.php');
@@ -163,12 +163,12 @@ class DividoPayment extends PaymentModule
         $status['invoice'] = false;
         $status['unremovable'] = true;
         $status['paid'] = false;
-        $state = $this->addState($this->l('Awaiting divido response'), '#0404B4', $status);
-        Configuration::updateValue('DIVIDO_AWAITING_STATUS', $state);
+        $state = $this->addState($this->l('Awaiting finance response'), '#0404B4', $status);
+        Configuration::updateValue('FINANCE_AWAITING_STATUS', $state);
 
         /*------------------Handle hooks according to version-------------------*/
         if ($this->ps_below_7 && !$this->registerHook('payment')) {
-            Configuration::updateValue('DIVIDO_PAYMENT_DESCRIPTION', $this->displayName);
+            Configuration::updateValue('FINANCE_PAYMENT_DESCRIPTION', $this->displayName);
             return false;
         } elseif (!$this->ps_below_7 && !$this->registerHook('paymentOptions')) {
             return false;
@@ -201,33 +201,33 @@ class DividoPayment extends PaymentModule
 
     public function uninstall()
     {
-        Configuration::deleteByName('DIVIDO_API_KEY');
-        Configuration::deleteByName('DIVIDO_PAYMENT_TITLE');
-        Configuration::deleteByName('DIVIDO_ACTIVATION_STATUS');
-        Configuration::deleteByName('DIVIDO_PRODUCT_WIDGET');
-        Configuration::deleteByName('DIVIDO_PRODUCT_CALCULATOR');
-        Configuration::deleteByName('DIVIDO_PRODUCT_WIDGET_PREFIX');
-        Configuration::deleteByName('DIVIDO_PRODUCT_WIDGET_SUFFIX');
-        Configuration::deleteByName('DIVIDO_ALL_PLAN_SELECTION');
-        Configuration::deleteByName('DIVIDO_PLAN_SELECTION');
-        Configuration::deleteByName('DIVIDO_WHOLE_CART');
-        Configuration::deleteByName('DIVIDO_CART_MINIMUM');
-        Configuration::deleteByName('DIVIDO_PRODUCTS_OPTIONS');
-        Configuration::deleteByName('DIVIDO_PRODUCTS_MINIMUM');
+        Configuration::deleteByName('FINANCE_API_KEY');
+        Configuration::deleteByName('FINANCE_PAYMENT_TITLE');
+        Configuration::deleteByName('FINANCE_ACTIVATION_STATUS');
+        Configuration::deleteByName('FINANCE_PRODUCT_WIDGET');
+        Configuration::deleteByName('FINANCE_PRODUCT_CALCULATOR');
+        Configuration::deleteByName('FINANCE_PRODUCT_WIDGET_PREFIX');
+        Configuration::deleteByName('FINANCE_PRODUCT_WIDGET_SUFFIX');
+        Configuration::deleteByName('FINANCE_ALL_PLAN_SELECTION');
+        Configuration::deleteByName('FINANCE_PLAN_SELECTION');
+        Configuration::deleteByName('FINANCE_WHOLE_CART');
+        Configuration::deleteByName('FINANCE_CART_MINIMUM');
+        Configuration::deleteByName('FINANCE_PRODUCTS_OPTIONS');
+        Configuration::deleteByName('FINANCE_PRODUCTS_MINIMUM');
 
         /*------------------Handle hooks according to version-------------------*/
         if (!$this->ps_below_7) {
-            Configuration::deleteByName('DIVIDO_PAYMENT_DESCRIPTION');
+            Configuration::deleteByName('FINANCE_PAYMENT_DESCRIPTION');
         }
 
         foreach ($this->ApiOrderStatus as $ApiStatus) {
-            Configuration::deleteByName('DIVIDO_STATUS_'.$ApiStatus['code']);
+            Configuration::deleteByName('FINANCE_STATUS_'.$ApiStatus['code']);
         }
-        $id_state = Configuration::get('DIVIDO_AWAITING_STATUS');
+        $id_state = Configuration::get('FINANCE_AWAITING_STATUS');
         $order_state = new OrderState($id_state);
         if (Validate::isLoadedObject($order_state)) {
             $order_state->delete();
-            Configuration::deleteByName('DIVIDO_AWAITING_STATUS');
+            Configuration::deleteByName('FINANCE_AWAITING_STATUS');
             if (file_exists(dirname(__FILE__).'/../../img/os/'.(int)$order_state->id.'.gif')) {
                 unlink(dirname(__FILE__).'/../../img/os/'.(int)$order_state->id.'.gif');
             }
@@ -294,7 +294,7 @@ class DividoPayment extends PaymentModule
                 'input' => array(
                     array(
                         'type' => 'text',
-                        'name' => 'DIVIDO_API_KEY',
+                        'name' => 'FINANCE_API_KEY',
                         'label' => $this->l('API key'),
                     )
                 ),
@@ -305,7 +305,7 @@ class DividoPayment extends PaymentModule
         );
 
         /*----------------------Display form only after key is inserted----------------------------*/
-        if (Configuration::get('DIVIDO_API_KEY')) {
+        if (Configuration::get('FINANCE_API_KEY')) {
             $api = new FinanceApi();
             $dividoPlans = $api->getAllPlans();
             $orderStatus = OrderState::getOrderStates($this->context->language->id);
@@ -325,19 +325,19 @@ class DividoPayment extends PaymentModule
             );
             $form['form']['input'][] = array(
                 'type' => 'text',
-                'name' => 'DIVIDO_PAYMENT_TITLE',
+                'name' => 'FINANCE_PAYMENT_TITLE',
                 'label' => $this->l('Title'),
             );
             if (!$this->ps_below_7) {
                 $form['form']['input'][] = array(
                     'type' => 'text',
-                    'name' => 'DIVIDO_PAYMENT_DESCRIPTION',
+                    'name' => 'FINANCE_PAYMENT_DESCRIPTION',
                     'label' => $this->l('Payment page description'),
                 );
             }
             $form['form']['input'][] = array(
                 'type' => 'select',
-                'name' => 'DIVIDO_ACTIVATION_STATUS',
+                'name' => 'FINANCE_ACTIVATION_STATUS',
                 'label' => $this->l('Activation status'),
                 'hint' => $this->l('Prestashop status to make divido activation call'),
                 'options' => array(
@@ -348,7 +348,7 @@ class DividoPayment extends PaymentModule
             );
             $form['form']['input'][] = array(
                 'type' => 'switch',
-                'name' => 'DIVIDO_ALL_PLAN_SELECTION',
+                'name' => 'FINANCE_ALL_PLAN_SELECTION',
                 'label' => $this->l('Select All Plans'),
                 'is_bool' => true,
                 'values' => array(
@@ -366,7 +366,7 @@ class DividoPayment extends PaymentModule
             );
             $form['form']['input'][] = array(
                 'type' => 'swap',
-                'name' => 'DIVIDO_PLAN_SELECTION',
+                'name' => 'FINANCE_PLAN_SELECTION',
                 'label' => $this->l('Plans Selected'),
                 'options' => array(
                     'query' => $dividoPlans,
@@ -376,7 +376,7 @@ class DividoPayment extends PaymentModule
             );
             $form['form']['input'][] = array(
                 'type' => 'switch',
-                'name' => 'DIVIDO_PRODUCT_WIDGET',
+                'name' => 'FINANCE_PRODUCT_WIDGET',
                 'label' => $this->l('Widget on product page'),
                 'is_bool' => true,
                 'values' => array(
@@ -394,7 +394,7 @@ class DividoPayment extends PaymentModule
             );
             $form['form']['input'][] = array(
                 'type' => 'switch',
-                'name' => 'DIVIDO_PRODUCT_CALCULATOR',
+                'name' => 'FINANCE_PRODUCT_CALCULATOR',
                 'label' => $this->l('Calculator on product page'),
                 'is_bool' => true,
                 'values' => array(
@@ -412,17 +412,17 @@ class DividoPayment extends PaymentModule
             );
             $form['form']['input'][] = array(
                 'type' => 'text',
-                'name' => 'DIVIDO_PRODUCT_WIDGET_PREFIX',
+                'name' => 'FINANCE_PRODUCT_WIDGET_PREFIX',
                 'label' => $this->l('Prefix'),
             );
             $form['form']['input'][] = array(
                 'type' => 'text',
-                'name' => 'DIVIDO_PRODUCT_WIDGET_SUFFIX',
+                'name' => 'FINANCE_PRODUCT_WIDGET_SUFFIX',
                 'label' => $this->l('Suffix'),
             );
             $form['form']['input'][] = array(
                 'type' => 'switch',
-                'name' => 'DIVIDO_WHOLE_CART',
+                'name' => 'FINANCE_WHOLE_CART',
                 'label' => $this->l('Require whole cart to be available on finance'),
                 'is_bool' => true,
                 'values' => array(
@@ -440,13 +440,13 @@ class DividoPayment extends PaymentModule
             );
             $form['form']['input'][] = array(
                 'type' => 'text',
-                'name' => 'DIVIDO_CART_MINIMUM',
+                'name' => 'FINANCE_CART_MINIMUM',
                 'label' => $this->l('Cart amount minimum'),
                 'help' => $this->l('Minimum required amount in cart, for Divido to be available')
             );
             $form['form']['input'][] = array(
                 'type' => 'select',
-                'name' => 'DIVIDO_PRODUCTS_OPTIONS',
+                'name' => 'FINANCE_PRODUCTS_OPTIONS',
                 'label' => $this->l('Product Selection'),
                 'options' => array(
                     'query' => $product_options,
@@ -456,7 +456,7 @@ class DividoPayment extends PaymentModule
             );
             $form['form']['input'][] = array(
                 'type' => 'text',
-                'name' => 'DIVIDO_PRODUCTS_MINIMUM',
+                'name' => 'FINANCE_PRODUCTS_MINIMUM',
                 'label' => $this->l('Product price minimum'),
             );
             $form['form']['input'][] = array(
@@ -466,7 +466,7 @@ class DividoPayment extends PaymentModule
             foreach ($this->ApiOrderStatus as $ApiStatus) {
                 $form['form']['input'][] = array(
                     'type' => 'select',
-                    'name' => 'DIVIDO_STATUS_'.$ApiStatus['code'],
+                    'name' => 'FINANCE_STATUS_'.$ApiStatus['code'],
                     'label' => $ApiStatus['code'],
                     'options' => array(
                         'query' => $orderStatus,
@@ -485,26 +485,26 @@ class DividoPayment extends PaymentModule
     protected function getConfigFormValues()
     {
         $form_values = array(
-            'DIVIDO_API_KEY' => Configuration::get('DIVIDO_API_KEY'),
-            'DIVIDO_PAYMENT_TITLE' => Configuration::get('DIVIDO_PAYMENT_TITLE'),
-            'DIVIDO_ACTIVATION_STATUS' => Configuration::get('DIVIDO_ACTIVATION_STATUS'),
-            'DIVIDO_ALL_PLAN_SELECTION' => Configuration::get('DIVIDO_ALL_PLAN_SELECTION'),
-            'DIVIDO_PLAN_SELECTION' => explode(',', Configuration::get('DIVIDO_PLAN_SELECTION')),
-            'DIVIDO_PRODUCT_WIDGET' => Configuration::get('DIVIDO_PRODUCT_WIDGET'),
-            'DIVIDO_PRODUCT_CALCULATOR' => Configuration::get('DIVIDO_PRODUCT_CALCULATOR'),
-            'DIVIDO_PRODUCT_WIDGET_SUFFIX' => Configuration::get('DIVIDO_PRODUCT_WIDGET_SUFFIX'),
-            'DIVIDO_PRODUCT_WIDGET_PREFIX' => Configuration::get('DIVIDO_PRODUCT_WIDGET_PREFIX'),
-            'DIVIDO_CART_MINIMUM' => Configuration::get('DIVIDO_CART_MINIMUM'),
-            'DIVIDO_PRODUCTS_OPTIONS' => Configuration::get('DIVIDO_PRODUCTS_OPTIONS'),
-            'DIVIDO_PRODUCTS_MINIMUM' => Configuration::get('DIVIDO_PRODUCTS_MINIMUM'),
-            'DIVIDO_WHOLE_CART' => Configuration::get('DIVIDO_WHOLE_CART'),
+            'FINANCE_API_KEY' => Configuration::get('FINANCE_API_KEY'),
+            'FINANCE_PAYMENT_TITLE' => Configuration::get('FINANCE_PAYMENT_TITLE'),
+            'FINANCE_ACTIVATION_STATUS' => Configuration::get('FINANCE_ACTIVATION_STATUS'),
+            'FINANCE_ALL_PLAN_SELECTION' => Configuration::get('FINANCE_ALL_PLAN_SELECTION'),
+            'FINANCE_PLAN_SELECTION' => explode(',', Configuration::get('FINANCE_PLAN_SELECTION')),
+            'FINANCE_PRODUCT_WIDGET' => Configuration::get('FINANCE_PRODUCT_WIDGET'),
+            'FINANCE_PRODUCT_CALCULATOR' => Configuration::get('FINANCE_PRODUCT_CALCULATOR'),
+            'FINANCE_PRODUCT_WIDGET_SUFFIX' => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
+            'FINANCE_PRODUCT_WIDGET_PREFIX' => Configuration::get('FINANCE_PRODUCT_WIDGET_PREFIX'),
+            'FINANCE_CART_MINIMUM' => Configuration::get('FINANCE_CART_MINIMUM'),
+            'FINANCE_PRODUCTS_OPTIONS' => Configuration::get('FINANCE_PRODUCTS_OPTIONS'),
+            'FINANCE_PRODUCTS_MINIMUM' => Configuration::get('FINANCE_PRODUCTS_MINIMUM'),
+            'FINANCE_WHOLE_CART' => Configuration::get('FINANCE_WHOLE_CART'),
         );
 
         if (!$this->ps_below_7) {
-            $form_values['DIVIDO_PAYMENT_DESCRIPTION'] = Configuration::get('DIVIDO_PAYMENT_DESCRIPTION');
+            $form_values['FINANCE_PAYMENT_DESCRIPTION'] = Configuration::get('FINANCE_PAYMENT_DESCRIPTION');
         }
         foreach ($this->ApiOrderStatus as $ApiStatus) {
-            $form_values['DIVIDO_STATUS_'.$ApiStatus['code']] = Configuration::get('DIVIDO_STATUS_'.$ApiStatus['code']);
+            $form_values['FINANCE_STATUS_'.$ApiStatus['code']] = Configuration::get('FINANCE_STATUS_'.$ApiStatus['code']);
         }
         return $form_values;
     }
@@ -514,13 +514,13 @@ class DividoPayment extends PaymentModule
      */
     protected function postProcess()
     {
-        if (!Tools::getValue('DIVIDO_API_KEY')) {
+        if (!Tools::getValue('FINANCE_API_KEY')) {
             return '<div class="alert alert-danger">'.Tools::displayError('Api key Cannot be empty').'</div>';
         }
         $form_values = $this->getConfigFormValues();
 
         foreach (array_keys($form_values) as $key) {
-            if ($key == 'DIVIDO_PLAN_SELECTION') {
+            if ($key == 'FINANCE_PLAN_SELECTION') {
                 if (Tools::getIsset($key.'_selected')) {
                     $value =  Tools::getValue($key.'_selected');
                 } else {
@@ -566,7 +566,7 @@ class DividoPayment extends PaymentModule
 
     public function getJsKey()
     {
-        $api_key   = Configuration::get('DIVIDO_API_KEY');
+        $api_key   = Configuration::get('FINANCE_API_KEY');
         $key_parts = explode('.', $api_key);
         $js_key    = Tools::strtolower(array_shift($key_parts));
         return $js_key;
@@ -582,7 +582,7 @@ class DividoPayment extends PaymentModule
             return;
         }
         $cart = $params['cart'];
-        if ($cart->getOrderTotal() < Configuration::get('DIVIDO_CART_MINIMUM') ||
+        if ($cart->getOrderTotal() < Configuration::get('FINANCE_CART_MINIMUM') ||
             $cart->id_address_delivery !== $cart->id_address_invoice
         ) {
             return;
@@ -596,7 +596,7 @@ class DividoPayment extends PaymentModule
         }
 
         $this->smarty->assign(array(
-            'payment_title' => Configuration::get('DIVIDO_PAYMENT_TITLE'),
+            'payment_title' => Configuration::get('FINANCE_PAYMENT_TITLE'),
         ));
         return $this->display(__FILE__, 'payment.tpl');
     }
@@ -611,8 +611,8 @@ class DividoPayment extends PaymentModule
             return;
         }
         $cart = $this->context->cart;
-        if ((Configuration::get('DIVIDO_CART_MINIMUM') &&
-            $cart->getOrderTotal() < Configuration::get('DIVIDO_CART_MINIMUM')) ||
+        if ((Configuration::get('FINANCE_CART_MINIMUM') &&
+            $cart->getOrderTotal() < Configuration::get('FINANCE_CART_MINIMUM')) ||
             $cart->id_address_delivery !== $cart->id_address_invoice
         ) {
             return;
@@ -625,8 +625,8 @@ class DividoPayment extends PaymentModule
             return;
         }
 
-        $action = Configuration::get('DIVIDO_PAYMENT_TITLE');
-        $info = Configuration::get('DIVIDO_PAYMENT_DESCRIPTION');
+        $action = Configuration::get('FINANCE_PAYMENT_TITLE');
+        $info = Configuration::get('FINANCE_PAYMENT_DESCRIPTION');
         $newOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption;
         $newOption->setCallToActionText($action);
         $newOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true));
@@ -680,7 +680,7 @@ class DividoPayment extends PaymentModule
 
     public function hookDisplayProductPriceBlock($params)
     {
-        if (!Configuration::get('DIVIDO_PRODUCT_WIDGET') ||
+        if (!Configuration::get('FINANCE_PRODUCT_WIDGET') ||
             $params['type'] != 'after_price'
         ) {
             return;
@@ -736,7 +736,7 @@ class DividoPayment extends PaymentModule
 
     public function hookDisplayFooterProduct($params)
     {
-        if (!Configuration::get('DIVIDO_PRODUCT_CALCULATOR')) {
+        if (!Configuration::get('FINANCE_PRODUCT_CALCULATOR')) {
             return;
         }
 
@@ -765,9 +765,9 @@ class DividoPayment extends PaymentModule
         );
 
 
-        if ($orderStatus->id == Configuration::get('DIVIDO_ACTIVATION_STATUS') && $orderPaymanet) {
+        if ($orderStatus->id == Configuration::get('FINANCE_ACTIVATION_STATUS') && $orderPaymanet) {
             
-            $api_key   = Configuration::get('DIVIDO_API_KEY');
+            $api_key   = Configuration::get('FINANCE_API_KEY');
 
             $request_data = array(
                 'merchant' => $api_key,
@@ -831,8 +831,8 @@ class DividoPayment extends PaymentModule
         $this->context->smarty->assign(array(
             'plans' => implode(',', array_keys($plans)),
             'raw_total' => $product_price,
-            'divido_prefix' => Configuration::get('DIVIDO_PRODUCT_WIDGET_PREFIX'),
-            'divido_suffix' => Configuration::get('DIVIDO_PRODUCT_WIDGET_SUFFIX'),
+            'divido_prefix' => Configuration::get('FINANCE_PRODUCT_WIDGET_PREFIX'),
+            'divido_suffix' => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
         ));
 
         return $this->display(__FILE__, $template);

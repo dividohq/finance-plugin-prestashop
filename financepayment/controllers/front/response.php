@@ -57,7 +57,7 @@ class DividoPaymentResponseModuleFrontController extends ModuleFrontController
         if (!Validate::isLoadedObject($cart)) {
             die;
         }
-        $status = Configuration::get('DIVIDO_STATUS_'.$data->status);
+        $status = Configuration::get('FINANCE_STATUS_'.$data->status);
 
         if (!$status) {
             die;
@@ -72,7 +72,7 @@ class DividoPaymentResponseModuleFrontController extends ModuleFrontController
             die;
         }
         $order = new Order(Order::getOrderByCartId($cart_id));
-        if ($order->current_state != Configuration::get('DIVIDO_AWAITING_STATUS')) {
+        if ($order->current_state != Configuration::get('FINANCE_AWAITING_STATUS')) {
             if ($status != $order->current_state) {
                 $this->setCurrentState($order, $status);
             }

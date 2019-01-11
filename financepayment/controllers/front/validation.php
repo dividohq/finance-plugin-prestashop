@@ -102,7 +102,7 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
 
     public function getConfirmation()
     {
-        $api_key   = Configuration::get('DIVIDO_API_KEY');
+        $api_key   = Configuration::get('FINANCE_API_KEY');
         //$set_api_key = Divido::setApiKey($api_key);
         $deposit = Tools::getValue('deposit');
         $finance = Tools::getValue('finance');
@@ -245,7 +245,7 @@ $result_redirect           = $decode->data->urls->application_url;
             $customer = new Customer($cart->id_customer);
             $this->validatOrder(
                 $cart_id,
-                Configuration::get('DIVIDO_AWAITING_STATUS'),
+                Configuration::get('FINANCE_AWAITING_STATUS'),
                 $sub_total,
                 $this->module->displayName,
                 null,
