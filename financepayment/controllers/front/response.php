@@ -24,7 +24,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-class DividoPaymentResponseModuleFrontController extends ModuleFrontController
+class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = true;
 

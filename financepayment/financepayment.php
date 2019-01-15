@@ -33,7 +33,7 @@ require_once dirname(__FILE__) . '/lib/divido/Divido.php';
 require_once dirname(__FILE__) . '/classes/divido.class.php';
 
 
-class DividoPayment extends PaymentModule
+class FinancePayment extends PaymentModule
 {  
     public $ps_below_7;
     public $ApiOrderStatus = array(
@@ -74,7 +74,7 @@ class DividoPayment extends PaymentModule
 
     public function __construct()
     {
-        $this->name = 'dividopayment';
+        $this->name = 'financepayment';
         $this->tab = 'payments_gateways';
         $this->version = '1.0.0';
         $this->author = 'Enter Author Here';

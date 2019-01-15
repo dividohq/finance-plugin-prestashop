@@ -24,7 +24,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-class DividoPaymentConfirmationModuleFrontController extends ModuleFrontController
+class FinancePaymentConfirmationModuleFrontController extends ModuleFrontController
 {
     public function init()
     {

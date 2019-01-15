@@ -24,7 +24,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-class DividoPaymentPaymentModuleFrontController extends ModuleFrontController
+class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
 {
     public $ssl = true;
     public $display_column_left = false;
@@ -76,12 +76,12 @@ class DividoPaymentPaymentModuleFrontController extends ModuleFrontController
                 'total' => Tools::displayPrice($cart->getOrderTotal(true, Cart::BOTH), $currency),
                 'merchant_script' => "//cdn.divido.com/calculator/".$js_key.".js",
                 'plans' => implode(',', array_keys($plans)),
-                'validationLink' => $this->context->link->getModuleLink('dividopayment', 'validation'),
+                'validationLink' => $this->context->link->getModuleLink('financepayment', 'validation'),
             )
         );
         Media::addJsDef(array(
             'merchant_script' => "//cdn.divido.com/calculator/".$js_key.".js",
-            'validationLink' => $this->context->link->getModuleLink('dividopayment', 'validation'),
+            'validationLink' => $this->context->link->getModuleLink('financepayment', 'validation'),
         ));
 
         if (!$this->module->ps_below_7) {

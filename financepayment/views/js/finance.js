@@ -26,14 +26,15 @@
 * to avoid any conflicts with others containers.
 */
 $(document).on('click', '#button-confirm-divido', function() {
-    console.log('1111');
-    var finance_elem = $('input[name="divido_plan"]');
+    
+    var finance_elem = $('input[name="divido_plan"]');   
     var deposit      = $('input[name="divido_deposit"]').val();
     var total      = $('input[name="divido_total"]').val();
 
     var finance;
     if (finance_elem.length > 0) {
         finance = finance_elem.val();
+        
     } else {
         alert('Please select plan.');
         return;

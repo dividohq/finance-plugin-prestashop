@@ -31,7 +31,7 @@ use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 use GuzzleHttp\Client as Guzzle;
 
 
-class DividoPaymentValidationModuleFrontController extends ModuleFrontController
+class FinancePaymentValidationModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = false;
     /**
