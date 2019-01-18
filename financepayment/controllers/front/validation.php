@@ -237,7 +237,7 @@ $decode                    = json_decode( $application_response_body );
 $result_id                 = $decode->data->id;
 $result_redirect           = $decode->data->urls->application_url;
 
- if (true) {
+ try {
             $data = array(
                 'status' => true,
                 'url'    => $result_redirect,
@@ -254,7 +254,7 @@ $result_redirect           = $decode->data->urls->application_url;
                 false,
                 $customer->secure_key
             );
-        } else {
+        } catch(Exception $e) {
             $data = array(
                 'status'  => false,
                 'message' => Tools::displayError($response->error),
