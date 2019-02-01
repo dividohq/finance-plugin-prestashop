@@ -121,7 +121,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $firstname = $customer->firstname;
         $lastname = $customer->lastname;
         $email = $customer->email;
-        $telephone = '';
+        $telephone = null;
         if ($address->phone) {
             $telephone = $address->phone;
         } elseif ($address->phone_mobile) {
@@ -184,7 +184,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 [
                     'firstName'   => $firstname,
                     'lastName'    => $lastname,
-                    'phoneNumber' => $telephone,
                     'email'       => $email,
                     'addresses'   => array(
                         [
@@ -230,8 +229,7 @@ $httpClientWrapper = new HttpClientWrapper(
 
 $sdk = new Client($httpClientWrapper, $env);
 
-
-$response                  = $sdk->applications()->createApplication($application);
+$response                  = $sdk->applications()->createApplication( $application, [], ['Content-Type' => 'application/json']);
 $application_response_body = $response->getBody()->getContents();
 $decode                    = json_decode( $application_response_body );
 $result_id                 = $decode->data->id;

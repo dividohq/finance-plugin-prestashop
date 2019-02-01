@@ -785,25 +785,25 @@ class FinancePayment extends PaymentModule
 
             //$response = Divido_Activation::activate($request_data);
 
-            $response = $this->set_fulfilled($orderPaymanet['transaction_id'], $total_price, $id_order);
+            // $response = $this->set_fulfilled($orderPaymanet['transaction_id'], $total_price, $id_order);
 
-            if (isset($response->status) && $response->status == 'ok') {
-                return true;
-            }
-            if (isset($response->error)) {
-                $error = $response->error;
-            } else {
-                $error = $this->l('There was some error during activation api call');
-            }
-
-            // try {
-            //     $response = $this->set_fulfilled($orderPaymanet['transaction_id'], $total_price, $id_order);
+            // if (isset($response->status) && $response->status == 'ok') {
             //     return true;
-            // } 
-    
-            // catch(Exception $e) {
-            //     return $e->message;
             // }
+            // if (isset($response->error)) {
+            //     $error = $response->error;
+            // } else {
+            //     $error = $this->l('There was some error during activation api call');
+            // }
+
+            try {
+                $response = $this->set_fulfilled($orderPaymanet['transaction_id'], $total_price, $id_order);
+                return true;
+            } 
+    
+            catch(Exception $e) {
+                return $e->message;
+            }
 
             PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int)$id_order, true);
         }
@@ -859,8 +859,14 @@ class FinancePayment extends PaymentModule
             ->withDeliveryMethod( $shipping_method )
             ->withTrackingNumber( $tracking_numbers );
         // Create a new activation for the application.
-        $env                      = FinanceApi::getEnvironment($api_key);;
-        $sdk                      = new \Divido\MerchantSDK\Client( $api_key, $env );
+        $env                      = FinanceApi::getEnvironment($api_key);
+        $client 				  = new \GuzzleHttp\Client();
+		$httpClientWrapper        = new HttpClientWrapper(
+                                    new GuzzleAdapter($client),
+                                    Environment::CONFIGURATION[$env]['base_uri'],
+                                    $api_key
+                                     );
+        $sdk                      = new \Divido\MerchantSDK\Client( $httpClientWrapper, $env );
         $response                 = $sdk->applicationActivations()->createApplicationActivation( $application, $application_activation );
         $activation_response_body = $response->getBody()->getContents();
         return $activation_response_body;
