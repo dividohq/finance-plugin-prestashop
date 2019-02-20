@@ -217,25 +217,25 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
 
 
-// Note: If creating an appliclation (credit request) on a merchant with a shared secret, you will have to pass in a correct hmac
+        // Note: If creating an appliclation (credit request) on a merchant with a shared secret, you will have to pass in a correct hmac
 
-$env = FinanceApi::getEnvironment($api_key);
-$client = new Guzzle();
-$httpClientWrapper = new HttpClientWrapper(
-    new GuzzleAdapter($client),
-    Environment::CONFIGURATION[$env]['base_uri'],
-    $api_key
-);
+        $env = FinanceApi::getEnvironment($api_key);
+        $client = new Guzzle();
+        $httpClientWrapper = new HttpClientWrapper(
+            new GuzzleAdapter($client),
+            Environment::CONFIGURATION[$env]['base_uri'],
+            $api_key
+        );
 
-$sdk = new Client($httpClientWrapper, $env);
+        $sdk = new Client($httpClientWrapper, $env);
 
-$response                  = $sdk->applications()->createApplication( $application, [], ['Content-Type' => 'application/json']);
-$application_response_body = $response->getBody()->getContents();
-$decode                    = json_decode( $application_response_body );
-$result_id                 = $decode->data->id;
-$result_redirect           = $decode->data->urls->application_url;
+        $response                  = $sdk->applications()->createApplication( $application, [], ['Content-Type' => 'application/json']);
+        $application_response_body = $response->getBody()->getContents();
+        $decode                    = json_decode( $application_response_body );
+        $result_id                 = $decode->data->id;
+        $result_redirect           = $decode->data->urls->application_url;
 
- try {
+        try {
             $data = array(
                 'status' => true,
                 'url'    => $result_redirect,
@@ -260,6 +260,33 @@ $result_redirect           = $decode->data->urls->application_url;
         }
          return $data;
     }
+
+    /**
+     * Returns environment code which is a lowercase name
+     * e.g. divido,duologi,nordea
+     * 
+     *  @param $api_key string
+     */
+    public function getFinanceEnv($api_key){
+
+        $env    =  FinanceApi::getEnvironment($api_key);
+        $client       =   new Guzzle();
+        $httpClientWrapper = new HttpClientWrapper(
+            new GuzzleAdapter($client),
+            Environment::CONFIGURATION[$env]['base_uri'],
+            $api_key
+        );
+
+        $sdk  = new Client($httpClientWrapper, $env);
+
+        $response = $sdk->platformEnvironments()->getPlatformEnvironment();
+        $finance_env = $response->getBody()->getContents();
+        $decoded = json_decode($finance_env);
+        return $decoded->data->environment;
+
+    }
+
+
 
     public function saveHash($cart_id, $salt, $total)
     {
