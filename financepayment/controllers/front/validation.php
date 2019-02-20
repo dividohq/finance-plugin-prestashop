@@ -24,7 +24,14 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-class DividoPaymentValidationModuleFrontController extends ModuleFrontController
+use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
+use Divido\MerchantSDK\Client;
+use Divido\MerchantSDK\Environment;
+use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
+use GuzzleHttp\Client as Guzzle;
+
+
+class FinancePaymentValidationModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = false;
     /**
@@ -48,10 +55,11 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
         if ($this->module->active == false) {
             echo Tools::jsonEncode($response);
             die;
+
         }
         
         $cart = $this->context->cart;
-
+        
         if ($cart->getOrderTotal(true, Cart::BOTH) != Tools::getValue('total')) {
             $response = array(
                 'status' => true,
@@ -85,25 +93,25 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
             echo json_encode($response);
             die;
         }
-
+        
         $response = $this->getConfirmation();
         echo Tools::jsonEncode($response);
         die;
+        
     }
 
     public function getConfirmation()
     {
-        $api_key   = Configuration::get('DIVIDO_API_KEY');
-        Divido::setApiKey($api_key);
+        $api_key   = Configuration::get('FINANCE_API_KEY');
+        //$set_api_key = Divido::setApiKey($api_key);
         $deposit = Tools::getValue('deposit');
         $finance = Tools::getValue('finance');
-
         $cart = $this->context->cart;
         $customer = new Customer($cart->id_customer);
         $address = new Address($cart->id_address_invoice);
         $country = Country::getIsoById($address->id_country);
 
-        $language = Tools::strtoupper(Language::getIsoById($this->context->language->id));
+        $language = Language::getIsoById($this->context->language->id);
 
         $currencyObj = new Currency($cart->id_currency);
         $currency = $currencyObj->iso_code;
@@ -113,7 +121,7 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
         $firstname = $customer->firstname;
         $lastname = $customer->lastname;
         $email = $customer->email;
-        $telephone = '';
+        $telephone = null;
         if ($address->phone) {
             $telephone = $address->phone;
         } elseif ($address->phone_mobile) {
@@ -125,30 +133,30 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
         $products  = array();
         foreach ($cart->getProducts() as $product) {
             $products[] = array(
-                'type' => 'product',
-                'text' => $product['name'],
+             
+                'name' => $product['name'],
                 'quantity' => $product['quantity'],
-                'value' => $product['price_wt'],
+                'price' => $product['price_wt']*100,
             );
         }
 
         $sub_total = $cart->getOrderTotal(true, Cart::BOTH);
-
         $shiphandle = $cart->getOrderTotal(true, Cart::ONLY_SHIPPING);
         $disounts = $cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS);
+        $discount = (float)$disounts;
 
         $products[] = array(
-            'type'     => 'product',
-            'text'     => 'Shipping & Handling',
+            
+            'name'     => 'Shipping & Handling',
             'quantity' => 1,
-            'value'    => $shiphandle,
+            'price'    => $shiphandle*100,
         );
 
         $products[] = array(
-            'type'     => 'product',
-            'text'     => 'Discount',
+        
+            'name'     => 'Discount',
             'quantity' => 1,
-            'value'    => "-".$disounts,
+            'price'    => -$discount*100,
         );
 
         $deposit_amount = Tools::ps_round(($deposit / 100) * $sub_total, 2);
@@ -163,52 +171,79 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
 
         $salt = uniqid('', true);
         $hash = hash('sha256', $cart_id.$salt);
-
+        
         $this->saveHash($cart_id, $salt, $sub_total);
 
-        $request_data = array(
-            'merchant' => $api_key,
-            'deposit'  => $deposit_amount,
-            'finance'  => $finance,
-            'country'  => $country,
-            'language' => $language,
-            'currency' => $currency,
-            'metadata' => array(
-                'cart_id' => $cart_id,
-                'cart_hash' => $hash,
-            ),
-            'customer' => array(
-                'title'         => '',
-                'first_name'    => $firstname,
-                'middle_name'   => '',
-                'last_name'     => $lastname,
-                'country'       => $country,
-                'postcode'      => $postcode,
-                'email'         => $email,
-                'mobile_number' => '',
-                'phone_number'  => $telephone,
-                'address' => array(
-                    'text' => $address->address1." ".$address->address2.
-                        " ".$address->city." ".$address->postcode,
-                ),
-            ),
-            'products' => $products,
-            'response_url' => $response_url,
-            'redirect_url' => $redirect_url,
-            'checkout_url' => $checkout_url,
+        $application               = ( new \Divido\MerchantSDK\Models\Application() )
+        ->withCountryId( $country )
+        ->withCurrencyId( $currency )
+        ->withLanguageId( $language )
+        ->withFinancePlanId( $finance )
+        ->withApplicants(
+            [
+                [
+                    'firstName'   => $firstname,
+                    'lastName'    => $lastname,
+                    'email'       => $email,
+                    'addresses'   => array(
+                        [
+                            'postcode' => $postcode,
+                            'street'   => $address->address1,
+                            'town'     => $address->city,
+                        ],
+                    ),
+                ],
+            ]
+        )
+        ->withOrderItems($products)
+        ->withDepositPercentage($deposit/100)
+        ->withFinalisationRequired( false )
+        ->withMerchantReference( '' )
+        ->withUrls(
+            [
+                'merchant_redirect_url' => $redirect_url,
+                'merchant_checkout_url' => $checkout_url,
+                'merchant_response_url' => $response_url,
+            ]
+        )
+        ->withMetadata(
+            [
+                'cart_id'      => $cart_id,
+                'cart_hash'    => $hash,
+
+            ]
         );
 
-        $response = Divido_CreditRequest::create($request_data);
 
-        if ($response->status == 'ok') {
+
+
+// Note: If creating an appliclation (credit request) on a merchant with a shared secret, you will have to pass in a correct hmac
+
+$env = FinanceApi::getEnvironment($api_key);
+$client = new Guzzle();
+$httpClientWrapper = new HttpClientWrapper(
+    new GuzzleAdapter($client),
+    Environment::CONFIGURATION[$env]['base_uri'],
+    $api_key
+);
+
+$sdk = new Client($httpClientWrapper, $env);
+
+$response                  = $sdk->applications()->createApplication( $application, [], ['Content-Type' => 'application/json']);
+$application_response_body = $response->getBody()->getContents();
+$decode                    = json_decode( $application_response_body );
+$result_id                 = $decode->data->id;
+$result_redirect           = $decode->data->urls->application_url;
+
+ try {
             $data = array(
                 'status' => true,
-                'url'    => $response->url,
+                'url'    => $result_redirect,
             );
             $customer = new Customer($cart->id_customer);
             $this->validatOrder(
                 $cart_id,
-                Configuration::get('DIVIDO_AWAITING_STATUS'),
+                Configuration::get('FINANCE_AWAITING_STATUS'),
                 $sub_total,
                 $this->module->displayName,
                 null,
@@ -217,14 +252,13 @@ class DividoPaymentValidationModuleFrontController extends ModuleFrontController
                 false,
                 $customer->secure_key
             );
-        } else {
+        } catch(Exception $e) {
             $data = array(
                 'status'  => false,
                 'message' => Tools::displayError($response->error),
             );
         }
-
-        return $data;
+         return $data;
     }
 
     public function saveHash($cart_id, $salt, $total)

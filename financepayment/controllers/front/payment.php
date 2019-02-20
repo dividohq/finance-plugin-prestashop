@@ -24,7 +24,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-class DividoPaymentPaymentModuleFrontController extends ModuleFrontController
+class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
 {
     public $ssl = true;
     public $display_column_left = false;
@@ -39,7 +39,7 @@ class DividoPaymentPaymentModuleFrontController extends ModuleFrontController
         if (!$this->module->checkCurrency($cart)) {
             Tools::redirect('index.php?controller=order');
         }
-        if ($cart->getOrderTotal() < Configuration::get('DIVIDO_CART_MINIMUM')) {
+        if ($cart->getOrderTotal() < Configuration::get('FINANCE_CART_MINIMUM')) {
             Tools::redirect('index.php?controller=order');
         }
 
@@ -58,7 +58,7 @@ class DividoPaymentPaymentModuleFrontController extends ModuleFrontController
 
         $js_key    = $this->module->getJsKey();
 
-        $api = new DividoApi();
+        $api = new FinanceApi();
         $plans = $api->getCartPlans($cart);
 
         if (!$plans) {
@@ -76,12 +76,12 @@ class DividoPaymentPaymentModuleFrontController extends ModuleFrontController
                 'total' => Tools::displayPrice($cart->getOrderTotal(true, Cart::BOTH), $currency),
                 'merchant_script' => "//cdn.divido.com/calculator/".$js_key.".js",
                 'plans' => implode(',', array_keys($plans)),
-                'validationLink' => $this->context->link->getModuleLink('dividopayment', 'validation'),
+                'validationLink' => $this->context->link->getModuleLink('financepayment', 'validation'),
             )
         );
         Media::addJsDef(array(
             'merchant_script' => "//cdn.divido.com/calculator/".$js_key.".js",
-            'validationLink' => $this->context->link->getModuleLink('dividopayment', 'validation'),
+            'validationLink' => $this->context->link->getModuleLink('financepayment', 'validation'),
         ));
 
         if (!$this->module->ps_below_7) {
@@ -101,6 +101,6 @@ class DividoPaymentPaymentModuleFrontController extends ModuleFrontController
     public function setMedia()
     {
         parent::setMedia();
-        $this->addJS(_PS_MODULE_DIR_.$this->module->name.'/views/js/divido.js');
+        $this->addJS(_PS_MODULE_DIR_.$this->module->name.'/views/js/finance.js');
     }
 }

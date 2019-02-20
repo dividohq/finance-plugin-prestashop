@@ -30,14 +30,14 @@ use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 use GuzzleHttp\Client as Guzzle;
 
-class DividoApi
+class FinanceApi
 {
     public function getGlobalSelectedPlans()
     {
         $all_plans     = $this->getAllPlans();
-        $selected_plans = explode(',', Configuration::get('DIVIDO_PLAN_SELECTION'));
+        $selected_plans = explode(',', Configuration::get('FINANCE_PLAN_SELECTION'));
 
-        if (Configuration::get('DIVIDO_ALL_PLAN_SELECTION')) {
+        if (Configuration::get('FINANCE_ALL_PLAN_SELECTION')) {
             return $all_plans;
         }
 
@@ -58,9 +58,9 @@ class DividoApi
     public function getAllPlans()
     {
         // Decide the env set by admin somehow...
-        $env = Environment::TESTING;
+        $env = Environment::SANDBOX;
 
-        $api_key = Configuration::get('DIVIDO_API_KEY');
+        $api_key = Configuration::get('FINANCE_API_KEY');
         if (!$api_key) {
             return array();
         }
@@ -107,7 +107,7 @@ class DividoApi
 
     public function getCartPlans($cart)
     {
-        $exclusive = Configuration::get('DIVIDO_WHOLE_CART');
+        $exclusive = Configuration::get('FINANCE_WHOLE_CART');
         $plans     = array();
         $products  = $cart->getProducts();
         foreach ($products as $product) {
@@ -135,8 +135,8 @@ class DividoApi
     public function getProductPlans($product_price, $id_product)
     {
         $settings = $this->getProductSettings($id_product);
-        $product_selection = Configuration::get('DIVIDO_PRODUCTS_OPTIONS');
-        $price_threshold   = Configuration::get('DIVIDO_PRODUCTS_MINIMUM');
+        $product_selection = Configuration::get('FINANCE_PRODUCTS_OPTIONS');
+        $price_threshold   = Configuration::get('FINANCE_PRODUCTS_MINIMUM');
 
         $plans = $this->getPlans(true);
 
@@ -183,8 +183,33 @@ class DividoApi
 
     public static function getProductSettings($id_product)
     {
-        $query = "select * from `"._DB_PREFIX_."divido_product` where id_product = '".(int)$id_product."'";
+        $query = "select * from `"._DB_PREFIX_."finance_product` where id_product = '".(int)$id_product."'";
 
         return Db::getInstance()->getRow($query);
     }
+
+    public static function getEnvironment( $key ) {
+        $array       = explode( '_', $key );
+        $environment = strtoupper( $array[0] );
+        switch ($environment) {
+            case 'LIVE':
+                return constant( 'Divido\MerchantSDK\Environment::' . $environment );
+                break;
+
+            case 'SANDBOX':
+                return constant( "Divido\MerchantSDK\Environment::$environment" );
+                break;
+            
+            default:
+                return constant( "Divido\MerchantSDK\Environment::SANDBOX" );
+                break;
+        }
+
+    }
+
+
+
 }
+
+
+    

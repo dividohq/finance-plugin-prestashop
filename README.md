@@ -6,7 +6,7 @@ For manual installation of the most recent version of the plugin follow all step
 To install the plugin direct from prestashop start at step 5.
 
 1. Download the Module from our github page our latest released version of the plugin can be found here.
-2. Upload the dividopayment folder to your modules folder - as the web server user.
+2. Upload the financepayment folder to your modules folder - as the web server user.
 3. Go to Modules > Modules & Services > Search for "Divido"
 ** if the module doesn't show up straight away - you may need to clear your prestashop cache, or check file permissions **
 4. Click Install > Click Configure.

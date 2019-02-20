@@ -23,21 +23,21 @@
 *  International Registered Trademark & Property of PrestaShop SA
 *}
 
-<div id="dividopayment" class="row">
+<div id="financepayment" class="row">
     <div class="col-md-12">
     	<div class="row form-group">
 			<div class="form-group  col-md-4">
-				<label class="form-control-label">{l s='Available for finance?' mod='dividopayment'}</label>
-				<select name="DIVIDO_display" class="form-control display_plans">
-					<option value="default">{l s='No' mod='dividopayment'}</option>
-					<option value="custom" {if isset($product_settings['display']) && $product_settings['display'] == 'custom'} selected="selected" {/if}>{l s='Selected' mod='dividopayment'}</option>
+				<label class="form-control-label">{l s='Available for finance?' mod='financepayment'}</label>
+				<select name="FINANCE_display" class="form-control display_plans">
+					<option value="default">{l s='No' mod='financepayment'}</option>
+					<option value="custom" {if isset($product_settings['display']) && $product_settings['display'] == 'custom'} selected="selected" {/if}>{l s='Selected' mod='financepayment'}</option>
 				</select>
 			</div>
     	</div>
     	<div class="row form-group divido_plans_wrapper">
 			<div class="form-group  col-md-4">
-				<label class="form-control-label">{l s='Selected Plans' mod='dividopayment'}</label>
-				<select name="DIVIDO_plans[]" multiple="multiple" class="form-control select_plans">
+				<label class="form-control-label">{l s='Selected Plans' mod='financepayment'}</label>
+				<select name="FINANCE_plans[]" multiple="multiple" class="form-control select_plans">
 					{foreach from=$plans item=plan}
 						<option value="{$plan->id|escape:'htmlall':'UTF-8'}" {if $plan->id|in_array:$product_settings.plans} selected="selected" {/if}>{$plan->text|escape:'htmlall':'UTF-8'}</option>
 					{/foreach}

@@ -24,7 +24,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-class DividoPaymentConfirmationModuleFrontController extends ModuleFrontController
+class FinancePaymentConfirmationModuleFrontController extends ModuleFrontController
 {
     public function init()
     {
@@ -45,7 +45,7 @@ class DividoPaymentConfirmationModuleFrontController extends ModuleFrontControll
             unset($context->cookie->id_cart);
         }
 
-        if ($order->current_state == Configuration::get('DIVIDO_AWAITING_STATUS')) {
+        if ($order->current_state == Configuration::get('FINANCE_AWAITING_STATUS')) {
             $this->context->cart = $cart;
             $response = $cart->duplicate();
             if ($response['success']) {

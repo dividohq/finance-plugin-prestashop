@@ -27,43 +27,43 @@
 */
 
 $(document).ready(function(){
-	if ($('input[name="DIVIDO_ALL_PLAN_SELECTION"]').length > 0) {
+	if ($('input[name="FINANCE_ALL_PLAN_SELECTION"]').length > 0) {
 		updatePlansDiv();
 	}
-	if ($('select[name="DIVIDO_PRODUCTS_OPTIONS"]').length > 0) {
+	if ($('select[name="FINANCE_PRODUCTS_OPTIONS"]').length > 0) {
 		updateProductOptions();
 	}
-	if ($('select[name="DIVIDO_display"]').length > 0) {
+	if ($('select[name="FINANCE_display"]').length > 0) {
 		updateProductPlans();
 	}
 });
 
-$(document).on('change', 'input[name="DIVIDO_ALL_PLAN_SELECTION"]', updatePlansDiv);
-$(document).on('change', 'select[name="DIVIDO_PRODUCTS_OPTIONS"]', updateProductOptions);
-$(document).on('change', 'select[name="DIVIDO_display"]', updateProductPlans);
+$(document).on('change', 'input[name="FINANCE_ALL_PLAN_SELECTION"]', updatePlansDiv);
+$(document).on('change', 'select[name="FINANCE_PRODUCTS_OPTIONS"]', updateProductOptions);
+$(document).on('change', 'select[name="FINANCE_display"]', updateProductPlans);
 
 function updatePlansDiv() {
-	val = $('input[name="DIVIDO_ALL_PLAN_SELECTION"]:checked').val();
+	val = $('input[name="FINANCE_ALL_PLAN_SELECTION"]:checked').val();
 	if (!val) {
-		$('select[name="DIVIDO_PLAN_SELECTION_available[]"]').closest('.form-group').parent().closest('.form-group').slideDown();
+		$('select[name="FINANCE_PLAN_SELECTION_available[]"]').closest('.form-group').parent().closest('.form-group').slideDown();
 	} else {
-		$('select[name="DIVIDO_PLAN_SELECTION_available[]"]').closest('.form-group').parent().closest('.form-group').slideUp();
+		$('select[name="FINANCE_PLAN_SELECTION_available[]"]').closest('.form-group').parent().closest('.form-group').slideUp();
 	}
 }
 
 function updateProductOptions() {
-	val = $('select[name="DIVIDO_PRODUCTS_OPTIONS"]').val();
+	val = $('select[name="FINANCE_PRODUCTS_OPTIONS"]').val();
 	if (val == 'min_price') {
-		$('input[name="DIVIDO_PRODUCTS_MINIMUM"]').closest('.form-group').slideDown();
+		$('input[name="FINANCE_PRODUCTS_MINIMUM"]').closest('.form-group').slideDown();
 	} else {
-		$('input[name="DIVIDO_PRODUCTS_MINIMUM"]').closest('.form-group').slideUp();
+		$('input[name="FINANCE_PRODUCTS_MINIMUM"]').closest('.form-group').slideUp();
 	}	
 }
 
 function updateProductPlans() {
-	val = $('select[name="DIVIDO_display"]').val();
+	val = $('select[name="FINANCE_display"]').val();
 
-	if ($('select[name="DIVIDO_display"]').val() == 'custom') {
+	if ($('select[name="FINANCE_display"]').val() == 'custom') {
 		$('.divido_plans_wrapper').slideDown();
 	} else {
 		$('.divido_plans_wrapper').slideUp();

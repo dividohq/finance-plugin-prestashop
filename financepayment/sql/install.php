@@ -34,12 +34,12 @@ $sql[] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'divido_requests` (
     PRIMARY KEY  (`id_divido_requests`)
 ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
 
-$sql[] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'divido_product` (
-    `id_divido_product` int(11) NOT NULL AUTO_INCREMENT,
+$sql[] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'finance_product` (
+    `id_finance_product` int(11) NOT NULL AUTO_INCREMENT,
     `id_product` int(11) NOT NULL,
     `display` text NOT NULL,
     `plans` text NOT NULL,
-    PRIMARY KEY  (`id_divido_product`)
+    PRIMARY KEY  (`id_finance_product`)
 ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
 
 foreach ($sql as $query) {
