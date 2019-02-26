@@ -111,7 +111,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $address = new Address($cart->id_address_invoice);
         $country = Country::getIsoById($address->id_country);
 
-        $language = Language::getIsoById($this->context->language->id);
+        $language = Language::getIsoById($this->context->language);
 
         $currencyObj = new Currency($cart->id_currency);
         $currency = $currencyObj->iso_code;
