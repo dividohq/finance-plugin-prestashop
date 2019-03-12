@@ -29,8 +29,11 @@ if (!defined('_PS_VERSION_')) {
 }
 
 require_once dirname(__FILE__) . '/vendor/autoload.php';
-require_once dirname(__FILE__) . '/lib/divido/Divido.php';
 require_once dirname(__FILE__) . '/classes/divido.class.php';
+
+use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
+use Divido\MerchantSDK\Environment;
+use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 
 
 class FinancePayment extends PaymentModule
@@ -99,6 +102,7 @@ class FinancePayment extends PaymentModule
     public function install()
     {
         Configuration::updateValue('FINANCE_API_KEY', null);
+        Configuration::updateValue('FINANCE_ENVIRONMENT',null);
         Configuration::updateValue('FINANCE_PAYMENT_TITLE', $this->displayName);
         Configuration::updateValue('FINANCE_ACTIVATION_STATUS', Configuration::get('PS_OS_DELIVERED'));
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET', null);
@@ -202,6 +206,7 @@ class FinancePayment extends PaymentModule
     public function uninstall()
     {
         Configuration::deleteByName('FINANCE_API_KEY');
+        Configuration::deleteByName('FINANCE_ENVIRONMENT');
         Configuration::deleteByName('FINANCE_PAYMENT_TITLE');
         Configuration::deleteByName('FINANCE_ACTIVATION_STATUS');
         Configuration::deleteByName('FINANCE_PRODUCT_WIDGET');
@@ -306,8 +311,10 @@ class FinancePayment extends PaymentModule
 
         /*----------------------Display form only after key is inserted----------------------------*/
         if (Configuration::get('FINANCE_API_KEY')) {
-          
+
             $api = new FinanceApi();
+            $api_key = Configuration::get('FINANCE_API_KEY');
+            Configuration::updateValue('FINANCE_ENVIRONMENT', $api->getFinanceEnv($api_key));
             $financePlans = $api->getAllPlans();
             $orderStatus = OrderState::getOrderStates($this->context->language->id);
             $product_options = array(
@@ -487,6 +494,7 @@ class FinancePayment extends PaymentModule
     {
         $form_values = array(
             'FINANCE_API_KEY' => Configuration::get('FINANCE_API_KEY'),
+            'FINANCE_ENVIRONMENT' => Configuration::get('FINANCE_ENVIRONMENT'),
             'FINANCE_PAYMENT_TITLE' => Configuration::get('FINANCE_PAYMENT_TITLE'),
             'FINANCE_ACTIVATION_STATUS' => Configuration::get('FINANCE_ACTIVATION_STATUS'),
             'FINANCE_ALL_PLAN_SELECTION' => Configuration::get('FINANCE_ALL_PLAN_SELECTION'),
@@ -561,7 +569,7 @@ class FinancePayment extends PaymentModule
     {
         $js_key = $this->getJsKey();
         Media::addJsDef(array(
-            'dividoKey' => $js_key,
+            Configuration::get('FINANCE_ENVIRONMENT') . 'Key' => $js_key,
         ));
         $this->context->controller->addJS(_PS_MODULE_DIR_.$this->name.'/views/js/finance.js');
     }
@@ -579,6 +587,7 @@ class FinancePayment extends PaymentModule
     {
         if (!$this->active) {
             return;
+            
         }
         if (!$this->checkCurrency($params['cart'])) {
             return;
@@ -600,6 +609,9 @@ class FinancePayment extends PaymentModule
         $this->smarty->assign(array(
             'payment_title' => Configuration::get('FINANCE_PAYMENT_TITLE'),
         ));
+
+        
+
         return $this->display(__FILE__, 'payment.tpl');
     }
 
@@ -687,7 +699,6 @@ class FinancePayment extends PaymentModule
         ) {
             return;
         }
-
         return $this->getWidgetData($params, 'widget.tpl');
     }
 
@@ -777,25 +788,7 @@ class FinancePayment extends PaymentModule
                 'deliveryMethod' => $order->shipping_number ? $order->shipping_number : 'not entered',
                 'trackingNumber' => $carrier->name,
             );
-           
-
-            Divido::setMerchant($api_key);
-
-        
-
-            //$response = Divido_Activation::activate($request_data);
-
-            // $response = $this->set_fulfilled($orderPaymanet['transaction_id'], $total_price, $id_order);
-
-            // if (isset($response->status) && $response->status == 'ok') {
-            //     return true;
-            // }
-            // if (isset($response->error)) {
-            //     $error = $response->error;
-            // } else {
-            //     $error = $this->l('There was some error during activation api call');
-            // }
-
+            
             try {
                 $response = $this->set_fulfilled($orderPaymanet['transaction_id'], $total_price, $id_order);
                 return true;
@@ -833,8 +826,9 @@ class FinancePayment extends PaymentModule
         $this->context->smarty->assign(array(
             'plans' => implode(',', array_keys($plans)),
             'raw_total' => $product_price,
-            'finance_prefix' => Configuration::get('FINANCE_PRODUCT_WIDGET_PREFIX'),
-            'finance_suffix' => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
+            'finance_prefix'       => Configuration::get('FINANCE_PRODUCT_WIDGET_PREFIX'),
+            'finance_suffix'       => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
+            'finance_environment'  => Configuration::get('FINANCE_ENVIRONMENT'),
         ));
 
         return $this->display(__FILE__, $template);
@@ -844,6 +838,7 @@ class FinancePayment extends PaymentModule
     function set_fulfilled( $application_id, $order_total, $order_id, $shipping_method = null, $tracking_numbers = null ) {
 
         // First get the application you wish to create an activation for.
+        $api_key   = Configuration::get('FINANCE_API_KEY');
         $application = ( new \Divido\MerchantSDK\Models\Application() )
         ->withId( $application_id );
         $items       = [

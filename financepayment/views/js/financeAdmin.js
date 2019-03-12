@@ -64,8 +64,8 @@ function updateProductPlans() {
 	val = $('select[name="FINANCE_display"]').val();
 
 	if ($('select[name="FINANCE_display"]').val() == 'custom') {
-		$('.divido_plans_wrapper').slideDown();
+		$('.finance_plans_wrapper').slideDown();
 	} else {
-		$('.divido_plans_wrapper').slideUp();
+		$('.finance_plans_wrapper').slideUp();
 	}
 }

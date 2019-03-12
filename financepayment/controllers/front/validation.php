@@ -103,7 +103,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
     public function getConfirmation()
     {
         $api_key   = Configuration::get('FINANCE_API_KEY');
-        //$set_api_key = Divido::setApiKey($api_key);
         $deposit = Tools::getValue('deposit');
         $finance = Tools::getValue('finance');
         $cart = $this->context->cart;

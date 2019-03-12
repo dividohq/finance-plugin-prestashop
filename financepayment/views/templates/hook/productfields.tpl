@@ -34,7 +34,7 @@
 				</select>
 			</div>
     	</div>
-    	<div class="row form-group divido_plans_wrapper">
+    	<div class="row form-group finance_plans_wrapper">
 			<div class="form-group  col-md-4">
 				<label class="form-control-label">{l s='Selected Plans' mod='financepayment'}</label>
 				<select name="FINANCE_plans[]" multiple="multiple" class="form-control select_plans">

@@ -24,8 +24,9 @@
 *}
 
 {literal}
-    <script type="text/javascript" src="https://cdn.divido.com/calculator/v2.1/production/js/template.divido.js"></script>
+    <script type="text/javascript" src="https://cdn.divido.com/calculator/v2.1/production/js/template.{/literal}{$finance_environment|escape:'htmlall':'UTF-8'}{literal}.js"></script>
 {/literal}
-<div data-divido-widget data-divido-mode="popup" data-divido-prefix="{if isset($divido_prefix) && $divido_prefix}{$divido_prefix|escape:'htmlall':'UTF-8'}{/if}" data-divido-suffix="{if isset($divido_suffix) && $divido_suffix}{$divido_suffix|escape:'htmlall':'UTF-8'}{/if}" data-divido-title-logo data-divido-amount="{$raw_total|escape:'htmlall':'UTF-8'}" data-divido-apply="true" data-divido-apply-label="Apply Now" data-divido-plans = "{$plans|escape:'htmlall':'UTF-8'}">
+
+<div data-{$finance_environment|escape:'htmlall':'UTF-8'}-widget data-{$finance_environment|escape:'htmlall':'UTF-8'}-mode="popup" data-{$finance_environment|escape:'htmlall':'UTF-8'}-prefix="{if isset($finance_prefix) && $finance_prefix}{$finance_prefix|escape:'htmlall':'UTF-8'}{/if}" data-{$finance_environment|escape:'htmlall':'UTF-8'}-suffix="{if isset($finance_suffix) && $finance_suffix}{$finance_suffix|escape:'htmlall':'UTF-8'}{/if}" data-{$finance_environment|escape:'htmlall':'UTF-8'}-amount="{$raw_total|escape:'htmlall':'UTF-8'}" data-{$finance_environment|escape:'htmlall':'UTF-8'}-apply="true" data-{$finance_environment|escape:'htmlall':'UTF-8'}-apply-label="Apply Now" data-{$finance_environment|escape:'htmlall':'UTF-8'}-plans = "{$plans|escape:'htmlall':'UTF-8'}">
 </div>
 

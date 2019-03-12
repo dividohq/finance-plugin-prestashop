@@ -40,11 +40,9 @@ class FinanceApi
         if (Configuration::get('FINANCE_ALL_PLAN_SELECTION')) {
             return $all_plans;
         }
-
         if (!$selected_plans) {
             return array();
         }
-
         $plans = array();
         foreach ($all_plans as $plan) {
             if (in_array($plan->id, $selected_plans)) {
@@ -55,10 +53,8 @@ class FinanceApi
         return $plans;
     }
 
-    public function getAllPlans()
-    {
-        // Decide the env set by admin somehow...
-        $env = Environment::SANDBOX;
+
+    public function getFinanceEnv($api_key){
 
         $api_key = Configuration::get('FINANCE_API_KEY');
         if (!$api_key) {
@@ -66,6 +62,35 @@ class FinanceApi
         }
 
         $client = new Guzzle();
+        $env = $this->getEnvironment($api_key);
+        $httpClientWrapper = new HttpClientWrapper(
+            new GuzzleAdapter($client),
+            Environment::CONFIGURATION[$env]['base_uri'],
+            $api_key
+        );
+
+        $sdk = new Client($httpClientWrapper, $env);
+
+        $response = $sdk->platformEnvironments()->getPlatformEnvironment();
+        $finance_env = $response->getBody()->getContents();
+        $decoded =json_decode($finance_env);
+
+        
+        return $decoded->data->environment;
+
+    }
+
+    public function getAllPlans()
+    {
+        // Decide the env set by admin somehow...
+
+        $api_key = Configuration::get('FINANCE_API_KEY');
+        if (!$api_key) {
+            return array();
+        }
+
+        $client = new Guzzle();
+        $env = $this->getEnvironment($api_key);
 
         $httpClientWrapper = new HttpClientWrapper(
             new GuzzleAdapter($client),
@@ -95,7 +120,6 @@ class FinanceApi
 
                 $plans_plain[$plan->id] = $plan_copy;
             }
-
             return $plans_plain;
         } catch (\Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException $e) {
             // Handle exception how you like...
@@ -135,8 +159,12 @@ class FinanceApi
     public function getProductPlans($product_price, $id_product)
     {
         $settings = $this->getProductSettings($id_product);
-        $product_selection = Configuration::get('FINANCE_PRODUCTS_OPTIONS');
-        $price_threshold   = Configuration::get('FINANCE_PRODUCTS_MINIMUM');
+
+
+       if ($settings["display"] != "custom"){
+          $product_selection = Configuration::get('FINANCE_PRODUCTS_OPTIONS');
+          $price_threshold   = Configuration::get('FINANCE_PRODUCTS_MINIMUM');
+        }
 
         $plans = $this->getPlans(true);
 
@@ -187,6 +215,7 @@ class FinanceApi
 
         return Db::getInstance()->getRow($query);
     }
+
 
     public static function getEnvironment( $key ) {
         $array       = explode( '_', $key );

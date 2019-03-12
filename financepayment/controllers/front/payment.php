@@ -35,6 +35,7 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
     public function initContent()
     {
         parent::initContent();
+        //var_dump(Configuration::get('FINANCE_ENVIRONMENT'));die;
         $cart = $this->context->cart;
         if (!$this->module->checkCurrency($cart)) {
             Tools::redirect('index.php?controller=order');
@@ -69,6 +70,7 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
             array(
                 'payment_error' => $payment_error,
                 'responsetext' => $responsetext,
+                'finance_environment' => Configuration::get('FINANCE_ENVIRONMENT'),
                 'nbProducts' => $cart->nbProducts(),
                 'responsedes' => $responsedes,
                 'cust_currency' => $cart->id_currency,
