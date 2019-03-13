@@ -54,8 +54,8 @@ class FinanceApi
     }
 
 
-    public function getFinanceEnv($api_key){
-
+    public function getFinanceEnv($api_key)
+    {
         $api_key = Configuration::get('FINANCE_API_KEY');
         if (!$api_key) {
             return array();
@@ -77,7 +77,6 @@ class FinanceApi
 
         
         return $decoded->data->environment;
-
     }
 
     public function getAllPlans()
@@ -161,9 +160,9 @@ class FinanceApi
         $settings = $this->getProductSettings($id_product);
 
 
-       if ($settings["display"] != "custom"){
-          $product_selection = Configuration::get('FINANCE_PRODUCTS_OPTIONS');
-          $price_threshold   = Configuration::get('FINANCE_PRODUCTS_MINIMUM');
+        if ($settings["display"] != "custom") {
+            $product_selection = Configuration::get('FINANCE_PRODUCTS_OPTIONS');
+            $price_threshold   = Configuration::get('FINANCE_PRODUCTS_MINIMUM');
         }
 
         $plans = $this->getPlans(true);
@@ -217,28 +216,19 @@ class FinanceApi
     }
 
 
-    public static function getEnvironment( $key ) {
-        $array       = explode( '_', $key );
-        $environment = strtoupper( $array[0] );
+    public static function getEnvironment($key)
+    {
+        $array       = explode('_', $key);
+        $environment = Tools::strtoupper($array[0]);
         switch ($environment) {
             case 'LIVE':
-                return constant( 'Divido\MerchantSDK\Environment::' . $environment );
-                break;
+                return constant("Divido\MerchantSDK\Environment::" . $environment);
 
             case 'SANDBOX':
-                return constant( "Divido\MerchantSDK\Environment::$environment" );
-                break;
+                return constant("Divido\MerchantSDK\Environment::$environment");
             
             default:
-                return constant( "Divido\MerchantSDK\Environment::SANDBOX" );
-                break;
+                return constant("Divido\MerchantSDK\Environment::SANDBOX");
         }
-
     }
-
-
-
 }
-
-
-    
