@@ -216,7 +216,7 @@ class FinanceApi
     }
 
 
-    public static function getEnvironment($key)
+    public function getEnvironment($key)
     {
         $array       = explode('_', $key);
         $environment = Tools::strtoupper($array[0]);
