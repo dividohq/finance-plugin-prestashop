@@ -18,7 +18,7 @@
 * needs please refer to http://www.prestashop.com for more information.
 *
 *  @author    PrestaShop SA <contact@prestashop.com>
-*  @copyright 2007-2018 PrestaShop SA
+*  @copyright 2007-2019 PrestaShop SA
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 *}
@@ -34,7 +34,7 @@
 				</select>
 			</div>
     	</div>
-    	<div class="row form-group divido_plans_wrapper">
+    	<div class="row form-group finance_plans_wrapper">
 			<div class="form-group  col-md-4">
 				<label class="form-control-label">{l s='Selected Plans' mod='financepayment'}</label>
 				<select name="FINANCE_plans[]" multiple="multiple" class="form-control select_plans">

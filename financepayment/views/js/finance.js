@@ -18,14 +18,14 @@
 * needs please refer to http://www.prestashop.com for more information.
 *
 *  @author    PrestaShop SA <contact@prestashop.com>
-*  @copyright 2007-2018 PrestaShop SA
+*  @copyright 2007-2019 PrestaShop SA
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 *
 * Don't forget to prefix your containers with your own identifier
 * to avoid any conflicts with others containers.
 */
-$(document).on('click', '#button-confirm-divido', function() {
+$(document).on('click', '#button-confirm-finance', function() {
     
     var finance_elem = $('input[name="divido_plan"]');   
     var deposit      = $('input[name="divido_deposit"]').val();
@@ -59,9 +59,9 @@ $(document).on('click', '#button-confirm-divido', function() {
                 location = data.url;
             } else {
                 message = data.message || 'Credit request could not be initiated';
-                $('#divido-checkout').prepend('<div class="alert alert-warning">' + message + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+                $('#finance-checkout').prepend('<div class="alert alert-warning">' + message + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
                 $('html, body').animate({
-                    scrollTop: $("#divido-checkout").offset().top
+                    scrollTop: $("#finance-checkout").offset().top
                 }, 1000);
             }
         },

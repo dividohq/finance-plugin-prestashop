@@ -4,7 +4,7 @@
     <displayName><![CDATA[Finance]]></displayName>
     <version><![CDATA[1.0.0]]></version>
     <description><![CDATA[The Finance extension allows you to accept finance payments in your Prestashop store.]]></description>
-    <author><![CDATA[Enter Author Here]]></author>
+    <author><![CDATA[Divido Financial Services Ltd]]></author>
     <tab><![CDATA[payments_gateways]]></tab>
 	<confirmUninstall><![CDATA[Are you sure you want to uninstall this module?]]></confirmUninstall>
     <is_configurable>1</is_configurable>

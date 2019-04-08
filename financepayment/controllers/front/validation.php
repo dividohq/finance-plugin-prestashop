@@ -30,7 +30,6 @@ use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 use GuzzleHttp\Client as Guzzle;
 
-
 class FinancePaymentValidationModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = false;
@@ -55,7 +54,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         if ($this->module->active == false) {
             echo Tools::jsonEncode($response);
             die;
-
         }
         
         $cart = $this->context->cart;
@@ -97,13 +95,11 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $response = $this->getConfirmation();
         echo Tools::jsonEncode($response);
         die;
-        
     }
 
     public function getConfirmation()
     {
         $api_key   = Configuration::get('FINANCE_API_KEY');
-        //$set_api_key = Divido::setApiKey($api_key);
         $deposit = Tools::getValue('deposit');
         $finance = Tools::getValue('finance');
         $cart = $this->context->cart;
@@ -121,13 +117,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $firstname = $customer->firstname;
         $lastname = $customer->lastname;
         $email = $customer->email;
-        $telephone = null;
-        if ($address->phone) {
-            $telephone = $address->phone;
-        } elseif ($address->phone_mobile) {
-            $telephone = $address->phone_mobile;
-        }
-
         $postcode  = $address->postcode;
 
         $products  = array();
@@ -159,8 +148,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             'price'    => -$discount*100,
         );
 
-        $deposit_amount = Tools::ps_round(($deposit / 100) * $sub_total, 2);
-
         $response_url = $this->context->link->getModuleLink($this->module->name, 'response');
         $redirect_url = $this->context->link->getModuleLink(
             $this->module->name,
@@ -175,84 +162,82 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $this->saveHash($cart_id, $salt, $sub_total);
 
         $application               = ( new \Divido\MerchantSDK\Models\Application() )
-        ->withCountryId( $country )
-        ->withCurrencyId( $currency )
-        ->withLanguageId( $language )
-        ->withFinancePlanId( $finance )
+        ->withCountryId($country)
+        ->withCurrencyId($currency)
+        ->withLanguageId($language)
+        ->withFinancePlanId($finance)
         ->withApplicants(
-            [
-                [
+            array(
+                array(
                     'firstName'   => $firstname,
                     'lastName'    => $lastname,
                     'email'       => $email,
                     'addresses'   => array(
-                        [
-                            'postcode' => $postcode,
-                            'street'   => $address->address1,
-                            'town'     => $address->city,
-                        ],
+                        array(
+                            'text'     => $postcode . " " . $address->address1 . " " . $address->city,
+                        ),
                     ),
-                ],
-            ]
+                ),
+            )
         )
         ->withOrderItems($products)
         ->withDepositPercentage($deposit/100)
-        ->withFinalisationRequired( false )
-        ->withMerchantReference( '' )
+        ->withFinalisationRequired(false)
+        ->withMerchantReference('')
         ->withUrls(
-            [
+            array (
                 'merchant_redirect_url' => $redirect_url,
                 'merchant_checkout_url' => $checkout_url,
                 'merchant_response_url' => $response_url,
-            ]
+            )
         )
         ->withMetadata(
-            [
+            array (
                 'cart_id'      => $cart_id,
                 'cart_hash'    => $hash,
 
-            ]
+            )
         );
 
+// Note: If creating an appliclation on a merchant with a shared secret, you will have to pass in a correct hmac
 
+                $env = FinanceApi::getEnvironment($api_key);
+                $client = new Guzzle();
+                $httpClientWrapper = new HttpClientWrapper(
+                    new GuzzleAdapter($client),
+                    Environment::CONFIGURATION[$env]['base_uri'],
+                    $api_key
+                );
 
+                $sdk = new Client($httpClientWrapper, $env);
 
-// Note: If creating an appliclation (credit request) on a merchant with a shared secret, you will have to pass in a correct hmac
+                $response = $sdk->applications()->createApplication(
+                    $application,
+                    array(),
+                    array ('Content-Type' => 'application/json')
+                );
+                $application_response_body = $response->getBody()->getContents();
+                $decode                    = json_decode($application_response_body);
+                $result_redirect           = $decode->data->urls->application_url;
 
-$env = FinanceApi::getEnvironment($api_key);
-$client = new Guzzle();
-$httpClientWrapper = new HttpClientWrapper(
-    new GuzzleAdapter($client),
-    Environment::CONFIGURATION[$env]['base_uri'],
-    $api_key
-);
-
-$sdk = new Client($httpClientWrapper, $env);
-
-$response                  = $sdk->applications()->createApplication( $application, [], ['Content-Type' => 'application/json']);
-$application_response_body = $response->getBody()->getContents();
-$decode                    = json_decode( $application_response_body );
-$result_id                 = $decode->data->id;
-$result_redirect           = $decode->data->urls->application_url;
-
- try {
+        try {
             $data = array(
                 'status' => true,
                 'url'    => $result_redirect,
             );
-            $customer = new Customer($cart->id_customer);
-            $this->validatOrder(
-                $cart_id,
-                Configuration::get('FINANCE_AWAITING_STATUS'),
-                $sub_total,
-                $this->module->displayName,
-                null,
-                array('transaction_id' => $response->id),
-                (int)$cart->id_currency,
-                false,
-                $customer->secure_key
-            );
-        } catch(Exception $e) {
+                    $customer = new Customer($cart->id_customer);
+                    $this->validatOrder(
+                        $cart_id,
+                        Configuration::get('FINANCE_AWAITING_STATUS'),
+                        $sub_total,
+                        $this->module->displayName,
+                        null,
+                        array('transaction_id' => $response->id),
+                        (int)$cart->id_currency,
+                        false,
+                        $customer->secure_key
+                    );
+        } catch (Exception $e) {
             $data = array(
                 'status'  => false,
                 'message' => Tools::displayError($response->error),

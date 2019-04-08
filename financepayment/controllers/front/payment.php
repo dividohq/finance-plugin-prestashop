@@ -69,6 +69,7 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
             array(
                 'payment_error' => $payment_error,
                 'responsetext' => $responsetext,
+                'finance_environment' => Configuration::get('FINANCE_ENVIRONMENT'),
                 'nbProducts' => $cart->nbProducts(),
                 'responsedes' => $responsedes,
                 'cust_currency' => $cart->id_currency,

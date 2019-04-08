@@ -29,12 +29,14 @@ if (!defined('_PS_VERSION_')) {
 }
 
 require_once dirname(__FILE__) . '/vendor/autoload.php';
-require_once dirname(__FILE__) . '/lib/divido/Divido.php';
 require_once dirname(__FILE__) . '/classes/divido.class.php';
 
+use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
+use Divido\MerchantSDK\Environment;
+use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 
 class FinancePayment extends PaymentModule
-{  
+{
     public $ps_below_7;
     public $ApiOrderStatus = array(
         array(
@@ -77,8 +79,9 @@ class FinancePayment extends PaymentModule
         $this->name = 'financepayment';
         $this->tab = 'payments_gateways';
         $this->version = '1.0.0';
-        $this->author = 'Enter Author Here';
+        $this->author = 'Divido Financial Services Ltd';
         $this->need_instance = 0;
+        $this->module_key = "71b50f7f5d75c244cd0a5635f664cd56";
 
         $this->bootstrap = true;
 
@@ -99,8 +102,11 @@ class FinancePayment extends PaymentModule
     public function install()
     {
         Configuration::updateValue('FINANCE_API_KEY', null);
+        Configuration::updateValue('FINANCE_ENVIRONMENT',null);
         Configuration::updateValue('FINANCE_PAYMENT_TITLE', $this->displayName);
         Configuration::updateValue('FINANCE_ACTIVATION_STATUS', Configuration::get('PS_OS_DELIVERED'));
+        Configuration::updateValue('FINANCE_CANCELLATION_STATUS', Configuration::get('PS_OS_CANCELED'));
+        Configuration::updateValue('FINANCE_REFUND_STATUS', Configuration::get('PS_OS_REFUNDED'));
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET', null);
         Configuration::updateValue('FINANCE_PRODUCT_CALCULATOR', null);
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET_PREFIX', 'Finance From');
@@ -138,6 +144,9 @@ class FinancePayment extends PaymentModule
                     break;
                 default:
                     $status = Configuration::get('PS_OS_PREPARATION');
+                    break;
+                case 'REFUNDED':
+                    $status = Configuration::get('PS_OS_REFUNDED');
                     break;
             }
             Configuration::updateValue('FINANCE_STATUS_'.$ApiStatus['code'], $status);
@@ -202,8 +211,12 @@ class FinancePayment extends PaymentModule
     public function uninstall()
     {
         Configuration::deleteByName('FINANCE_API_KEY');
+        Configuration::deleteByName('FINANCE_ENVIRONMENT');
         Configuration::deleteByName('FINANCE_PAYMENT_TITLE');
         Configuration::deleteByName('FINANCE_ACTIVATION_STATUS');
+        Configuration::deleteByName('FINANCE_CANCELLATION_STATUS');
+        Configuration::deleteByName('FINANCE_REFUND_STATUS');
+        Configuration::deleteByName('FINANCE_REFUNDED_STATUS');
         Configuration::deleteByName('FINANCE_PRODUCT_WIDGET');
         Configuration::deleteByName('FINANCE_PRODUCT_CALCULATOR');
         Configuration::deleteByName('FINANCE_PRODUCT_WIDGET_PREFIX');
@@ -241,7 +254,7 @@ class FinancePayment extends PaymentModule
      * Load the configuration form
      */
     public function getContent()
-    { 
+    {
         /**
          * If values have been submitted in the form, process.
          */
@@ -256,7 +269,7 @@ class FinancePayment extends PaymentModule
      * Create the form that will be displayed in the configuration of the module.
      */
     protected function renderForm()
-    {   
+    {
         $helper = new HelperForm();
         
         $helper->show_toolbar = false;
@@ -306,8 +319,9 @@ class FinancePayment extends PaymentModule
 
         /*----------------------Display form only after key is inserted----------------------------*/
         if (Configuration::get('FINANCE_API_KEY')) {
-          
             $api = new FinanceApi();
+            $api_key = Configuration::get('FINANCE_API_KEY');
+            Configuration::updateValue('FINANCE_ENVIRONMENT', $api->getFinanceEnv($api_key));
             $financePlans = $api->getAllPlans();
             $orderStatus = OrderState::getOrderStates($this->context->language->id);
             $product_options = array(
@@ -341,6 +355,28 @@ class FinancePayment extends PaymentModule
                 'name' => 'FINANCE_ACTIVATION_STATUS',
                 'label' => $this->l('Activation status'),
                 'hint' => $this->l('Prestashop status to make finance activation call'),
+                'options' => array(
+                    'query' => $orderStatus,
+                    'id' => 'id_order_state',
+                    'name' => 'name',
+                ),
+            );
+            $form['form']['input'][] = array(
+                'type' => 'select',
+                'name' => 'FINANCE_CANCELLATION_STATUS',
+                'label' => $this->l('Cancellation status'),
+                'hint' => $this->l('Prestashop status to make finance cancellation call'),
+                'options' => array(
+                    'query' => $orderStatus,
+                    'id' => 'id_order_state',
+                    'name' => 'name',
+                ),
+            );
+            $form['form']['input'][] = array(
+                'type' => 'select',
+                'name' => 'FINANCE_REFUND_STATUS',
+                'label' => $this->l('Refund status'),
+                'hint' => $this->l('Prestashop status to make finance refund call'),
                 'options' => array(
                     'query' => $orderStatus,
                     'id' => 'id_order_state',
@@ -462,7 +498,7 @@ class FinancePayment extends PaymentModule
             );
             $form['form']['input'][] = array(
                 'type' => 'html',
-                'name' => '<div class="alert alert-warning">'.$this->l('FINANCE Response status mapping').'</div>',
+                'name' => $this->l('FINANCE Response status mapping'),
             );
             foreach ($this->ApiOrderStatus as $ApiStatus) {
                 $form['form']['input'][] = array(
@@ -487,8 +523,11 @@ class FinancePayment extends PaymentModule
     {
         $form_values = array(
             'FINANCE_API_KEY' => Configuration::get('FINANCE_API_KEY'),
+            'FINANCE_ENVIRONMENT' => Configuration::get('FINANCE_ENVIRONMENT'),
             'FINANCE_PAYMENT_TITLE' => Configuration::get('FINANCE_PAYMENT_TITLE'),
             'FINANCE_ACTIVATION_STATUS' => Configuration::get('FINANCE_ACTIVATION_STATUS'),
+            'FINANCE_CANCELLATION_STATUS' => Configuration::get('FINANCE_CANCELLATION_STATUS'),
+            'FINANCE_REFUND_STATUS' => Configuration::get('FINANCE_REFUND_STATUS'),
             'FINANCE_ALL_PLAN_SELECTION' => Configuration::get('FINANCE_ALL_PLAN_SELECTION'),
             'FINANCE_PLAN_SELECTION' => explode(',', Configuration::get('FINANCE_PLAN_SELECTION')),
             'FINANCE_PRODUCT_WIDGET' => Configuration::get('FINANCE_PRODUCT_WIDGET'),
@@ -505,7 +544,8 @@ class FinancePayment extends PaymentModule
             $form_values['FINANCE_PAYMENT_DESCRIPTION'] = Configuration::get('FINANCE_PAYMENT_DESCRIPTION');
         }
         foreach ($this->ApiOrderStatus as $ApiStatus) {
-            $form_values['FINANCE_STATUS_'.$ApiStatus['code']] = Configuration::get('FINANCE_STATUS_'.$ApiStatus['code']);
+            $form_values['FINANCE_STATUS_'.$ApiStatus['code']] =
+            Configuration::get('FINANCE_STATUS_'.$ApiStatus['code']);
         }
         return $form_values;
     }
@@ -514,9 +554,9 @@ class FinancePayment extends PaymentModule
      * Save form data.
      */
     protected function postProcess()
-    { 
+    {
         if (!Tools::getValue('FINANCE_API_KEY')) {
-            return '<div class="alert alert-danger">'.Tools::displayError('Api key Cannot be empty').'</div>';
+            return $this->displayError($this->l('Api key Cannot be empty'));
         }
         $form_values = $this->getConfigFormValues();
 
@@ -538,7 +578,6 @@ class FinancePayment extends PaymentModule
             $this->context->link->getAdminLink('AdminModules')
             .'&configure='.$this->name.'&conf=4&tab_module='.$this->tab.'&module_name='.$this->name
         );
-        
     }
 
     /*-----------------check if allowed currency---------------*/
@@ -561,7 +600,7 @@ class FinancePayment extends PaymentModule
     {
         $js_key = $this->getJsKey();
         Media::addJsDef(array(
-            'dividoKey' => $js_key,
+            Configuration::get('FINANCE_ENVIRONMENT') . 'Key' => $js_key,
         ));
         $this->context->controller->addJS(_PS_MODULE_DIR_.$this->name.'/views/js/finance.js');
     }
@@ -574,7 +613,7 @@ class FinancePayment extends PaymentModule
         return $js_key;
     }
 
-    /*------------------Button on payment page in 1.6-------------------*/
+     /*------------------Button on payment page in 1.6-------------------*/
     public function hookPayment($params)
     {
         if (!$this->active) {
@@ -600,6 +639,7 @@ class FinancePayment extends PaymentModule
         $this->smarty->assign(array(
             'payment_title' => Configuration::get('FINANCE_PAYMENT_TITLE'),
         ));
+        
         return $this->display(__FILE__, 'payment.tpl');
     }
 
@@ -687,7 +727,6 @@ class FinancePayment extends PaymentModule
         ) {
             return;
         }
-
         return $this->getWidgetData($params, 'widget.tpl');
     }
 
@@ -758,8 +797,7 @@ class FinancePayment extends PaymentModule
         if ($order->module != $this->name) {
             return;
         }
-       
-        $carrier = new Carrier($order->id_carrier);
+
         $orderPaymanet = Db::getInstance()->getRow(
             'SELECT * FROM `'._DB_PREFIX_.'order_payment`
             WHERE `order_reference` = "'.pSQL($order->reference).'"
@@ -768,46 +806,38 @@ class FinancePayment extends PaymentModule
 
 
         if ($orderStatus->id == Configuration::get('FINANCE_ACTIVATION_STATUS') && $orderPaymanet) {
-            
-            $api_key   = Configuration::get('FINANCE_API_KEY');
-
-            $request_data = array(
-                'merchant' => $api_key,
-                'application' => $orderPaymanet['transaction_id'],
-                'deliveryMethod' => $order->shipping_number ? $order->shipping_number : 'not entered',
-                'trackingNumber' => $carrier->name,
-            );
-           
-
-            Divido::setMerchant($api_key);
-
-        
-
-            //$response = Divido_Activation::activate($request_data);
-
-            // $response = $this->set_fulfilled($orderPaymanet['transaction_id'], $total_price, $id_order);
-
-            // if (isset($response->status) && $response->status == 'ok') {
-            //     return true;
-            // }
-            // if (isset($response->error)) {
-            //     $error = $response->error;
-            // } else {
-            //     $error = $this->l('There was some error during activation api call');
-            // }
-
             try {
-                $response = $this->set_fulfilled($orderPaymanet['transaction_id'], $total_price, $id_order);
+                $this->setFulfilled($orderPaymanet['transaction_id'], $total_price, $id_order);
+                return true;
+            } catch (Exception $e) {
+                return $e->message;
+            }
+            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int)$id_order, true);
+        }
+        elseif ($orderStatus->id == Configuration::get('FINANCE_CANCELLATION_STATUS') && $orderPaymanet) {
+            
+            try {
+                $this->set_cancelled($orderPaymanet['transaction_id'], $total_price, $id_order);
                 return true;
             } 
     
             catch(Exception $e) {
                 return $e->message;
             }
+            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int)$id_order, true);
 
+        } elseif ($orderStatus->id == Configuration::get('FINANCE_REFUND_STATUS') && $orderPaymanet) {
+
+            try {
+                $this->set_refunded($orderPaymanet['transaction_id'], $total_price, $id_order);
+                return true;
+            } 
+    
+            catch(Exception $e) {
+                return $e->message;
+            }
             PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int)$id_order, true);
         }
-
     }
 
     public function getWidgetData($params, $template)
@@ -833,17 +863,64 @@ class FinancePayment extends PaymentModule
         $this->context->smarty->assign(array(
             'plans' => implode(',', array_keys($plans)),
             'raw_total' => $product_price,
-            'finance_prefix' => Configuration::get('FINANCE_PRODUCT_WIDGET_PREFIX'),
-            'finance_suffix' => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
+            'finance_prefix'       => Configuration::get('FINANCE_PRODUCT_WIDGET_PREFIX'),
+            'finance_suffix'       => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
+            'finance_environment'  => Configuration::get('FINANCE_ENVIRONMENT'),
         ));
 
         return $this->display(__FILE__, $template);
     }
 
  
-    function set_fulfilled( $application_id, $order_total, $order_id, $shipping_method = null, $tracking_numbers = null ) {
+    public function setFulfilled(
+        $application_id,
+        $order_total,
+        $order_id,
+        $shipping_method = null,
+        $tracking_numbers = null
+    ) {
+        // First get the application you wish to create an activation for.
+        $api_key   = Configuration::get('FINANCE_API_KEY');
+        $application = (new \Divido\MerchantSDK\Models\Application())
+        ->withId($application_id);
+        $items       = array(
+            array(
+                'name'     => "Order id: $order_id",
+                'quantity' => 1,
+                'price'    => $order_total * 100,
+            ),
+        );
+        // Create a new application activation model.
+        $application_activation = (new \Divido\MerchantSDK\Models\ApplicationActivation())
+            ->withOrderItems($items)
+            ->withDeliveryMethod($shipping_method)
+            ->withTrackingNumber($tracking_numbers);
+        // Create a new activation for the application.
+        $env = FinanceApi::getEnvironment($api_key);
+        $client = new \GuzzleHttp\Client();
+        $httpClientWrapper = new HttpClientWrapper(
+            new GuzzleAdapter($client),
+            Environment::CONFIGURATION[$env]['base_uri'],
+            $api_key
+        );
+        $sdk                      = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
+        $response                 = $sdk->applicationActivations()->createApplicationActivation(
+            $application,
+            $application_activation
+        );
+        $activation_response_body = $response->getBody()->getContents();
+        return $activation_response_body;
+    }
+
+
+    function set_cancelled( 
+        $application_id,
+        $order_total,
+        $order_id
+    ) {
 
         // First get the application you wish to create an activation for.
+        $api_key   = Configuration::get('FINANCE_API_KEY');
         $application = ( new \Divido\MerchantSDK\Models\Application() )
         ->withId( $application_id );
         $items       = [
@@ -854,22 +931,56 @@ class FinancePayment extends PaymentModule
             ],
         ];
         // Create a new application activation model.
-        $application_activation = ( new \Divido\MerchantSDK\Models\ApplicationActivation() )
-            ->withOrderItems( $items )
-            ->withDeliveryMethod( $shipping_method )
-            ->withTrackingNumber( $tracking_numbers );
+        $applicationCancel = ( new \Divido\MerchantSDK\Models\ApplicationCancellation() )
+            ->withAmount( $items[0]['price'] )
+            ->withOrderItems( $items );
         // Create a new activation for the application.
         $env                      = FinanceApi::getEnvironment($api_key);
         $client 				  = new \GuzzleHttp\Client();
 		$httpClientWrapper        = new HttpClientWrapper(
-                                    new GuzzleAdapter($client),
-                                    Environment::CONFIGURATION[$env]['base_uri'],
-                                    $api_key
-                                     );
+            new GuzzleAdapter($client),
+            Environment::CONFIGURATION[$env]['base_uri'],
+            $api_key
+        );                         
         $sdk                      = new \Divido\MerchantSDK\Client( $httpClientWrapper, $env );
-        $response                 = $sdk->applicationActivations()->createApplicationActivation( $application, $application_activation );
-        $activation_response_body = $response->getBody()->getContents();
-        return $activation_response_body;
-    }   
+        $response                 = $sdk->applicationCancellations()->createApplicationCancellation( $application, $applicationCancel );
+        $cancellation_response_body = $response->getBody()->getContents();
+        return $cancellation_response_body;
+    }  
 
+
+    function set_refunded( 
+        $application_id,
+        $order_total,
+        $order_id
+    ) {
+        // First get the application you wish to create an activation for.
+        $api_key   = Configuration::get('FINANCE_API_KEY');
+        $application = ( new \Divido\MerchantSDK\Models\Application() )
+        ->withId( $application_id );
+        $items       = [
+            [
+                'name'     => "Order id: $order_id",
+                'quantity' => 1,
+                'price'    => $order_total * 100,
+            ],
+        ];
+        // Create a new application activation model.
+        $applicationRefund = ( new \Divido\MerchantSDK\Models\ApplicationRefund() )
+            ->withAmount( $items[0]['price'] )
+            ->withOrderItems( $items );
+        // Create a new activation for the application.
+        $env                      = FinanceApi::getEnvironment($api_key);
+        $client 				  = new \GuzzleHttp\Client();
+		$httpClientWrapper        = new HttpClientWrapper(
+            new GuzzleAdapter($client),
+            Environment::CONFIGURATION[$env]['base_uri'],
+            $api_key
+     );
+                                     
+        $sdk                      = new \Divido\MerchantSDK\Client( $httpClientWrapper, $env );
+        $response                 = $sdk->applicationRefunds()->createApplicationRefund( $application, $applicationRefund );
+        $cancellation_response_body = $response->getBody()->getContents();
+        return $cancellation_response_body;
+    }  
 }
