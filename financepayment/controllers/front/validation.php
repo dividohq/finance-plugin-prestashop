@@ -156,6 +156,21 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         );
         $checkout_url = $this->context->link->getPageLink('order');
 
+        // checkiong for  keys
+        PrestaShopLogger::addLog('Checking if DIVIDO_USE_NGROK value is set in ps_configuration table');
+
+        if(!empty(Configuration::get("DIVIDO_USE_NGROK"))){
+            if(Configuration::get("DIVIDO_USE_NGROK") === "True" && Configuration::get(DIVIDO_NGROK_BASE_URL)){
+                PrestaShopLogger::addLog('using ngrok for redirects');
+                $response_url = Configuration::get("DIVIDO_NGROK_BASE_URL") . substr($response_url,  strpos($response_url, "?" ) , strlen($response_url));
+                $redirect_url = Configuration::get("DIVIDO_NGROK_BASE_URL") . substr($redirect_url ,  strpos($redirect_url, "?" ) , strlen($redirect_url ));
+                $checkout_url = Configuration::get("DIVIDO_NGROK_BASE_URL") . substr($checkout_url,  strpos($checkout_url, "?" ) , strlen($checkout_url));
+                PrestaShopLogger::addLog('Ngrok repsonse url'.  $response_url );
+                PrestaShopLogger::addLog('Ngrok redirect url'.  $redirect_url  );
+                PrestaShopLogger::addLog('Ngrok checkout url'.  $checkout_url );
+            }
+        }
+
         $salt = uniqid('', true);
         $hash = hash('sha256', $cart_id.$salt);
         

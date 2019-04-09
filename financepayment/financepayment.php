@@ -118,6 +118,10 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_PRODUCTS_OPTIONS', 'All');
         Configuration::updateValue('FINANCE_PRODUCTS_MINIMUM', '0');
 
+        Configuration::updateValue('DIVIDO_USE_NGROK', true);
+        Configuration::updateValue('DIVIDO_NGROK_BASE_URL', 'https://prestashop-dev.ngrok.io ');
+
+
         foreach ($this->ApiOrderStatus as $ApiStatus) {
             switch ($ApiStatus['code']) {
                 case 'ACCEPTED':
