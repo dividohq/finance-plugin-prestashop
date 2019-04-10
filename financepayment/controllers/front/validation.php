@@ -55,7 +55,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             echo Tools::jsonEncode($response);
             die;
         }
-        
+
         $cart = $this->context->cart;
         
         if ($cart->getOrderTotal(true, Cart::BOTH) != Tools::getValue('total')) {
@@ -91,10 +91,11 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             echo json_encode($response);
             die;
         }
-        
+
         $response = $this->getConfirmation();
         echo Tools::jsonEncode($response);
         die;
+
     }
 
     public function getConfirmation()
@@ -108,7 +109,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $country = Country::getIsoById($address->id_country);
 
         $language = Language::getIsoById($this->context->language);
-
         $currencyObj = new Currency($cart->id_currency);
         $currency = $currencyObj->iso_code;
 
@@ -147,7 +147,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             'quantity' => 1,
             'price'    => -$discount*100,
         );
-
         $response_url = $this->context->link->getModuleLink($this->module->name, 'response');
         $redirect_url = $this->context->link->getModuleLink(
             $this->module->name,
@@ -159,17 +158,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         // checkiong for  keys
         PrestaShopLogger::addLog('Checking if DIVIDO_USE_NGROK value is set in ps_configuration table');
 
-        if(!empty(Configuration::get("DIVIDO_USE_NGROK"))){
-            if(Configuration::get("DIVIDO_USE_NGROK") === "True" && Configuration::get(DIVIDO_NGROK_BASE_URL)){
-                PrestaShopLogger::addLog('using ngrok for redirects');
-                $response_url = Configuration::get("DIVIDO_NGROK_BASE_URL") . substr($response_url,  strpos($response_url, "?" ) , strlen($response_url));
-                $redirect_url = Configuration::get("DIVIDO_NGROK_BASE_URL") . substr($redirect_url ,  strpos($redirect_url, "?" ) , strlen($redirect_url ));
-                $checkout_url = Configuration::get("DIVIDO_NGROK_BASE_URL") . substr($checkout_url,  strpos($checkout_url, "?" ) , strlen($checkout_url));
-                PrestaShopLogger::addLog('Ngrok repsonse url'.  $response_url );
-                PrestaShopLogger::addLog('Ngrok redirect url'.  $redirect_url  );
-                PrestaShopLogger::addLog('Ngrok checkout url'.  $checkout_url );
-            }
-        }
 
         $salt = uniqid('', true);
         $hash = hash('sha256', $cart_id.$salt);
@@ -357,7 +345,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 );
                 die(Tools::displayError('Secure key does not match'));
             }
-
             // For each package, generate an order
             $delivery_option_list = $this->context->cart->getDeliveryOptionList();
             $package_list = $this->context->cart->getPackageList();
@@ -377,7 +364,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
             $order_list = array();
             $order_detail_list = array();
-
             do {
                 $reference = Order::generateReference();
             } while (Order::getByReference($reference)->count());
@@ -451,7 +437,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     }
                 }
             }
-
             foreach ($package_list as $id_address => $packageByAddress) {
                 foreach ($packageByAddress as $id_package => $package) {
                     /** @var Order $order */
@@ -715,7 +700,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     true
                 );
             }
-
             // Register Payment only if the order status validate the order
             if ($order_status->logable) {
                 // $order is the last order loop in the foreach
@@ -783,7 +767,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     //$orderDetail = new OrderDetail(null, null, $this->context);
                     //$orderDetail->createList($order, $this->context->cart, $id_order_state);
 
-                    
 
                     // Specify order id for message
                     $old_message = Message::getMessageByCartId((int)$this->context->cart->id);
