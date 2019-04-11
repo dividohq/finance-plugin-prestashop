@@ -100,15 +100,29 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
     public function getConfirmation()
     {
+        $this->context = Context::getContext();
         $api_key   = Configuration::get('FINANCE_API_KEY');
         $deposit = Tools::getValue('deposit');
         $finance = Tools::getValue('finance');
         $cart = $this->context->cart;
+
         $customer = new Customer($cart->id_customer);
         $address = new Address($cart->id_address_invoice);
         $country = Country::getIsoById($address->id_country);
 
-        $language = Language::getIsoById($this->context->language);
+        //
+        if(gettype($this->context->language)==="integer"){
+            $language = Language::getIsoById($this->context->language);
+        }
+        else{
+            $language = Language::getIsoById($this->context->language->id);
+        }
+
+        // if language code is gb set to english
+        if($language === "gb"){
+            $language = "en";
+        }
+
         $currencyObj = new Currency($cart->id_currency);
         $currency = $currencyObj->iso_code;
 
@@ -155,10 +169,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         );
         $checkout_url = $this->context->link->getPageLink('order');
 
-        // checkiong for  keys
-        PrestaShopLogger::addLog('Checking if DIVIDO_USE_NGROK value is set in ps_configuration table');
-
-
         $salt = uniqid('', true);
         $hash = hash('sha256', $cart_id.$salt);
         
@@ -202,7 +212,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             )
         );
 
-// Note: If creating an appliclation on a merchant with a shared secret, you will have to pass in a correct hmac
+                // Note: If creating an appliclation on a merchant with a shared secret, you will have to pass in a correct hmac
 
                 $env = FinanceApi::getEnvironment($api_key);
                 $client = new Guzzle();
@@ -219,15 +229,15 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     array(),
                     array ('Content-Type' => 'application/json')
                 );
+        try {
                 $application_response_body = $response->getBody()->getContents();
                 $decode                    = json_decode($application_response_body);
+                PrestaShopLogger::addLog(serialize($decode));
                 $result_redirect           = $decode->data->urls->application_url;
-
-        try {
-            $data = array(
-                'status' => true,
-                'url'    => $result_redirect,
-            );
+                $data = array(
+                    'status' => true,
+                    'url'    => $result_redirect,
+                );
                     $customer = new Customer($cart->id_customer);
                     $this->validatOrder(
                         $cart_id,
@@ -235,15 +245,16 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                         $sub_total,
                         $this->module->displayName,
                         null,
-                        array('transaction_id' => $response->id),
+                        array('transaction_id' => $decode->data->id),
                         (int)$cart->id_currency,
                         false,
                         $customer->secure_key
                     );
         } catch (Exception $e) {
+
             $data = array(
                 'status'  => false,
-                'message' => Tools::displayError($response->error),
+                'message' => Tools::displayError("something went wrong?"),
             );
         }
          return $data;
