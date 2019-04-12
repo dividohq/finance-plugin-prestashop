@@ -232,7 +232,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         try {
                 $application_response_body = $response->getBody()->getContents();
                 $decode                    = json_decode($application_response_body);
-                PrestaShopLogger::addLog(serialize($decode));
                 $result_redirect           = $decode->data->urls->application_url;
                 $data = array(
                     'status' => true,
