@@ -55,7 +55,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             echo Tools::jsonEncode($response);
             die;
         }
-        
+
         $cart = $this->context->cart;
         
         if ($cart->getOrderTotal(true, Cart::BOTH) != Tools::getValue('total')) {
@@ -91,23 +91,37 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             echo json_encode($response);
             die;
         }
-        
+
         $response = $this->getConfirmation();
         echo Tools::jsonEncode($response);
         die;
+
     }
 
     public function getConfirmation()
     {
+        $this->context = Context::getContext();
         $api_key   = Configuration::get('FINANCE_API_KEY');
         $deposit = Tools::getValue('deposit');
         $finance = Tools::getValue('finance');
         $cart = $this->context->cart;
+
         $customer = new Customer($cart->id_customer);
         $address = new Address($cart->id_address_invoice);
         $country = Country::getIsoById($address->id_country);
 
-        $language = Language::getIsoById($this->context->language);
+        //
+        if(gettype($this->context->language)==="integer"){
+            $language = Language::getIsoById($this->context->language);
+        }
+        else{
+            $language = Language::getIsoById($this->context->language->id);
+        }
+
+        // if language code is gb set to english
+        if($language === "gb"){
+            $language = "en";
+        }
 
         $currencyObj = new Currency($cart->id_currency);
         $currency = $currencyObj->iso_code;
@@ -147,7 +161,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             'quantity' => 1,
             'price'    => -$discount*100,
         );
-
         $response_url = $this->context->link->getModuleLink($this->module->name, 'response');
         $redirect_url = $this->context->link->getModuleLink(
             $this->module->name,
@@ -199,7 +212,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             )
         );
 
-// Note: If creating an appliclation on a merchant with a shared secret, you will have to pass in a correct hmac
+                // Note: If creating an appliclation on a merchant with a shared secret, you will have to pass in a correct hmac
 
                 $env = FinanceApi::getEnvironment($api_key);
                 $client = new Guzzle();
@@ -216,15 +229,14 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     array(),
                     array ('Content-Type' => 'application/json')
                 );
+        try {
                 $application_response_body = $response->getBody()->getContents();
                 $decode                    = json_decode($application_response_body);
                 $result_redirect           = $decode->data->urls->application_url;
-
-        try {
-            $data = array(
-                'status' => true,
-                'url'    => $result_redirect,
-            );
+                $data = array(
+                    'status' => true,
+                    'url'    => $result_redirect,
+                );
                     $customer = new Customer($cart->id_customer);
                     $this->validatOrder(
                         $cart_id,
@@ -232,15 +244,16 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                         $sub_total,
                         $this->module->displayName,
                         null,
-                        array('transaction_id' => $response->id),
+                        array('transaction_id' => $decode->data->id),
                         (int)$cart->id_currency,
                         false,
                         $customer->secure_key
                     );
         } catch (Exception $e) {
+
             $data = array(
                 'status'  => false,
-                'message' => Tools::displayError($response->error),
+                'message' => Tools::displayError("something went wrong?"),
             );
         }
          return $data;
@@ -342,7 +355,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 );
                 die(Tools::displayError('Secure key does not match'));
             }
-
             // For each package, generate an order
             $delivery_option_list = $this->context->cart->getDeliveryOptionList();
             $package_list = $this->context->cart->getPackageList();
@@ -362,7 +374,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
             $order_list = array();
             $order_detail_list = array();
-
             do {
                 $reference = Order::generateReference();
             } while (Order::getByReference($reference)->count());
@@ -436,7 +447,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     }
                 }
             }
-
             foreach ($package_list as $id_address => $packageByAddress) {
                 foreach ($packageByAddress as $id_package => $package) {
                     /** @var Order $order */
@@ -700,7 +710,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     true
                 );
             }
-
             // Register Payment only if the order status validate the order
             if ($order_status->logable) {
                 // $order is the last order loop in the foreach
@@ -768,7 +777,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     //$orderDetail = new OrderDetail(null, null, $this->context);
                     //$orderDetail->createList($order, $this->context->cart, $id_order_state);
 
-                    
 
                     // Specify order id for message
                     $old_message = Message::getMessageByCartId((int)$this->context->cart->id);

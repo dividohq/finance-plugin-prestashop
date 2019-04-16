@@ -99,6 +99,11 @@ class FinancePayment extends PaymentModule
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
     }
 
+    /**
+     * @return bool
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
     public function install()
     {
         Configuration::updateValue('FINANCE_API_KEY', null);
@@ -186,6 +191,14 @@ class FinancePayment extends PaymentModule
         return true;
     }
 
+    /**
+     * @param $name
+     * @param $color
+     * @param $status
+     * @return int
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
     private function addState($name, $color, $status)
     {
         $order_state = new OrderState();
@@ -208,6 +221,11 @@ class FinancePayment extends PaymentModule
         return $order_state->id;
     }
 
+    /**
+     * @return bool
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
     public function uninstall()
     {
         Configuration::deleteByName('FINANCE_API_KEY');
@@ -322,7 +340,7 @@ class FinancePayment extends PaymentModule
             $api = new FinanceApi();
             $api_key = Configuration::get('FINANCE_API_KEY');
             Configuration::updateValue('FINANCE_ENVIRONMENT', $api->getFinanceEnv($api_key));
-            $financePlans = $api->getAllPlans();
+            $financePlans = $this->getPlans();
             $orderStatus = OrderState::getOrderStates($this->context->language->id);
             $product_options = array(
                 array(
@@ -580,7 +598,12 @@ class FinancePayment extends PaymentModule
         );
     }
 
-    /*-----------------check if allowed currency---------------*/
+    /**
+     * check if allowed currency
+     *
+     * @param $cart
+     * @return bool
+     */
     public function checkCurrency($cart)
     {
         $currency_order = new Currency($cart->id_currency);
@@ -596,6 +619,9 @@ class FinancePayment extends PaymentModule
         return false;
     }
 
+    /**
+     *  hook header
+     */
     public function hookHeader()
     {
         $js_key = $this->getJsKey();
@@ -605,6 +631,9 @@ class FinancePayment extends PaymentModule
         $this->context->controller->addJS(_PS_MODULE_DIR_.$this->name.'/views/js/finance.js');
     }
 
+    /**
+     * @return bool|false|mixed|string|string[]|null
+     */
     public function getJsKey()
     {
         $api_key   = Configuration::get('FINANCE_API_KEY');
@@ -613,9 +642,15 @@ class FinancePayment extends PaymentModule
         return $js_key;
     }
 
-     /*------------------Button on payment page in 1.6-------------------*/
+    /**
+     * Button on payment page in 1.6
+     *
+     * @param $params
+     * @return string|void
+     */
     public function hookPayment($params)
     {
+        PrestaShopLogger::addLog('hook payment');
         if (!$this->active) {
             return;
         }
@@ -629,8 +664,8 @@ class FinancePayment extends PaymentModule
             return;
         }
 
-        $api = new FinanceApi();
-        $plans = $api->getCartPlans($this->context->cart);
+        // checks cache first to see if they are stored there
+        $plans = $this->getPlansFromCart($this->context->cart);
 
         if (!$plans) {
             return;
@@ -643,9 +678,16 @@ class FinancePayment extends PaymentModule
         return $this->display(__FILE__, 'payment.tpl');
     }
 
-    /*------------------Button on payment page in 1.7-------------------*/
+    /**
+     * -Button on payment page in 1.
+     *
+     * @param $params
+     * @return array|void
+     * @throws Exception
+     */
     public function hookPaymentOptions($params)
     {
+        PrestaShopLogger::addLog('hook payment options');
         if (!$this->active) {
             return;
         }
@@ -660,10 +702,10 @@ class FinancePayment extends PaymentModule
             return;
         }
 
-        $api = new FinanceApi();
-        $plans = $api->getCartPlans($cart);
+        // checks cache first to see if they are stored there
+        $plans = $this->getPlansFromCart($cart);
 
-        if (!$plans) {
+        if (!$plans || $plans === null) {
             return;
         }
 
@@ -678,7 +720,12 @@ class FinancePayment extends PaymentModule
         return $payment_options;
     }
 
-    /*------------------OrderConfirmation-------------------*/
+    /**
+     * OrderConfirmation-
+     *
+     * @param $params
+     * @return string|void
+     */
     public function hookPaymentReturn($params)
     {
         if ($this->active == false) {
@@ -715,11 +762,18 @@ class FinancePayment extends PaymentModule
         return $this->display(__FILE__, 'confirmation.tpl');
     }
 
+    /**
+     *
+     */
     public function hookActionAdminControllerSetMedia()
     {
         $this->context->controller->addJS($this->_path.'views/js/financeAdmin.js');
     }
 
+    /**
+     * @param $params
+     * @return string|void
+     */
     public function hookDisplayProductPriceBlock($params)
     {
         if (!Configuration::get('FINANCE_PRODUCT_WIDGET') ||
@@ -730,12 +784,17 @@ class FinancePayment extends PaymentModule
         return $this->getWidgetData($params, 'widget.tpl');
     }
 
+    /**
+     * @param $params
+     * @return string|void
+     */
     public function hookDisplayAdminProductsExtra($params)
     {
+        PrestaShopLogger::addLog('hook display admin');
         $settings = FinanceApi::getProductSettings($params['id_product']);
 
-        $FinanceApi = new FinanceApi();
-        $plans = $FinanceApi->getPlans();
+        // checks cached finance plans first
+        $plans = $this->getPlans();
 
         if (!$plans) {
             return;
@@ -758,6 +817,10 @@ class FinancePayment extends PaymentModule
         return $this->display(__FILE__, 'productfields.tpl');
     }
 
+    /**
+     * @param $params
+     * @throws PrestaShopDatabaseException
+     */
     public function hookActionProductUpdate($params)
     {
         $id_product = (int)$params['id_product'];
@@ -784,7 +847,12 @@ class FinancePayment extends PaymentModule
         return $this->getWidgetData($params, 'calculator.tpl');
     }
 
-
+    /**
+     * @param $params
+     * @return bool|void
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
     public function hookActionOrderStatusUpdate($params)
     {
 
@@ -840,10 +908,16 @@ class FinancePayment extends PaymentModule
         }
     }
 
+    /**
+     * @param $params
+     * @param $template
+     * @return string|void
+     */
     public function getWidgetData($params, $template)
     {
+
         $product = $params['product'];
-        $finance = new FinanceApi();
+
 
         if ($this->ps_below_7 && is_object($product)) {
             $product_price = $product->price;
@@ -854,6 +928,8 @@ class FinancePayment extends PaymentModule
         } else {
             return;
         }
+
+        $finance = new FinanceApi();
         $plans = $finance->getProductPlans($product_price, $id_product);
 
         if (!$plans) {
@@ -871,7 +947,14 @@ class FinancePayment extends PaymentModule
         return $this->display(__FILE__, $template);
     }
 
- 
+    /**
+     * @param $application_id
+     * @param $order_total
+     * @param $order_id
+     * @param null $shipping_method
+     * @param null $tracking_numbers
+     * @return string
+     */
     public function setFulfilled(
         $application_id,
         $order_total,
@@ -912,7 +995,12 @@ class FinancePayment extends PaymentModule
         return $activation_response_body;
     }
 
-
+    /**
+     * @param $application_id
+     * @param $order_total
+     * @param $order_id
+     * @return string
+     */
     function set_cancelled( 
         $application_id,
         $order_total,
@@ -946,9 +1034,14 @@ class FinancePayment extends PaymentModule
         $response                 = $sdk->applicationCancellations()->createApplicationCancellation( $application, $applicationCancel );
         $cancellation_response_body = $response->getBody()->getContents();
         return $cancellation_response_body;
-    }  
+    }
 
-
+    /**
+     * @param $application_id
+     * @param $order_total
+     * @param $order_id
+     * @return string
+     */
     function set_refunded( 
         $application_id,
         $order_total,
@@ -982,5 +1075,60 @@ class FinancePayment extends PaymentModule
         $response                 = $sdk->applicationRefunds()->createApplicationRefund( $application, $applicationRefund );
         $cancellation_response_body = $response->getBody()->getContents();
         return $cancellation_response_body;
-    }  
+    }
+
+    /**
+     * gets cached finance plans if available
+     * or makes an api call then stores finance plans in cache
+     *
+     * @param $cart
+     * @return array|mixed
+     */
+    function getPlansFromCart($cart){
+
+        if (!empty(Configuration::get('FINANCE_PLAN_SELECTION'))) {
+           return unserialize( Configuration::get('FINANCE_PLAN_SELECTION'));
+        }
+        else{
+            $api = new FinanceApi();
+            $plans = $api->getCartPlans($cart);
+            if(count($plans) >= 1){
+                Configuration::updateValue('FINANCE_PLAN_SELECTION', serialize($plans));
+            }
+            else{
+                Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
+                $plans = null;
+            }
+            return $plans;
+        }
+    }
+
+    /**
+     *  gets cached finance plans if available
+     * or makes an api call then stores finance plans in cache
+     *
+     * @return array|mixed
+     */
+    function getPlans(){
+
+        if ( Configuration::get('FINANCE_PLAN_SELECTION') !== null ) {
+            return unserialize( Configuration::get('FINANCE_PLAN_SELECTION'));
+        }
+        else{
+            $FinanceApi = new FinanceApi();
+            $plans  = $FinanceApi->getPlans();
+            if(count($plans) >= 1){
+                Configuration::updateValue('FINANCE_PLAN_SELECTION', serialize($plans));
+            }
+            else{
+                Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
+                $plans = null;
+            }
+            return $plans;
+        }
+
+
+    }
+
+
 }
