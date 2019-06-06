@@ -36,8 +36,8 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : NULL;
         $secret = NULL;
 
-        if(!empty(Configuration::get('SHARED_SECRET')) || !empty($callback_sign)){
-        $secret = $this->creat_signature( $input, Configuration::get('SHARED_SECRET'));
+        if(!empty(Configuration::get('FINANCE_HMAC')) || !empty($callback_sign)){
+        $secret = $this->create_signature( $input, Configuration::get('SHARED_SECRET'));
            if( $secret != $callback_sign ) {
              echo "Invalid Hash";
              die;
@@ -617,7 +617,14 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         );
     }
 
-    protected function creat_signature( $payload, $secret ) {
+    /**
+     * Generate a HMAC signature based on the config secret
+     *
+     * @param [type] $payload
+     * @param [type] $secret
+     * @return void
+     */
+    protected function create_signature( $payload, $secret ) {
         $hmac      = hash_hmac( 'sha256', $payload , $secret, true );
         $signature = base64_encode( $hmac );
         return $signature;
