@@ -267,13 +267,13 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             'total' => pSQL($total),
         );
         $result = Db::getInstance()->getRow(
-            'SELECT * FROM `'._DB_PREFIX_.'divido_requests` WHERE `cart_id` = "'.(int)$cart_id.'"'
+            'SELECT * FROM `'._DB_PREFIX_.'finance_requests` WHERE `cart_id` = "'.(int)$cart_id.'"'
         );
 
         if ($result) {
-            Db::getInstance()->update('divido_requests', $data, '`cart_id` = "'.(int)$cart_id.'"');
+            Db::getInstance()->update('finance_requests', $data, '`cart_id` = "'.(int)$cart_id.'"');
         } else {
-            Db::getInstance()->insert('divido_requests', $data);
+            Db::getInstance()->insert('finance_requests', $data);
         }
     }
 

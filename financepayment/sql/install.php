@@ -26,12 +26,12 @@
 
 $sql = array();
 
-$sql[] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'divido_requests` (
-    `id_divido_requests` int(11) NOT NULL AUTO_INCREMENT,
+$sql[] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'finance_requests` (
+    `id_finance_requests` int(11) NOT NULL AUTO_INCREMENT,
     `cart_id` int(11) NOT NULL,
     `hash` text NOT NULL,
     `total` text NOT NULL,
-    PRIMARY KEY  (`id_divido_requests`)
+    PRIMARY KEY  (`id_finance_requests`)
 ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
 
 $sql[] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'finance_product` (

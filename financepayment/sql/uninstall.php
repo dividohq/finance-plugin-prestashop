@@ -31,7 +31,7 @@
 */
 
 $sql = array();
-$sql[] = 'DROP TABLE IF EXISTS `'._DB_PREFIX_.'divido_requests`';
+$sql[] = 'DROP TABLE IF EXISTS `'._DB_PREFIX_.'finance_requests`';
 $sql[] = 'DROP TABLE IF EXISTS `'._DB_PREFIX_.'finance_product`';
 
 foreach ($sql as $query) {

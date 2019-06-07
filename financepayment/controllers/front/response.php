@@ -40,7 +40,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $cart_id   = $data->metadata->cart_id;
 
         $result = Db::getInstance()->getRow(
-            'SELECT * FROM `'._DB_PREFIX_.'divido_requests` WHERE `cart_id` = "'.(int)$cart_id.'"'
+            'SELECT * FROM `'._DB_PREFIX_.'finance_requests` WHERE `cart_id` = "'.(int)$cart_id.'"'
         );
 
         if (!$result) {
