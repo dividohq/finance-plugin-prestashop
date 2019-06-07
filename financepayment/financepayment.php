@@ -1111,16 +1111,14 @@ class FinancePayment extends PaymentModule
      */
     function getPlans(){
 
-        if ( Configuration::get('FINANCE_PLAN_SELECTION') !== null ) {
+        if (!empty(Configuration::get('FINANCE_PLAN_SELECTION'))) {
             return unserialize( Configuration::get('FINANCE_PLAN_SELECTION'));
-        }
-        else{
+        } else {
             $FinanceApi = new FinanceApi();
             $plans  = $FinanceApi->getPlans();
-            if(count($plans) >= 1){
+            if (count($plans) >= 1) {
                 Configuration::updateValue('FINANCE_PLAN_SELECTION', serialize($plans));
-            }
-            else{
+            } else {
                 Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
                 $plans = null;
             }
