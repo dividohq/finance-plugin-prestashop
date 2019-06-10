@@ -1102,10 +1102,10 @@ class FinancePayment extends PaymentModule
     }
 
     /**
-     *  gets cached finance plans if available
-     * or makes an api call then stores finance plans in cache
+     * Returns an array of all of the finance plans available to the merchant 
+     * via the SDK, or null if no plans are available
      *
-     * @return array|mixed
+     * @return array|null
      */
     function getPlans(){
         $FinanceApi = new FinanceApi();
