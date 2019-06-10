@@ -1102,8 +1102,7 @@ class FinancePayment extends PaymentModule
     }
 
     /**
-     *  gets cached finance plans if available
-     * or makes an api call then stores finance plans in cache
+     *  Gets all of the plans via the SDK
      *
      * @return array|mixed
      */
