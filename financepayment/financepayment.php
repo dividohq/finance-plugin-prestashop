@@ -1108,23 +1108,8 @@ class FinancePayment extends PaymentModule
      * @return array|mixed
      */
     function getPlans(){
-
-        if (!empty(Configuration::get('FINANCE_PLAN_SELECTION'))) {
-            return unserialize( Configuration::get('FINANCE_PLAN_SELECTION'));
-        } else {
-            $FinanceApi = new FinanceApi();
-            $plans  = $FinanceApi->getPlans();
-            if (count($plans) >= 1) {
-                Configuration::updateValue('FINANCE_PLAN_SELECTION', serialize($plans));
-            } else {
-                Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
-                $plans = null;
-            }
-            return $plans;
-        }
-
-
+        $FinanceApi = new FinanceApi();
+        $plans  = $FinanceApi->getPlans();
+        return (count($plans) > 0) ? $plans : null;
     }
-
-
 }
