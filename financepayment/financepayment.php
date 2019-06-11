@@ -1079,63 +1079,27 @@ class FinancePayment extends PaymentModule
     }
 
     /**
-     * gets cached finance plans if available
-     * or makes an api call then stores finance plans in cache
+     * Retrieve all plans applicable to all/some of the items in the cart,
+     * according to the merchant config settings
      *
-     * @param $cart
-     * @return array|mixed
+     * @param $cart The shopping cart
+     * @return array|null Array of plans or null if empty
      */
     function getPlansFromCart($cart){
         $api = new FinanceApi();
         $plans = $api->getCartPlans($cart);
         return $plans;
-        
-        /*
-        if (!empty(Configuration::get('FINANCE_PLAN_SELECTION'))) {
-           return unserialize( Configuration::get('FINANCE_PLAN_SELECTION'));
-        }
-        else{
-            $api = new FinanceApi();
-            $plans = $api->getCartPlans($cart);
-            
-            if(count($plans) >= 1){
-                Configuration::updateValue('FINANCE_PLAN_SELECTION', serialize($plans));
-            }
-            else{
-                Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
-                $plans = null;
-            }
-            return $plans;
-        }
-        */
     }
 
     /**
-     *  gets cached finance plans if available
-     * or makes an api call then stores finance plans in cache
+     * Returns an array of all of the finance plans available to the merchant 
+     * via the SDK, or null if no plans are available
      *
-     * @return array|mixed
+     * @return array|null Array of plans or null if empty
      */
     function getPlans(){
-        /*
-        if ( Configuration::get('FINANCE_PLAN_SELECTION') !== null ) {
-            return unserialize( Configuration::get('FINANCE_PLAN_SELECTION'));
-        }
-        else{*/
-            $FinanceApi = new FinanceApi();
-            $plans  = $FinanceApi->getPlans();
-            /*if(count($plans) >= 1){
-                Configuration::updateValue('FINANCE_PLAN_SELECTION', serialize($plans));
-            }
-            else{
-                Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
-                $plans = null;
-            }*/
-            return (count($plans) > 0) ? $plans : null;
-        //}
-
-
+        $FinanceApi = new FinanceApi();
+        $plans  = $FinanceApi->getPlans();
+        return (count($plans) > 0) ? $plans : null;
     }
-
-
 }
