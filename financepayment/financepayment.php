@@ -31,6 +31,7 @@ if (!defined('_PS_VERSION_')) {
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/classes/divido.class.php';
 
+use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
@@ -171,14 +172,6 @@ class FinancePayment extends PaymentModule
             !$this->registerHook('paymentReturn')) {
             return false;
         }
-        $status = array();
-        $status['module_name'] = $this->name;
-        $status['send_email'] = false;
-        $status['invoice'] = false;
-        $status['unremovable'] = true;
-        $status['paid'] = false;
-        $state = $this->addState($this->l('Awaiting finance response'), '#0404B4', $status);
-        Configuration::updateValue('FINANCE_AWAITING_STATUS', $state);
 
         /*------------------Handle hooks according to version-------------------*/
         if ($this->ps_below_7 && !$this->registerHook('payment')) {
@@ -187,6 +180,15 @@ class FinancePayment extends PaymentModule
         } elseif (!$this->ps_below_7 && !$this->registerHook('paymentOptions')) {
             return false;
         }
+
+        $status = array();
+        $status['module_name'] = $this->name;
+        $status['send_email'] = false;
+        $status['invoice'] = false;
+        $status['unremovable'] = true;
+        $status['paid'] = false;
+        $state = $this->addState($this->l('Awaiting finance response'), '#0404B4', $status);
+        Configuration::updateValue('FINANCE_AWAITING_STATUS', $state);
         
         return true;
     }
@@ -202,8 +204,7 @@ class FinancePayment extends PaymentModule
     private function addState($name, $color, $status)
     {
         $order_state = new OrderState();
-        $order_state->name = array();
-        $order_state->name[$this->context->language->id] = $name;
+        $order_state->name = array_fill(0,10,$name);
         $order_state->module_name = $status['module_name'];
         $order_state->send_email = $status['send_email'];
         $order_state->color = $color;
@@ -679,7 +680,7 @@ class FinancePayment extends PaymentModule
     }
 
     /**
-     * -Button on payment page in 1.
+     * Button on payment page in 1.7+
      *
      * @param $params
      * @return array|void
@@ -1085,13 +1086,18 @@ class FinancePayment extends PaymentModule
      * @return array|mixed
      */
     function getPlansFromCart($cart){
-
+        $api = new FinanceApi();
+        $plans = $api->getCartPlans($cart);
+        return $plans;
+        
+        /*
         if (!empty(Configuration::get('FINANCE_PLAN_SELECTION'))) {
            return unserialize( Configuration::get('FINANCE_PLAN_SELECTION'));
         }
         else{
             $api = new FinanceApi();
             $plans = $api->getCartPlans($cart);
+            
             if(count($plans) >= 1){
                 Configuration::updateValue('FINANCE_PLAN_SELECTION', serialize($plans));
             }
@@ -1101,6 +1107,7 @@ class FinancePayment extends PaymentModule
             }
             return $plans;
         }
+        */
     }
 
     /**
@@ -1110,22 +1117,22 @@ class FinancePayment extends PaymentModule
      * @return array|mixed
      */
     function getPlans(){
-
+        /*
         if ( Configuration::get('FINANCE_PLAN_SELECTION') !== null ) {
             return unserialize( Configuration::get('FINANCE_PLAN_SELECTION'));
         }
-        else{
+        else{*/
             $FinanceApi = new FinanceApi();
             $plans  = $FinanceApi->getPlans();
-            if(count($plans) >= 1){
+            /*if(count($plans) >= 1){
                 Configuration::updateValue('FINANCE_PLAN_SELECTION', serialize($plans));
             }
             else{
                 Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
                 $plans = null;
-            }
-            return $plans;
-        }
+            }*/
+            return (count($plans) > 0) ? $plans : null;
+        //}
 
 
     }

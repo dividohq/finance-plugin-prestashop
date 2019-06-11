@@ -253,7 +253,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
             $data = array(
                 'status'  => false,
-                'message' => Tools::displayError("something went wrong?"),
+                'message' => Tools::displayError($e->getMessage()),
             );
         }
          return $data;
