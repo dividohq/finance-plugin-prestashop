@@ -203,6 +203,7 @@ class FinancePayment extends PaymentModule
     {
         $order_state = new OrderState();
         $order_state->name = array_fill(0, 10, $name);
+        $order_state->name[$this->context->language->id] = $name;
         $order_state->module_name = $status['module_name'];
         $order_state->send_email = $status['send_email'];
         $order_state->color = $color;
