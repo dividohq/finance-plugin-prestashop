@@ -36,7 +36,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : NULL;
         $secret = NULL;
 
-        if(!empty(Configuration::get('FINANCE_HMAC')) || !empty($callback_sign)) {
+        if(!empty(Configuration::get('FINANCE_HMAC')) && !empty($callback_sign)) {
            $secret = $this->create_signature( $input, Configuration::get('FINANCE_HMAC'));
            if( $secret != $callback_sign ) {
              echo "Invalid Hash";
