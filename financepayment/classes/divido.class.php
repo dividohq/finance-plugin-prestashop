@@ -222,11 +222,9 @@ class FinanceApi
         $environment = Tools::strtoupper($array[0]);
         switch ($environment) {
             case 'LIVE':
-                return constant("Divido\MerchantSDK\Environment::" . $environment);
-
+                return constant("Divido\MerchantSDK\Environment::$environment");
             case 'SANDBOX':
                 return constant("Divido\MerchantSDK\Environment::$environment");
-            
             default:
                 return constant("Divido\MerchantSDK\Environment::SANDBOX");
         }
