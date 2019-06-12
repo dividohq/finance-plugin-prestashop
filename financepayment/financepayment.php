@@ -1104,30 +1104,16 @@ class FinancePayment extends PaymentModule
     }
 
     /**
-     *  gets cached finance plans if available
-     * or makes an api call then stores finance plans in cache
+     * Returns an array of all the finance plans
+     * available to the merchant via an API call
+     * or null if no plans are available
      *
-     * @return array|mixed
+     * @return array|null
      */
     function getPlans(){
-
-        if ( Configuration::get('FINANCE_PLAN_SELECTION') !== null ) {
-            return unserialize( Configuration::get('FINANCE_PLAN_SELECTION'));
-        }
-        else{
-            $FinanceApi = new FinanceApi();
-            $plans  = $FinanceApi->getPlans();
-            if(count($plans) >= 1){
-                Configuration::updateValue('FINANCE_PLAN_SELECTION', serialize($plans));
-            }
-            else{
-                Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
-                $plans = null;
-            }
-            return $plans;
-        }
-
-
+        $FinanceApi = new FinanceApi();
+        $plans  = $FinanceApi->getPlans();
+        return (count($plans) > 0) ? $plans : null;
     }
 
 
