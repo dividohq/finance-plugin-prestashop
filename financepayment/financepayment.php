@@ -1078,29 +1078,16 @@ class FinancePayment extends PaymentModule
     }
 
     /**
-     * gets cached finance plans if available
-     * or makes an api call then stores finance plans in cache
+     * Retrieve all plans applicable to all/some of the items
+     * in the cart, according to the merchant config settings
      *
-     * @param $cart
-     * @return array|mixed
+     * @param $cart The shopping cart
+     * @return array|null Array of plans or null if no plans
      */
     function getPlansFromCart($cart){
-
-        if (!empty(Configuration::get('FINANCE_PLAN_SELECTION'))) {
-           return unserialize( Configuration::get('FINANCE_PLAN_SELECTION'));
-        }
-        else{
-            $api = new FinanceApi();
-            $plans = $api->getCartPlans($cart);
-            if(count($plans) >= 1){
-                Configuration::updateValue('FINANCE_PLAN_SELECTION', serialize($plans));
-            }
-            else{
-                Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
-                $plans = null;
-            }
-            return $plans;
-        }
+        $api = new FinanceApi();
+        $plans = $api->getCartPlans($cart);
+        return (count($plans) > 0) ? $plans : null;
     }
 
     /**
@@ -1108,7 +1095,7 @@ class FinancePayment extends PaymentModule
      * available to the merchant via an API call
      * or null if no plans are available
      *
-     * @return array|null
+     * @return array|null Array of plans or null if no plans
      */
     function getPlans(){
         $FinanceApi = new FinanceApi();
