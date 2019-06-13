@@ -358,6 +358,12 @@ class FinancePayment extends PaymentModule
             );
             $form['form']['input'][] = array(
                 'type' => 'text',
+                'name' => 'FINANCE_HMAC',
+                'label' => $this->l('Shared Secret'),
+                'hint' => $this->l('An additional code supplied by your finance supplier (optional)'),
+            );
+            $form['form']['input'][] = array(
+                'type' => 'text',
                 'name' => 'FINANCE_PAYMENT_TITLE',
                 'label' => $this->l('Title'),
             );
@@ -541,6 +547,7 @@ class FinancePayment extends PaymentModule
     {
         $form_values = array(
             'FINANCE_API_KEY' => Configuration::get('FINANCE_API_KEY'),
+            'FINANCE_HMAC' => Configuration::get('FINANCE_HMAC'),
             'FINANCE_ENVIRONMENT' => Configuration::get('FINANCE_ENVIRONMENT'),
             'FINANCE_PAYMENT_TITLE' => Configuration::get('FINANCE_PAYMENT_TITLE'),
             'FINANCE_ACTIVATION_STATUS' => Configuration::get('FINANCE_ACTIVATION_STATUS'),

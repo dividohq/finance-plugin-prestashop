@@ -28,10 +28,21 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = true;
 
+
     public function postProcess()
     {
         $input = Tools::file_get_contents('php://input');
         $data  = Tools::jsonDecode($input);
+        $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : NULL;
+        $secret = NULL;
+
+        if(!empty(Configuration::get('FINANCE_HMAC')) && !empty($callback_sign)) {
+           $secret = $this->create_signature( $input, Configuration::get('FINANCE_HMAC'));
+           if( $secret != $callback_sign ) {
+             echo "Invalid Hash";
+             die;
+           }
+        }
 
         if (!isset($data->status) || !isset($data->metadata->cart_id)) {
             die;
@@ -77,6 +88,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $this->setCurrentState($order, $status);
             }
         } elseif ($status != $order->current_state) {
+            
             $extra_vars = array('transaction_id' => $data->application);
             $order->addOrderPayment($result['total'], null, $data->application);
             $this->setCurrentState($order, $status);
@@ -603,4 +615,19 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             $fields_style
         );
     }
+
+    /**
+     * Generate a HMAC signature based on the config secret
+     *
+     * @param [type] $payload
+     * @param [type] $secret
+     * @return void
+     */
+    protected function create_signature( $payload, $secret ) {
+        $hmac      = hash_hmac( 'sha256', $payload , $secret, true );
+        $signature = base64_encode( $hmac );
+        return $signature;
+    }
+
+   
 }
