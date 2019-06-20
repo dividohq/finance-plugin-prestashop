@@ -1,4 +1,4 @@
-# Divido Prestashop
+# Powered by Divido Prestashop
 
 # Installation
 
