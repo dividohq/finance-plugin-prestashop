@@ -25,48 +25,54 @@
 * Don't forget to prefix your containers with your own identifier
 * to avoid any conflicts with others containers.
 */
-$(document).on('click', '#button-confirm-finance', function() {
+$(document).on(
+    'click', '#button-confirm-finance', function() {
     
-    var finance_elem = $('input[name="divido_plan"]');   
-    var deposit      = $('input[name="divido_deposit"]').val();
-    var total      = $('input[name="divido_total"]').val();
+        var finance_elem = $('input[name="divido_plan"]');   
+        var deposit      = $('input[name="divido_deposit"]').val();
+        var total      = $('input[name="divido_total"]').val();
 
-    var finance;
-    if (finance_elem.length > 0) {
-        finance = finance_elem.val();
+        var finance;
+        if (finance_elem.length > 0) {
+            finance = finance_elem.val();
         
-    } else {
-        alert('Please select plan.');
-        return;
-    }
-
-    var data = {
-        finance: finance,
-        deposit: deposit,
-        total: total,
-    };
-    el = $(this);
-    el.val($(this).data('loading-text'));
-    $.ajax({
-        type     : 'post',
-        url      : validationLink,
-        data     : data,
-        dataType : 'json',
-        cache    : false,
-        success: function(data) {
-            el.val(el.data('confirm-text'));
-            if (data.status) {
-                location = data.url;
-            } else {
-                message = data.message || 'Credit request could not be initiated';
-                $('#finance-checkout').prepend('<div class="alert alert-warning">' + message + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
-                $('html, body').animate({
-                    scrollTop: $("#finance-checkout").offset().top
-                }, 1000);
-            }
-        },
-        error: function() {
-            el.val(el.data('confirm-text'));
+        } else {
+            alert('Please select plan.');
+            return;
         }
-    });
-});
+
+        var data = {
+            finance: finance,
+            deposit: deposit,
+            total: total,
+        };
+        el = $(this);
+        el.val($(this).data('loading-text'));
+        $.ajax(
+            {
+                type     : 'post',
+                url      : validationLink,
+                data     : data,
+                dataType : 'json',
+                cache    : false,
+                success: function(data) {
+                    el.val(el.data('confirm-text'));
+                    if (data.status) {
+                        location = data.url;
+                    } else {
+                        message = data.message || 'Credit request could not be initiated';
+                        $('#finance-checkout').prepend('<div class="alert alert-warning">' + message + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+                        $('html, body').animate(
+                            {
+                                scrollTop: $("#finance-checkout").offset().top
+                            }, 1000
+                        );
+                    }
+                },
+                error: function() {
+                    el.val(el.data('confirm-text'));
+                }
+            }
+        );
+    }
+);

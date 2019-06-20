@@ -33,15 +33,15 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
     {
         $input = Tools::file_get_contents('php://input');
         $data  = Tools::jsonDecode($input);
-        $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : NULL;
-        $secret = NULL;
+        $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : null;
+        $secret = null;
 
-        if(!empty(Configuration::get('FINANCE_HMAC')) && !empty($callback_sign)) {
-           $secret = $this->create_signature( $input, Configuration::get('FINANCE_HMAC'));
-           if( $secret != $callback_sign ) {
-             echo "Invalid Hash";
-             die;
-           }
+        if (!empty(Configuration::get('FINANCE_HMAC')) && !empty($callback_sign)) {
+            $secret = $this->createSignature($input, Configuration::get('FINANCE_HMAC'));
+            if ($secret != $callback_sign) {
+                echo "Invalid Hash";
+                die;
+            }
         }
 
         if (!isset($data->status) || !isset($data->metadata->cart_id)) {
@@ -88,7 +88,6 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $this->setCurrentState($order, $status);
             }
         } elseif ($status != $order->current_state) {
-            
             $extra_vars = array('transaction_id' => $data->application);
             $order->addOrderPayment($result['total'], null, $data->application);
             $this->setCurrentState($order, $status);
@@ -111,10 +110,12 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $history->id_order = (int)$order->id;
         $history->id_employee = (int)$id_employee;
         $history->changeIdOrderState((int)$id_order_state, $order, true);
-        $res = Db::getInstance()->getRow('
+        $res = Db::getInstance()->getRow(
+            '
             SELECT `invoice_number`, `invoice_date`, `delivery_number`, `delivery_date`
             FROM `'._DB_PREFIX_.'orders`
-            WHERE `id_order` = '.(int)$order->id);
+            WHERE `id_order` = '.(int)$order->id
+        );
         $order->invoice_date = $res['invoice_date'];
         $order->invoice_number = $res['invoice_number'];
         $order->delivery_date = $res['delivery_date'];
@@ -297,10 +298,10 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             $order_list = Db::getInstance()->executeS(
                 'SELECT * FROM `'._DB_PREFIX_.'orders` WHERE `id_cart` = "'.(int)$order->id_cart.'"'
             );
-            if (count($order_list) == 1 &&
-                $values['tax_incl'] > ($order->total_products_wt - $total_reduction_value_ti) &&
-                $cart_rule['obj']->partial_use == 1 &&
-                $cart_rule['obj']->reduction_amount > 0
+            if (count($order_list) == 1
+                && $values['tax_incl'] > ($order->total_products_wt - $total_reduction_value_ti)
+                && $cart_rule['obj']->partial_use == 1
+                && $cart_rule['obj']->reduction_amount > 0
             ) {
                 // Create a new voucher from the original
                 // We need to instantiate the CartRule without lang parameter to allow saving it
@@ -317,7 +318,8 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                     '/\-([0-9]{1,2})\-([0-9]{1,2})$/',
                     $voucher->code,
                     $matches
-                ) && $matches[1] == $matches[2]) {
+                ) && $matches[1] == $matches[2]
+                ) {
                     $voucher->code = preg_replace(
                         '/'.$matches[0].'$/',
                         '-'.((int)($matches[1]) + 1),
@@ -332,8 +334,8 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                     ) - $order->total_products_wt;
 
                     // Add total shipping amout only if reduction amount > total shipping
-                    if ($voucher->free_shipping == 1 &&
-                        $voucher->reduction_amount >= $order->total_shipping_tax_incl
+                    if ($voucher->free_shipping == 1
+                        && $voucher->reduction_amount >= $order->total_shipping_tax_incl
                     ) {
                         $voucher->reduction_amount -= $order->total_shipping_tax_incl;
                     }
@@ -343,8 +345,8 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                     ) - $order->total_products;
 
                     // Add total shipping amout only if reduction amount > total shipping
-                    if ($voucher->free_shipping == 1 &&
-                        $voucher->reduction_amount >= $order->total_shipping_tax_excl
+                    if ($voucher->free_shipping == 1
+                        && $voucher->reduction_amount >= $order->total_shipping_tax_excl
                     ) {
                         $voucher->reduction_amount -= $order->total_shipping_tax_excl;
                     }
@@ -411,9 +413,9 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $cart_rule['obj']->free_shipping
             );
 
-            if ($id_order_state != Configuration::get('PS_OS_ERROR') &&
-                $id_order_state != Configuration::get('PS_OS_CANCELED') &&
-                !in_array($cart_rule['obj']->id, $cart_rule_used)
+            if ($id_order_state != Configuration::get('PS_OS_ERROR')
+                && $id_order_state != Configuration::get('PS_OS_CANCELED')
+                && !in_array($cart_rule['obj']->id, $cart_rule_used)
             ) {
                 $cart_rule_used[] = $cart_rule['obj']->id;
 
@@ -448,9 +450,9 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 
 
         // Send an e-mail to customer (one order = one email)
-        if ($id_order_state != Configuration::get('PS_OS_ERROR') &&
-            $id_order_state != Configuration::get('PS_OS_CANCELED') &&
-            $customer->id
+        if ($id_order_state != Configuration::get('PS_OS_ERROR')
+            && $id_order_state != Configuration::get('PS_OS_CANCELED')
+            && $customer->id
         ) {
             $invoice = new Address((int)$order->id_address_invoice);
             $delivery = new Address((int)$order->id_address_delivery);
@@ -463,14 +465,22 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 '{email}' => $customer->email,
                 '{delivery_block_txt}' => $this->getFormatedAddress($delivery, "\n"),
                 '{invoice_block_txt}' => $this->getFormatedAddress($invoice, "\n"),
-                '{delivery_block_html}' => $this->getFormatedAddress($delivery, '<br />', array(
+                '{delivery_block_html}' => $this->getFormatedAddress(
+                    $delivery,
+                    '<br />',
+                    array(
                     'firstname'    => '<span style="font-weight:bold;">%s</span>',
                     'lastname'    => '<span style="font-weight:bold;">%s</span>'
-                )),
-                '{invoice_block_html}' => $this->getFormatedAddress($invoice, '<br />', array(
+                    )
+                ),
+                '{invoice_block_html}' => $this->getFormatedAddress(
+                    $invoice,
+                    '<br />',
+                    array(
                         'firstname'    => '<span style="font-weight:bold;">%s</span>',
                         'lastname'    => '<span style="font-weight:bold;">%s</span>'
-                )),
+                    )
+                ),
                 '{delivery_company}' => $delivery->company,
                 '{delivery_firstname}' => $delivery->firstname,
                 '{delivery_lastname}' => $delivery->lastname,
@@ -529,9 +539,9 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             }
 
             // Join PDF invoice
-            if ((int)Configuration::get('PS_INVOICE') &&
-                $order_status->invoice &&
-                $order->invoice_number
+            if ((int)Configuration::get('PS_INVOICE')
+                && $order_status->invoice
+                && $order->invoice_number
             ) {
                 $file_attachement = array();
                 $order_invoice_list = $order->getInvoicesCollection();
@@ -619,15 +629,14 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
     /**
      * Generate a HMAC signature based on the config secret
      *
-     * @param [type] $payload
-     * @param [type] $secret
+     * @param  [type] $payload
+     * @param  [type] $secret
      * @return void
      */
-    protected function create_signature( $payload, $secret ) {
-        $hmac      = hash_hmac( 'sha256', $payload , $secret, true );
-        $signature = base64_encode( $hmac );
+    protected function createSignature($payload, $secret)
+    {
+        $hmac      = hash_hmac('sha256', $payload, $secret, true);
+        $signature = base64_encode($hmac);
         return $signature;
     }
-
-   
 }
