@@ -125,34 +125,34 @@ class FinancePayment extends PaymentModule
 
         foreach ($this->ApiOrderStatus as $ApiStatus) {
             switch ($ApiStatus['code']) {
-            case 'ACCEPTED':
-            case 'DEPOSIT-PAID':
-            case 'ACTION-LENDER':
-            case 'DEFERRED':
-            case 'REFERRED':
-                $status = Configuration::get('PS_OS_PREPARATION');
-                break;
+                case 'ACCEPTED':
+                case 'DEPOSIT-PAID':
+                case 'ACTION-LENDER':
+                case 'DEFERRED':
+                case 'REFERRED':
+                    $status = Configuration::get('PS_OS_PREPARATION');
+                    break;
 
-            case 'SIGNED':
-            case 'READY':
-            case 'COMPLETED':
-                $status = Configuration::get('PS_OS_PAYMENT');
-                break;
+                case 'SIGNED':
+                case 'READY':
+                case 'COMPLETED':
+                    $status = Configuration::get('PS_OS_PAYMENT');
+                    break;
 
-            case 'CANCELED':
-            case 'DECLINED':
-                $status = Configuration::get('PS_OS_CANCELED');
-                break;
+                case 'CANCELED':
+                case 'DECLINED':
+                    $status = Configuration::get('PS_OS_CANCELED');
+                    break;
 
-            case 'FULFILLED':
-                $status = Configuration::get('PS_OS_DELIVERED');
-                break;
-            default:
-                $status = Configuration::get('PS_OS_PREPARATION');
-                break;
-            case 'REFUNDED':
-                $status = Configuration::get('PS_OS_REFUNDED');
-                break;
+                case 'FULFILLED':
+                    $status = Configuration::get('PS_OS_DELIVERED');
+                    break;
+                default:
+                    $status = Configuration::get('PS_OS_PREPARATION');
+                    break;
+                case 'REFUNDED':
+                    $status = Configuration::get('PS_OS_REFUNDED');
+                    break;
             }
             Configuration::updateValue('FINANCE_STATUS_'.$ApiStatus['code'], $status);
         }
@@ -668,7 +668,7 @@ class FinancePayment extends PaymentModule
             return;
         }
         $cart = $params['cart'];
-        if ($cart->getOrderTotal() < Configuration::get('FINANCE_CART_MINIMUM') 
+        if ($cart->getOrderTotal() < Configuration::get('FINANCE_CART_MINIMUM')
             || $cart->id_address_delivery !== $cart->id_address_invoice
         ) {
             return;
@@ -707,8 +707,8 @@ class FinancePayment extends PaymentModule
             return;
         }
         $cart = $this->context->cart;
-        if ((Configuration::get('FINANCE_CART_MINIMUM') 
-            && $cart->getOrderTotal() < Configuration::get('FINANCE_CART_MINIMUM')) 
+        if ((Configuration::get('FINANCE_CART_MINIMUM')
+            && $cart->getOrderTotal() < Configuration::get('FINANCE_CART_MINIMUM'))
             || $cart->id_address_delivery !== $cart->id_address_invoice
         ) {
             return;
@@ -788,7 +788,7 @@ class FinancePayment extends PaymentModule
      */
     public function hookDisplayProductPriceBlock($params)
     {
-        if (!Configuration::get('FINANCE_PRODUCT_WIDGET') 
+        if (!Configuration::get('FINANCE_PRODUCT_WIDGET')
             || $params['type'] != 'after_price'
         ) {
             return;
@@ -895,27 +895,19 @@ class FinancePayment extends PaymentModule
                 return $e->message;
             }
             PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int)$id_order, true);
-        }
-        elseif ($orderStatus->id == Configuration::get('FINANCE_CANCELLATION_STATUS') && $orderPaymanet) {
-            
+        } elseif ($orderStatus->id == Configuration::get('FINANCE_CANCELLATION_STATUS') && $orderPaymanet) {
             try {
-                $this->set_cancelled($orderPaymanet['transaction_id'], $total_price, $id_order);
+                $this->setCancelled($orderPaymanet['transaction_id'], $total_price, $id_order);
                 return true;
-            } 
-    
-            catch(Exception $e) {
+            } catch (Exception $e) {
                 return $e->message;
             }
             PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int)$id_order, true);
-
         } elseif ($orderStatus->id == Configuration::get('FINANCE_REFUND_STATUS') && $orderPaymanet) {
-
             try {
-                $this->set_refunded($orderPaymanet['transaction_id'], $total_price, $id_order);
+                $this->setRefunded($orderPaymanet['transaction_id'], $total_price, $id_order);
                 return true;
-            } 
-    
-            catch(Exception $e) {
+            } catch (Exception $e) {
                 return $e->message;
             }
             PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int)$id_order, true);
@@ -1017,7 +1009,7 @@ class FinancePayment extends PaymentModule
      * @param $order_id
      * @return string
      */
-    public function set_cancelled( 
+    public function setCancelled(
         $application_id,
         $order_total,
         $order_id
@@ -1045,7 +1037,7 @@ class FinancePayment extends PaymentModule
             new GuzzleAdapter($client),
             Environment::CONFIGURATION[$env]['base_uri'],
             $api_key
-        );                         
+        );
         $sdk                      = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
         $response                 = $sdk->applicationCancellations()->createApplicationCancellation($application, $applicationCancel);
         $cancellation_response_body = $response->getBody()->getContents();
@@ -1058,7 +1050,7 @@ class FinancePayment extends PaymentModule
      * @param $order_id
      * @return string
      */
-    public function set_refunded( 
+    public function setRefunded(
         $application_id,
         $order_total,
         $order_id
@@ -1120,6 +1112,4 @@ class FinancePayment extends PaymentModule
         $plans  = $FinanceApi->getPlans();
         return (count($plans) > 0) ? $plans : null;
     }
-
-
 }
