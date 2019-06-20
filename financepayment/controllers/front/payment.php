@@ -80,16 +80,20 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
                 'validationLink' => $this->context->link->getModuleLink('financepayment', 'validation'),
             )
         );
-        Media::addJsDef(array(
+        Media::addJsDef(
+            array(
             'merchant_script' => "//cdn.divido.com/calculator/".$js_key.".js",
             'validationLink' => $this->context->link->getModuleLink('financepayment', 'validation'),
-        ));
+            )
+        );
 
         if (!$this->module->ps_below_7) {
-            $this->context->smarty->assign(array(
+            $this->context->smarty->assign(
+                array(
                 'currencies' => Currency::getCurrencies(),
                 'this_path_bw' => $this->module->getPathUri(),
-            ));
+                )
+            );
         }
 
         if ($this->module->ps_below_7) {

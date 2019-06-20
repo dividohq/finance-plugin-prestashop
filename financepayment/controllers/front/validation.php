@@ -111,7 +111,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $country = Country::getIsoById($address->id_country);
 
         //
-        if(gettype($this->context->language)==="integer"){
+        if(gettype($this->context->language)==="integer") {
             $language = Language::getIsoById($this->context->language);
         }
         else{
@@ -119,7 +119,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         }
 
         // if language code is gb set to english
-        if($language === "gb"){
+        if($language === "gb") {
             $language = "en";
         }
 
@@ -362,8 +362,8 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
             // If some delivery options are not defined, or not valid, use the first valid option
             foreach ($delivery_option_list as $id_address => $package) {
-                if (!isset($cart_delivery_option[$id_address]) ||
-                    !array_key_exists($cart_delivery_option[$id_address], $package)
+                if (!isset($cart_delivery_option[$id_address]) 
+                    || !array_key_exists($cart_delivery_option[$id_address], $package)
                 ) {
                     foreach (array_keys($package) as $key) {
                         $cart_delivery_option[$id_address] = $key;
@@ -407,13 +407,13 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 if (($rule = new CartRule((int)$cart_rule['obj']->id)) && Validate::isLoadedObject($rule)) {
                     if ($error = $rule->checkValidity($this->context, true, true)) {
                         $this->context->cart->removeCartRule((int)$rule->id);
-                        if (isset($this->context->cookie) &&
-                            isset($this->context->cookie->id_customer) &&
-                            $this->context->cookie->id_customer &&
-                            !empty($rule->code)
+                        if (isset($this->context->cookie) 
+                            && isset($this->context->cookie->id_customer) 
+                            && $this->context->cookie->id_customer 
+                            && !empty($rule->code)
                         ) {
-                            if ($this->module->ps_below_7 &&
-                                Configuration::get('PS_ORDER_PROCESS_TYPE') == 1
+                            if ($this->module->ps_below_7 
+                                && Configuration::get('PS_ORDER_PROCESS_TYPE') == 1
                             ) {
                                 Tools::redirect(
                                     'index.php?controller=order-opc&submitAddDiscount=1&discount_name='.
@@ -449,7 +449,9 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             }
             foreach ($package_list as $id_address => $packageByAddress) {
                 foreach ($packageByAddress as $id_package => $package) {
-                    /** @var Order $order */
+                    /**
+ * @var Order $order 
+*/
                     $order = new Order();
                     $order->product_list = $package['product_list'];
 
@@ -517,18 +519,22 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                         $order->product_list,
                         $id_carrier
                     );
-                    $order->total_discounts_tax_excl = (float)abs($this->context->cart->getOrderTotal(
-                        false,
-                        Cart::ONLY_DISCOUNTS,
-                        $order->product_list,
-                        $id_carrier
-                    ));
-                    $order->total_discounts_tax_incl = (float)abs($this->context->cart->getOrderTotal(
-                        true,
-                        Cart::ONLY_DISCOUNTS,
-                        $order->product_list,
-                        $id_carrier
-                    ));
+                    $order->total_discounts_tax_excl = (float)abs(
+                        $this->context->cart->getOrderTotal(
+                            false,
+                            Cart::ONLY_DISCOUNTS,
+                            $order->product_list,
+                            $id_carrier
+                        )
+                    );
+                    $order->total_discounts_tax_incl = (float)abs(
+                        $this->context->cart->getOrderTotal(
+                            true,
+                            Cart::ONLY_DISCOUNTS,
+                            $order->product_list,
+                            $id_carrier
+                        )
+                    );
                     $order->total_discounts = $order->total_discounts_tax_incl;
 
                     $order->total_shipping_tax_excl = (float)$this->context->cart->getPackageShippingCost(
@@ -553,18 +559,22 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                         );
                     }
 
-                    $order->total_wrapping_tax_excl = (float)abs($this->context->cart->getOrderTotal(
-                        false,
-                        Cart::ONLY_WRAPPING,
-                        $order->product_list,
-                        $id_carrier
-                    ));
-                    $order->total_wrapping_tax_incl = (float)abs($this->context->cart->getOrderTotal(
-                        true,
-                        Cart::ONLY_WRAPPING,
-                        $order->product_list,
-                        $id_carrier
-                    ));
+                    $order->total_wrapping_tax_excl = (float)abs(
+                        $this->context->cart->getOrderTotal(
+                            false,
+                            Cart::ONLY_WRAPPING,
+                            $order->product_list,
+                            $id_carrier
+                        )
+                    );
+                    $order->total_wrapping_tax_incl = (float)abs(
+                        $this->context->cart->getOrderTotal(
+                            true,
+                            Cart::ONLY_WRAPPING,
+                            $order->product_list,
+                            $id_carrier
+                        )
+                    );
                     $order->total_wrapping = $order->total_wrapping_tax_incl;
 
                     $order->total_paid_tax_excl = (float)Tools::ps_round(
@@ -623,8 +633,8 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     //http://www.php.net/manual/en/language.types.float.php
                     // if ($order->total_paid != $order->total_paid_real)
                     // We use number_format in order to compare two string
-                    if ($order_status->logable &&
-                        number_format(
+                    if ($order_status->logable 
+                        && number_format(
                             $cart_total_paid,
                             _PS_PRICE_COMPUTE_PRECISION_
                         ) != number_format($amount_paid, _PS_PRICE_COMPUTE_PRECISION_)
@@ -721,9 +731,9 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     $transaction_id = null;
                 }
 
-                if (!isset($order) ||
-                    !Validate::isLoadedObject($order) ||
-                    !$order->addOrderPayment($amount_paid, null, $transaction_id)
+                if (!isset($order) 
+                    || !Validate::isLoadedObject($order) 
+                    || !$order->addOrderPayment($amount_paid, null, $transaction_id)
                 ) {
                     PrestaShopLogger::addLog(
                         'PaymentModule::validateOrder - Cannot save Order Payment',
@@ -740,7 +750,9 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             // Make sure CartRule caches are empty
             CartRule::cleanCache();
             foreach ($order_detail_list as $key => $order_detail) {
-                /** @var OrderDetail $order_detail */
+                /**
+ * @var OrderDetail $order_detail 
+*/
 
                 $order = $order_list[$key];
                 if (!$order_creation_failed && isset($order->id)) {
@@ -820,13 +832,15 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     }
 
                     // Hook validate order
-                    Hook::exec('actionValidateOrder', array(
+                    Hook::exec(
+                        'actionValidateOrder', array(
                         'cart' => $this->context->cart,
                         'order' => $order,
                         'customer' => $this->context->customer,
                         'currency' => $this->context->currency,
                         'orderStatus' => $order_status
-                    ));
+                        )
+                    );
 
                     foreach ($this->context->cart->getProducts() as $product) {
                         if ($order_status->logable) {
@@ -855,8 +869,8 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     $new_history->addWithemail(true, $extra_vars);
 
                     // Switch to back order if needed
-                    if (Configuration::get('PS_STOCK_MANAGEMENT') &&
-                        ($order_detail->getStockState() || $order_detail->product_quantity_in_stock <= 0)
+                    if (Configuration::get('PS_STOCK_MANAGEMENT') 
+                        && ($order_detail->getStockState() || $order_detail->product_quantity_in_stock <= 0)
                     ) {
                         $history = new OrderHistory();
                         $history->id_order = (int)$order->id;

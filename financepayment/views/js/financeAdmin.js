@@ -26,46 +26,48 @@
 * to avoid any conflicts with others containers.
 */
 
-$(document).ready(function(){
-	if ($('input[name="FINANCE_ALL_PLAN_SELECTION"]').length > 0) {
-		updatePlansDiv();
-	}
-	if ($('select[name="FINANCE_PRODUCTS_OPTIONS"]').length > 0) {
-		updateProductOptions();
-	}
-	if ($('select[name="FINANCE_display"]').length > 0) {
-		updateProductPlans();
-	}
-});
+$(document).ready(
+    function(){
+        if ($('input[name="FINANCE_ALL_PLAN_SELECTION"]').length > 0) {
+            updatePlansDiv();
+        }
+        if ($('select[name="FINANCE_PRODUCTS_OPTIONS"]').length > 0) {
+            updateProductOptions();
+        }
+        if ($('select[name="FINANCE_display"]').length > 0) {
+            updateProductPlans();
+        }
+    }
+);
 
 $(document).on('change', 'input[name="FINANCE_ALL_PLAN_SELECTION"]', updatePlansDiv);
 $(document).on('change', 'select[name="FINANCE_PRODUCTS_OPTIONS"]', updateProductOptions);
 $(document).on('change', 'select[name="FINANCE_display"]', updateProductPlans);
 
 function updatePlansDiv() {
-	val = $('input[name="FINANCE_ALL_PLAN_SELECTION"]:checked').val();
-	if (!val) {
-		$('select[name="FINANCE_PLAN_SELECTION_available[]"]').closest('.form-group').parent().closest('.form-group').slideDown();
-	} else {
-		$('select[name="FINANCE_PLAN_SELECTION_available[]"]').closest('.form-group').parent().closest('.form-group').slideUp();
-	}
+    val = $('input[name="FINANCE_ALL_PLAN_SELECTION"]:checked').val();
+    if (!val) {
+        $('select[name="FINANCE_PLAN_SELECTION_available[]"]').closest('.form-group').parent().closest('.form-group').slideDown();
+    } else {
+        $('select[name="FINANCE_PLAN_SELECTION_available[]"]').closest('.form-group').parent().closest('.form-group').slideUp();
+    }
 }
 
 function updateProductOptions() {
-	val = $('select[name="FINANCE_PRODUCTS_OPTIONS"]').val();
-	if (val == 'min_price') {
-		$('input[name="FINANCE_PRODUCTS_MINIMUM"]').closest('.form-group').slideDown();
-	} else {
-		$('input[name="FINANCE_PRODUCTS_MINIMUM"]').closest('.form-group').slideUp();
-	}	
+    val = $('select[name="FINANCE_PRODUCTS_OPTIONS"]').val();
+    if (val == 'min_price') {
+        $('input[name="FINANCE_PRODUCTS_MINIMUM"]').closest('.form-group').slideDown();
+    } else {
+        $('input[name="FINANCE_PRODUCTS_MINIMUM"]').closest('.form-group').slideUp();
+    }    
 }
 
 function updateProductPlans() {
-	val = $('select[name="FINANCE_display"]').val();
+    val = $('select[name="FINANCE_display"]').val();
 
-	if ($('select[name="FINANCE_display"]').val() == 'custom') {
-		$('.finance_plans_wrapper').slideDown();
-	} else {
-		$('.finance_plans_wrapper').slideUp();
-	}
+    if ($('select[name="FINANCE_display"]').val() == 'custom') {
+        $('.finance_plans_wrapper').slideDown();
+    } else {
+        $('.finance_plans_wrapper').slideUp();
+    }
 }
