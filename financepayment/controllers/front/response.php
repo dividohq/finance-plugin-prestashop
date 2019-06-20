@@ -36,9 +36,9 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : null;
         $secret = null;
 
-        if(!empty(Configuration::get('FINANCE_HMAC')) && !empty($callback_sign)) {
-            $secret = $this->create_signature($input, Configuration::get('FINANCE_HMAC'));
-            if($secret != $callback_sign ) {
+        if (!empty(Configuration::get('FINANCE_HMAC')) && !empty($callback_sign)) {
+            $secret = $this->createSignature($input, Configuration::get('FINANCE_HMAC'));
+            if ($secret != $callback_sign) {
                 echo "Invalid Hash";
                 die;
             }
@@ -88,7 +88,6 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $this->setCurrentState($order, $status);
             }
         } elseif ($status != $order->current_state) {
-            
             $extra_vars = array('transaction_id' => $data->application);
             $order->addOrderPayment($result['total'], null, $data->application);
             $this->setCurrentState($order, $status);
@@ -299,9 +298,9 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             $order_list = Db::getInstance()->executeS(
                 'SELECT * FROM `'._DB_PREFIX_.'orders` WHERE `id_cart` = "'.(int)$order->id_cart.'"'
             );
-            if (count($order_list) == 1 
-                && $values['tax_incl'] > ($order->total_products_wt - $total_reduction_value_ti) 
-                && $cart_rule['obj']->partial_use == 1 
+            if (count($order_list) == 1
+                && $values['tax_incl'] > ($order->total_products_wt - $total_reduction_value_ti)
+                && $cart_rule['obj']->partial_use == 1
                 && $cart_rule['obj']->reduction_amount > 0
             ) {
                 // Create a new voucher from the original
@@ -335,7 +334,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                     ) - $order->total_products_wt;
 
                     // Add total shipping amout only if reduction amount > total shipping
-                    if ($voucher->free_shipping == 1 
+                    if ($voucher->free_shipping == 1
                         && $voucher->reduction_amount >= $order->total_shipping_tax_incl
                     ) {
                         $voucher->reduction_amount -= $order->total_shipping_tax_incl;
@@ -346,7 +345,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                     ) - $order->total_products;
 
                     // Add total shipping amout only if reduction amount > total shipping
-                    if ($voucher->free_shipping == 1 
+                    if ($voucher->free_shipping == 1
                         && $voucher->reduction_amount >= $order->total_shipping_tax_excl
                     ) {
                         $voucher->reduction_amount -= $order->total_shipping_tax_excl;
@@ -414,8 +413,8 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $cart_rule['obj']->free_shipping
             );
 
-            if ($id_order_state != Configuration::get('PS_OS_ERROR') 
-                && $id_order_state != Configuration::get('PS_OS_CANCELED') 
+            if ($id_order_state != Configuration::get('PS_OS_ERROR')
+                && $id_order_state != Configuration::get('PS_OS_CANCELED')
                 && !in_array($cart_rule['obj']->id, $cart_rule_used)
             ) {
                 $cart_rule_used[] = $cart_rule['obj']->id;
@@ -451,8 +450,8 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 
 
         // Send an e-mail to customer (one order = one email)
-        if ($id_order_state != Configuration::get('PS_OS_ERROR') 
-            && $id_order_state != Configuration::get('PS_OS_CANCELED') 
+        if ($id_order_state != Configuration::get('PS_OS_ERROR')
+            && $id_order_state != Configuration::get('PS_OS_CANCELED')
             && $customer->id
         ) {
             $invoice = new Address((int)$order->id_address_invoice);
@@ -467,13 +466,17 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 '{delivery_block_txt}' => $this->getFormatedAddress($delivery, "\n"),
                 '{invoice_block_txt}' => $this->getFormatedAddress($invoice, "\n"),
                 '{delivery_block_html}' => $this->getFormatedAddress(
-                    $delivery, '<br />', array(
+                    $delivery,
+                    '<br />',
+                    array(
                     'firstname'    => '<span style="font-weight:bold;">%s</span>',
                     'lastname'    => '<span style="font-weight:bold;">%s</span>'
                     )
                 ),
                 '{invoice_block_html}' => $this->getFormatedAddress(
-                    $invoice, '<br />', array(
+                    $invoice,
+                    '<br />',
+                    array(
                         'firstname'    => '<span style="font-weight:bold;">%s</span>',
                         'lastname'    => '<span style="font-weight:bold;">%s</span>'
                     )
@@ -536,8 +539,8 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             }
 
             // Join PDF invoice
-            if ((int)Configuration::get('PS_INVOICE') 
-                && $order_status->invoice 
+            if ((int)Configuration::get('PS_INVOICE')
+                && $order_status->invoice
                 && $order->invoice_number
             ) {
                 $file_attachement = array();
@@ -630,12 +633,10 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
      * @param  [type] $secret
      * @return void
      */
-    protected function create_signature( $payload, $secret ) 
+    protected function createSignature($payload, $secret)
     {
         $hmac      = hash_hmac('sha256', $payload, $secret, true);
         $signature = base64_encode($hmac);
         return $signature;
     }
-
-   
 }
