@@ -159,15 +159,15 @@ class FinancePayment extends PaymentModule
 
         include_once dirname(__FILE__).'/sql/install.php';
         
-        if (!parent::install() 
-            || !$this->registerHook('payment') 
-            || !$this->registerHook('header') 
-            || !$this->registerHook('actionAdminControllerSetMedia') 
-            || !$this->registerHook('displayFooterProduct') 
-            || !$this->registerHook('displayProductPriceBlock') 
-            || !$this->registerHook('displayAdminProductsExtra') 
-            || !$this->registerHook('actionProductUpdate') 
-            || !$this->registerHook('actionOrderStatusUpdate') 
+        if (!parent::install()
+            || !$this->registerHook('payment')
+            || !$this->registerHook('header')
+            || !$this->registerHook('actionAdminControllerSetMedia')
+            || !$this->registerHook('displayFooterProduct')
+            || !$this->registerHook('displayProductPriceBlock')
+            || !$this->registerHook('displayAdminProductsExtra')
+            || !$this->registerHook('actionProductUpdate')
+            || !$this->registerHook('actionOrderStatusUpdate')
             || !$this->registerHook('paymentReturn')
         ) {
             return false;
@@ -1038,8 +1038,8 @@ class FinancePayment extends PaymentModule
             Environment::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
-        $sdk                      = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
-        $response                 = $sdk->applicationCancellations()->createApplicationCancellation($application, $applicationCancel);
+        $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
+        $response = $sdk->applicationCancellations()->createApplicationCancellation($application, $applicationCancel);
         $cancellation_response_body = $response->getBody()->getContents();
         return $cancellation_response_body;
     }
@@ -1079,8 +1079,8 @@ class FinancePayment extends PaymentModule
             $api_key
         );
                                      
-        $sdk                      = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
-        $response                 = $sdk->applicationRefunds()->createApplicationRefund($application, $applicationRefund);
+        $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
+        $response = $sdk->applicationRefunds()->createApplicationRefund($application, $applicationRefund);
         $cancellation_response_body = $response->getBody()->getContents();
         return $cancellation_response_body;
     }

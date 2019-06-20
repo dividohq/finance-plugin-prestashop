@@ -95,7 +95,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $response = $this->getConfirmation();
         echo Tools::jsonEncode($response);
         die;
-
     }
 
     public function getConfirmation()
@@ -210,9 +209,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
             )
         );
-
-                // Note: If creating an appliclation on a merchant with a shared secret, you will have to pass in a correct hmac
-
+//Note: If creating an application on a merchant with a shared secret, you will have to pass in a valid hmac
                 $env = FinanceApi::getEnvironment($api_key);
                 $client = new Guzzle();
                 $httpClientWrapper = new HttpClientWrapper(
