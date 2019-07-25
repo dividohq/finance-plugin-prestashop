@@ -27,15 +27,15 @@
 */
 $(document).on(
     'click', '#button-confirm-finance', function() {
-    
-        var finance_elem = $('input[name="divido_plan"]');   
-        var deposit      = $('input[name="divido_deposit"]').val();
-        var total      = $('input[name="divido_total"]').val();
+
+        var finance_elem = $('input[name="divido_plan"]');
+        var total = parseFloat($('input[name="divido_total"]').val());
+        var deposit = parseFloat($('input[name="divido_deposit"]').val()) / total;
 
         var finance;
         if (finance_elem.length > 0) {
             finance = finance_elem.val();
-        
+
         } else {
             alert('Please select plan.');
             return;
@@ -46,6 +46,10 @@ $(document).on(
             deposit: deposit,
             total: total,
         };
+        console.log(validationLink);
+        console.log(data);
+
+
         el = $(this);
         el.val($(this).data('loading-text'));
         $.ajax(
