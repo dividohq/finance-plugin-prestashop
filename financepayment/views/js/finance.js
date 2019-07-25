@@ -46,9 +46,6 @@ $(document).on(
             deposit: deposit,
             total: total,
         };
-        console.log(validationLink);
-        console.log(data);
-
 
         el = $(this);
         el.val($(this).data('loading-text'));
