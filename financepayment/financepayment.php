@@ -955,7 +955,7 @@ class FinancePayment extends PaymentModule
             'finance_prefix'       => Configuration::get('FINANCE_PRODUCT_WIDGET_PREFIX'),
             'finance_suffix'       => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
             'finance_environment'  => Configuration::get('FINANCE_ENVIRONMENT'),
-            'api_key' => substr(Configuration::get('DIVIDO_API_KEY'),  0,  strpos(Configuration::get('DIVIDO_API_KEY'), ".")),
+            'api_key' => substr(Configuration::get('FINANCE_API_KEY'),  0,  strpos(Configuration::get('FINANCE_API_KEY'), ".")),
             'lender' => $lender
             )
         );

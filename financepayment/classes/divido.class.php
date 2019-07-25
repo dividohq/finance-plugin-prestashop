@@ -258,7 +258,6 @@ class FinanceApi
 
         Configuration::updateValue('FINANCE_LENDER', $data[0]['lender']['name']);
 
-
         return $data[0]['lender']['name'];
     }
 
