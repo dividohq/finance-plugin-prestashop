@@ -158,7 +158,7 @@ class FinancePayment extends PaymentModule
         }
 
         include_once dirname(__FILE__).'/sql/install.php';
-        
+
         if (!parent::install()
             || !$this->registerHook('payment')
             || !$this->registerHook('header')
@@ -188,7 +188,7 @@ class FinancePayment extends PaymentModule
         } elseif (!$this->ps_below_7 && !$this->registerHook('paymentOptions')) {
             return false;
         }
-        
+
         return true;
     }
 
@@ -290,7 +290,7 @@ class FinancePayment extends PaymentModule
     protected function renderForm()
     {
         $helper = new HelperForm();
-        
+
         $helper->show_toolbar = false;
         $helper->table = $this->table;
         $helper->module = $this;
@@ -686,7 +686,7 @@ class FinancePayment extends PaymentModule
             'payment_title' => Configuration::get('FINANCE_PAYMENT_TITLE'),
             )
         );
-        
+
         return $this->display(__FILE__, 'payment.tpl');
     }
 
@@ -949,6 +949,7 @@ class FinancePayment extends PaymentModule
             'finance_prefix'       => Configuration::get('FINANCE_PRODUCT_WIDGET_PREFIX'),
             'finance_suffix'       => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
             'finance_environment'  => Configuration::get('FINANCE_ENVIRONMENT'),
+                'api_key' => substr(Configuration::get('DIVIDO_API_KEY'),  0,  strpos(Configuration::get('DIVIDO_API_KEY'), "."))
             )
         );
 
@@ -1078,7 +1079,7 @@ class FinancePayment extends PaymentModule
             Environment::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
-                                     
+
         $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
         $response = $sdk->applicationRefunds()->createApplicationRefund($application, $applicationRefund);
         $cancellation_response_body = $response->getBody()->getContents();

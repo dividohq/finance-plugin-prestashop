@@ -78,6 +78,7 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
                 'merchant_script' => "//cdn.divido.com/calculator/".$js_key.".js",
                 'plans' => implode(',', array_keys($plans)),
                 'validationLink' => $this->context->link->getModuleLink('financepayment', 'validation'),
+                'api_key' => substr(Configuration::get('DIVIDO_API_KEY'),  0,  strpos(Configuration::get('DIVIDO_API_KEY'), "."))
             )
         );
         Media::addJsDef(
