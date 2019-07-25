@@ -31,10 +31,9 @@
         }
     </script>
 {/literal}
-<div data-calculator-widget data-mode="lightbox" data-amount="{$raw_total*100|escape:'htmlall':'UTF-8'}" data-plans= "{$plans|escape:'htmlall':'UTF-8'}">
-</div>
+<div data-calculator-widget data-mode="lightbox" data-amount="{$raw_total*100|escape:'htmlall':'UTF-8'}" data-plans= "{$plans|escape:'htmlall':'UTF-8'}"></div>
 
 {literal}
-<script type="text/javascript"  src="https://cdn.divido.com/widget/dist/{/literal}{$finance_environment|escape:'htmlall':'UTF-8'}{literal}.calculator.js" ></script>
+    <script type="text/javascript"  src="https://cdn.divido.com/widget/dist/{/literal}{$finance_environment|escape:'htmlall':'UTF-8'}{literal}.calculator.js" ></script>
 {/literal}
 

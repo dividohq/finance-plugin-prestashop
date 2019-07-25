@@ -49,12 +49,12 @@
     }
 </script>
 {/literal}
-<div id="finance-checkout">
-   <div data-calculator-widget data-mode="calculator" data-amount="{$raw_total *100|escape:'htmlall':'UTF-8'}" data-plans="{$plans|escape:'htmlall':'UTF-8'}">
-</div>
-    {literal}
+    <div id="finance-checkout">
+       <div data-calculator-widget data-mode="calculator" data-amount="{$raw_total *100|escape:'htmlall':'UTF-8'}" data-plans="{$plans|escape:'htmlall':'UTF-8'}">
+    </div>
+{literal}
     <script type="text/javascript"  src="https://cdn.divido.com/widget/dist/{/literal}{$finance_environment|escape:'htmlall':'UTF-8'}{literal}.calculator.js" ></script>
-    {/literal}
+{/literal}
 <div class="buttons">
     <p class="cart_navigation clearfix">
         <a class="btn btn-primary pull-xs-left" href="{url entity=order}">
