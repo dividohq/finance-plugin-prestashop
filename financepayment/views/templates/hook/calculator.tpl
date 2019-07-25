@@ -22,8 +22,16 @@
 *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 *}
-
-<div data-calculator-widget data-amount="{$raw_total|escape:'htmlall':'UTF-8'}"  data-plans="{$plans|escape:'htmlall':'UTF-8'}"></div>
+{literal}
+<script>
+    __widgetConfig = {
+        lenderConfig:{ preset: '{/literal}{$lender}{literal}'},
+        apiKey: '{/literal}{$api_key}{literal}',
+        theme:{}
+    }
+</script>
+{/literal}
+<div data-calculator-widget data-amount="{$raw_total*100|escape:'htmlall':'UTF-8'}"  data-plans="{$plans|escape:'htmlall':'UTF-8'}"></div>
 
 {literal}
 <script type="text/javascript"  src="https://cdn.divido.com/widget/dist/{/literal}{$finance_environment|escape:'htmlall':'UTF-8'}{literal}.calculator.js" ></script>

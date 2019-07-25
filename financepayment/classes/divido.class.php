@@ -75,7 +75,7 @@ class FinanceApi
         $finance_env = $response->getBody()->getContents();
         $decoded =json_decode($finance_env);
 
-        
+
         return $decoded->data->environment;
     }
 
@@ -228,5 +228,45 @@ class FinanceApi
             default:
                 return constant("Divido\MerchantSDK\Environment::SANDBOX");
         }
+    }
+
+
+    public function setLender(){
+
+        $api_key = Configuration::get('FINANCE_API_KEY');
+        if (!$api_key) {
+            return array();
+        }
+
+        $client = new Guzzle();
+        $env = $this->getEnvironment($api_key);
+        $httpClientWrapper = new HttpClientWrapper(
+            new GuzzleAdapter($client),
+            Environment::CONFIGURATION[$env]['base_uri'],
+            $api_key
+        );
+
+        $sdk = new Client($httpClientWrapper, $env);
+
+        // Set any request options.
+        $requestOptions = (new \Divido\MerchantSDK\Handlers\ApiRequestOptions());
+
+        // Retrieve all finance plans for the merchant.
+        $plans = $sdk->getAllPlans($requestOptions);
+
+        $data = json_decode(json_encode($plans->getResources()), true);
+
+        Configuration::updateValue('FINANCE_LENDER', $data[0]['lender']['name']);
+
+
+        return $data[0]['lender']['name'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getLender(){
+
+        return  Configuration::get('FINANCE_LENDER');
     }
 }

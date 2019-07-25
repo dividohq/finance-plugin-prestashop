@@ -40,9 +40,17 @@
         {l s='Your shopping cart is empty.' mod='financepayment'}
     </p>
 {else}
-
+{literal}
+<script>
+    __widgetConfig = {
+        lenderConfig:{ preset: '{/literal}{$lender}{literal}'},
+        apiKey: '{/literal}{$api_key}{literal}',
+        theme:{}
+    }
+</script>
+{/literal}
 <div id="finance-checkout">
-   <div data-calculator-widget data-mode="calculator" data-amount="{$raw_total *100|escape:'htmlall':'UTF-8'}" data-plans="{$plans|escape:'htmlall':'UTF-8'}" data-api-key="{$api_key|escape:'htmlall':'UTF-8'}">
+   <div data-calculator-widget data-mode="calculator" data-amount="{$raw_total *100|escape:'htmlall':'UTF-8'}" data-plans="{$plans|escape:'htmlall':'UTF-8'}">
 </div>
     {literal}
     <script type="text/javascript"  src="https://cdn.divido.com/widget/dist/{/literal}{$finance_environment|escape:'htmlall':'UTF-8'}{literal}.calculator.js" ></script>

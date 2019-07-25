@@ -65,6 +65,12 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
             Tools::redirect('index.php?controller=order');
         }
 
+        // get lender name to set widget styling
+        $lender = $api->getLender();
+        if(empty($lender)){
+            $lender =  $api->setLender();
+        }
+
         $this->context->smarty->assign(
             array(
                 'payment_error' => $payment_error,
@@ -78,7 +84,8 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
                 'merchant_script' => "//cdn.divido.com/calculator/".$js_key.".js",
                 'plans' => implode(',', array_keys($plans)),
                 'validationLink' => $this->context->link->getModuleLink('financepayment', 'validation'),
-                'api_key' => substr(Configuration::get('DIVIDO_API_KEY'),  0,  strpos(Configuration::get('DIVIDO_API_KEY'), "."))
+                'api_key' => substr(Configuration::get('DIVIDO_API_KEY'),  0,  strpos(Configuration::get('DIVIDO_API_KEY'), ".")),
+                'lender' => $lender
             )
         );
         Media::addJsDef(
