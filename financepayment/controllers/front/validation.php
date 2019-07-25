@@ -40,10 +40,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
     public function postProcess()
     {
 
-        PrestaShopLogger::addLog('psot process', 1, null, 'Cart', true);
-        PrestaShopLogger::addLog(Tools::getIsset('total'), 1, null, 'Cart', true);
-        PrestaShopLogger::addLog(Tools::getIsset('deposit'), 1, null, 'Cart', true);
-        PrestaShopLogger::addLog(Tools::getIsset('finance'), 1, null, 'Cart', true);
         if (!(Tools::getIsset('total') && Tools::getIsset('deposit') && Tools::getIsset('finance'))) {
             Tools::redirect($this->context->link->getPageLink('index'));
         }
