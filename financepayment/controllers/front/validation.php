@@ -39,6 +39,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
      */
     public function postProcess()
     {
+
         if (!(Tools::getIsset('total') && Tools::getIsset('deposit') && Tools::getIsset('finance'))) {
             Tools::redirect($this->context->link->getPageLink('index'));
         }
@@ -57,7 +58,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         }
 
         $cart = $this->context->cart;
-        
+
         if ($cart->getOrderTotal(true, Cart::BOTH) != Tools::getValue('total')) {
             $response = array(
                 'status' => true,
@@ -99,6 +100,14 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
     public function getConfirmation()
     {
+
+        PrestaShopLogger::addLog(
+            'get confirmation',
+            1,
+            null,
+            'Cart',
+            true
+        );
         $this->context = Context::getContext();
         $api_key   = Configuration::get('FINANCE_API_KEY');
         $deposit = Tools::getValue('deposit');
@@ -134,7 +143,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $products  = array();
         foreach ($cart->getProducts() as $product) {
             $products[] = array(
-             
+
                 'name' => $product['name'],
                 'quantity' => $product['quantity'],
                 'price' => $product['price_wt']*100,
@@ -147,14 +156,14 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $discount = (float)$disounts;
 
         $products[] = array(
-            
+
             'name'     => 'Shipping & Handling',
             'quantity' => 1,
             'price'    => $shiphandle*100,
         );
 
         $products[] = array(
-        
+
             'name'     => 'Discount',
             'quantity' => 1,
             'price'    => -$discount*100,
@@ -169,7 +178,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
         $salt = uniqid('', true);
         $hash = hash('sha256', $cart_id.$salt);
-        
+
         $this->saveHash($cart_id, $salt, $sub_total);
 
         $application               = ( new \Divido\MerchantSDK\Models\Application() )

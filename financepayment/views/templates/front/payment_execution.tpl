@@ -41,13 +41,20 @@
     </p>
 {else}
 {literal}
-    <script type="text/javascript" src="https://cdn.divido.com/calculator/v2.1/production/js/template.{/literal}{$finance_environment|escape:'htmlall':'UTF-8'}{literal}.js"></script>
+<script>
+    __widgetConfig = {
+        lenderConfig:{ preset: '{/literal}{$lender}{literal}'},
+        apiKey: '{/literal}{$api_key}{literal}',
+        theme:{}
+    }
+</script>
 {/literal}
-<div id="finance-checkout">
-   <div data-{$finance_environment|escape:'htmlall':'UTF-8'}-widget data-{$finance_environment|escape:'htmlall':'UTF-8'}-prefix="{if isset($finance_prefix) && $finance_prefix}{$finance_prefix|escape:'htmlall':'UTF-8'}{/if}" data-{$finance_environment|escape:'htmlall':'UTF-8'}-suffix="{if isset($finance_suffix) && $finance_suffix}{$finance_suffix|escape:'htmlall':'UTF-8'}{/if}" data-{$finance_environment|escape:'htmlall':'UTF-8'}-title-logo data-{$finance_environment|escape:'htmlall':'UTF-8'}-amount="{$raw_total|escape:'htmlall':'UTF-8'}" data-{$finance_environment|escape:'htmlall':'UTF-8'}-apply="true" data-{$finance_environment|escape:'htmlall':'UTF-8'}-apply-label="Apply Now" data-{$finance_environment|escape:'htmlall':'UTF-8'}-plans = "{$plans|escape:'htmlall':'UTF-8'}">
-
-
-</div>
+    <div id="finance-checkout">
+       <div data-calculator-widget data-mode="calculator" data-amount="{$raw_total *100|escape:'htmlall':'UTF-8'}" data-plans="{$plans|escape:'htmlall':'UTF-8'}">
+    </div>
+{literal}
+    <script type="text/javascript"  src="https://cdn.divido.com/widget/dist/{/literal}{$finance_environment|escape:'htmlall':'UTF-8'}{literal}.calculator.js" ></script>
+{/literal}
 <div class="buttons">
     <p class="cart_navigation clearfix">
         <a class="btn btn-primary pull-xs-left" href="{url entity=order}">

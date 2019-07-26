@@ -46,14 +46,24 @@
 		{l s='Your shopping cart is empty.' mod='financepayment'}
 	</p>
 {else}
+
 {literal}
-    <script type="text/javascript" src="https://cdn.divido.com/calculator/v2.1/production/js/template.{/literal}{$finance_environment|escape:'htmlall':'UTF-8'}{literal}.js"></script>
+<script>
+    __widgetConfig = {
+        lenderConfig:{ preset: '{/literal}{$lender}{literal}'},
+        apiKey: '{/literal}{$api_key}{literal}',
+        theme:{}
+    }
+</script>
 {/literal}
 <div id="finance-checkout">
-    <div data-{$finance_environment|escape:'htmlall':'UTF-8'}-widget data-{$finance_environment|escape:'htmlall':'UTF-8'}-prefix="finance for" data-{$finance_environment|escape:'htmlall':'UTF-8'}-suffix="with" data-{$finance_environment|escape:'htmlall':'UTF-8'}-title-logo data-{$finance_environment|escape:'htmlall':'UTF-8'}-amount="{$raw_total|escape:'htmlall':'UTF-8'}" data-{$finance_environment|escape:'htmlall':'UTF-8'}-apply="true" data-{$finance_environment|escape:'htmlall':'UTF-8'}-apply-label="Apply Now" data-{$finance_environment|escape:'htmlall':'UTF-8'}-plans = "{$plans|escape:'htmlall':'UTF-8'}"></div>
-
+    <div data-calculator-widget data-mode="calculator" data-amount="{$raw_total *100|escape:'htmlall':'UTF-8'}" data-plans="{$plans|escape:'htmlall':'UTF-8'}">
 </div>
-<div class="buttons">
+{literal}
+    <script type="text/javascript"  src="https://cdn.divido.com/widget/dist/{/literal}{$finance_environment|escape:'htmlall':'UTF-8'}{literal}.calculator.js" ></script>
+{/literal}
+
+    <div class="buttons">
     <p class="cart_navigation clearfix">
         <a class="btn btn-primary pull-xs-left" href="{$link->getPageLink('order')|escape:'htmlall':'UTF-8'}">
             <i class="icon-chevron-left"></i>{l s='Other payment methods' mod='financepayment'}
