@@ -100,14 +100,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
     public function getConfirmation()
     {
-
-        PrestaShopLogger::addLog(
-            'get confirmation',
-            1,
-            null,
-            'Cart',
-            true
-        );
         $this->context = Context::getContext();
         $api_key   = Configuration::get('FINANCE_API_KEY');
         $deposit = Tools::getValue('deposit');
@@ -156,14 +148,12 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $discount = (float)$disounts;
 
         $products[] = array(
-
             'name'     => 'Shipping & Handling',
             'quantity' => 1,
             'price'    => $shiphandle*100,
         );
 
         $products[] = array(
-
             'name'     => 'Discount',
             'quantity' => 1,
             'price'    => -$discount*100,
