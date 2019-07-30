@@ -26,7 +26,7 @@
 <div class="row">
 	<div class="col-xs-12 col-md-12">
         <p class="payment_module">
-            <a  class="divido"  href="{$link->getModuleLink('financepayment', 'payment')|escape:'html':'UTF-8'}"
+            <a  class="divido"  href="{$link->getModuleLink('financepayment', 'payment')|escape:'html':'UTF-8'}" 
             title="{$payment_title|escape:'html':'UTF-8'}">
             	{$payment_title|escape:'html':'UTF-8'}
             </a>
