@@ -87,16 +87,17 @@ class FinancePayment extends PaymentModule
 
         parent::__construct();
 
-        $this->displayName = $this->l('Finance');
-        $this->description = $this->l(
-            'The Finance extension allows you to accept finance payments in your Prestashop store.'
-        );
+        $this->displayName = $this->l('Pay by Finance');
+        $this->description = "'".$this->l(
+            'This extension allows you to accept finance payments in your store'
+        ).".'";
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall this module?');
         /*------Version Check-------------*/
         $this->ps_below_7 = Tools::version_compare(_PS_VERSION_, '1.7', '<');
 
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
+
     }
 
     /**
@@ -327,7 +328,7 @@ class FinancePayment extends PaymentModule
                     array(
                         'type' => 'text',
                         'name' => 'FINANCE_API_KEY',
-                        'label' => $this->l('API key'),
+                        'label' => $this->l('API Key'),
                     )
                 ),
                 'submit' => array(
@@ -346,194 +347,200 @@ class FinancePayment extends PaymentModule
             $product_options = array(
                 array(
                     'type' => 'All',
-                    'name' => $this->l('All Products'),
+                    'name' => $this->l('All products'),
                 ),
                 array(
                     'type' => 'product_selected',
-                    'name' => $this->l('Selected Products'),
+                    'name' => $this->l('Finance specific products'),
                 ),
                 array(
                     'type' => 'min_price',
-                    'name' => $this->l('Products above minimum value'),
+                    'name' => $this->l('All products above a defined price'),
                 ),
             );
             $form['form']['input'][] = array(
-                'type' => 'text',
-                'name' => 'FINANCE_HMAC',
+                'type'  => 'text',
+                'name'  => 'FINANCE_HMAC',
                 'label' => $this->l('Shared Secret'),
-                'hint' => $this->l('An additional code supplied by your finance supplier (optional)'),
+                'hint'  => $this->l('The optional shared secret is an agreed code used to verify information between you and your finance provider'),
             );
             $form['form']['input'][] = array(
-                'type' => 'text',
-                'name' => 'FINANCE_PAYMENT_TITLE',
-                'label' => $this->l('Title'),
+                'type'  => 'text',
+                'name'  => 'FINANCE_PAYMENT_TITLE',
+                'label' => $this->l('Checkout Title'),
+                'hint'  => $this->l('The name of the payment option at checkout'),
             );
             if (!$this->ps_below_7) {
                 $form['form']['input'][] = array(
-                    'type' => 'text',
-                    'name' => 'FINANCE_PAYMENT_DESCRIPTION',
-                    'label' => $this->l('Payment page description'),
+                    'type'  => 'text',
+                    'name'  => 'FINANCE_PAYMENT_DESCRIPTION',
+                    'label' => $this->l('Checkout Description'),
+                    'hint'  => $this->l('The description of the payment option at checkout'),
                 );
             }
             $form['form']['input'][] = array(
-                'type' => 'select',
-                'name' => 'FINANCE_ACTIVATION_STATUS',
-                'label' => $this->l('Activation status'),
-                'hint' => $this->l('Prestashop status to make finance activation call'),
+                'type'    => 'select',
+                'name'    => 'FINANCE_ACTIVATION_STATUS',
+                'label'   => $this->l('Activate Order On Status'),
+                'hint'    => $this->l('Notify your finance provider that the transaction has been completed'),
                 'options' => array(
                     'query' => $orderStatus,
-                    'id' => 'id_order_state',
-                    'name' => 'name',
+                    'id'    => 'id_order_state',
+                    'name'  => 'name',
                 ),
             );
             $form['form']['input'][] = array(
-                'type' => 'select',
-                'name' => 'FINANCE_CANCELLATION_STATUS',
-                'label' => $this->l('Cancellation status'),
-                'hint' => $this->l('Prestashop status to make finance cancellation call'),
+                'type'    => 'select',
+                'name'    => 'FINANCE_CANCELLATION_STATUS',
+                'label'   => $this->l('Cancel Order On Status'),
+                'hint'    => $this->l('Notify your finance provider that the transaction has been cancelled'),
                 'options' => array(
                     'query' => $orderStatus,
-                    'id' => 'id_order_state',
-                    'name' => 'name',
+                    'id'    => 'id_order_state',
+                    'name'  => 'name',
                 ),
             );
             $form['form']['input'][] = array(
-                'type' => 'select',
-                'name' => 'FINANCE_REFUND_STATUS',
-                'label' => $this->l('Refund status'),
-                'hint' => $this->l('Prestashop status to make finance refund call'),
+                'type'    => 'select',
+                'name'    => 'FINANCE_REFUND_STATUS',
+                'label'   => $this->l('Refund Order On Status'),
+                'hint'    => $this->l('Notify your finance provider that the transaction has been refunded'),
                 'options' => array(
                     'query' => $orderStatus,
-                    'id' => 'id_order_state',
-                    'name' => 'name',
+                    'id'    => 'id_order_state',
+                    'name'  => 'name',
                 ),
             );
             $form['form']['input'][] = array(
-                'type' => 'switch',
-                'name' => 'FINANCE_ALL_PLAN_SELECTION',
-                'label' => $this->l('Select All Plans'),
+                'type'    => 'switch',
+                'name'    => 'FINANCE_ALL_PLAN_SELECTION',
+                'label'   => $this->l('Show all plans'),
                 'is_bool' => true,
-                'values' => array(
+                'values'  => array(
                     array(
-                        'id' => 'active_on',
+                        'id'    => 'active_on',
                         'value' => true,
                         'label' => $this->l('Yes')
                     ),
                     array(
-                        'id' => 'active_off',
+                        'id'    => 'active_off',
                         'value' => false,
                         'label' => $this->l('No')
                     )
                 ),
             );
             $form['form']['input'][] = array(
-                'type' => 'swap',
-                'name' => 'FINANCE_PLAN_SELECTION',
-                'label' => $this->l('Plans Selected'),
+                'type'    => 'swap',
+                'name'    => 'FINANCE_PLAN_SELECTION',
+                'label'   => $this->l('Refine Plans list'),
                 'options' => array(
                     'query' => $financePlans,
-                    'name' => 'text',
-                    'id' => 'id',
+                    'name'  => 'text',
+                    'id'    => 'id',
                 ),
             );
             $form['form']['input'][] = array(
-                'type' => 'switch',
-                'name' => 'FINANCE_PRODUCT_WIDGET',
-                'label' => $this->l('Widget on product page'),
+                'type'    => 'switch',
+                'name'    => 'FINANCE_PRODUCT_WIDGET',
+                'label'   => $this->l('Show Widget'),
+                'hint'    => $this->l('Show a handy widget with the finance options on your products page'),
                 'is_bool' => true,
-                'values' => array(
+                'values'  => array(
                     array(
-                        'id' => 'active_on',
+                        'id'    => 'active_on',
                         'value' => true,
-                        'label' => $this->l('Enabled')
+                        'label' => $this->l('Yes')
                     ),
                     array(
-                        'id' => 'active_off',
+                        'id'    => 'active_off',
                         'value' => false,
-                        'label' => $this->l('Disabled')
+                        'label' => $this->l('No')
                     )
                 ),
             );
             $form['form']['input'][] = array(
-                'type' => 'switch',
-                'name' => 'FINANCE_PRODUCT_CALCULATOR',
-                'label' => $this->l('Calculator on product page'),
+                'type'    => 'switch',
+                'name'    => 'FINANCE_PRODUCT_CALCULATOR',
+                'label'   => $this->l('Calculator on product page'),
                 'is_bool' => true,
-                'values' => array(
+                'values'  => array(
                     array(
-                        'id' => 'active_on',
+                        'id'    => 'active_on',
                         'value' => true,
-                        'label' => $this->l('Enabled')
+                        'label' => $this->l('Yes')
                     ),
                     array(
-                        'id' => 'active_off',
+                        'id'    => 'active_off',
                         'value' => false,
-                        'label' => $this->l('Disabled')
+                        'label' => $this->l('No')
                     )
                 ),
             );
             $form['form']['input'][] = array(
-                'type' => 'text',
-                'name' => 'FINANCE_PRODUCT_WIDGET_PREFIX',
+                'type'  => 'text',
+                'name'  => 'FINANCE_PRODUCT_WIDGET_PREFIX',
                 'label' => $this->l('Prefix'),
             );
             $form['form']['input'][] = array(
-                'type' => 'text',
-                'name' => 'FINANCE_PRODUCT_WIDGET_SUFFIX',
+                'type'  => 'text',
+                'name'  => 'FINANCE_PRODUCT_WIDGET_SUFFIX',
                 'label' => $this->l('Suffix'),
+                'hint'  => $this->l('')
             );
             $form['form']['input'][] = array(
-                'type' => 'switch',
-                'name' => 'FINANCE_WHOLE_CART',
-                'label' => $this->l('Require whole cart to be available on finance'),
+                'type'    => 'switch',
+                'name'    => 'FINANCE_WHOLE_CART',
+                'label'   => $this->l('Require whole cart to be available on finance'),
                 'is_bool' => true,
-                'values' => array(
+                'values'  => array(
                     array(
-                        'id' => 'active_on',
+                        'id'    => 'active_on',
                         'value' => true,
-                        'label' => $this->l('Enabled')
+                        'label' => $this->l('Yes')
                     ),
                     array(
-                        'id' => 'active_off',
+                        'id'    => 'active_off',
                         'value' => false,
-                        'label' => $this->l('Disabled')
+                        'label' => $this->l('No')
                     )
                 ),
             );
             $form['form']['input'][] = array(
-                'type' => 'text',
-                'name' => 'FINANCE_CART_MINIMUM',
-                'label' => $this->l('Cart amount minimum'),
-                'help' => $this->l('Minimum required amount in cart, for Finance to be available')
+                'type'  => 'text',
+                'name'  => 'FINANCE_CART_MINIMUM',
+                'label' => $this->l('Cart Threshold'),
+                'help'  => $this->l('The minimum amount necessary for the cart to total in order for finance to be an option at checkout')
             );
             $form['form']['input'][] = array(
-                'type' => 'select',
-                'name' => 'FINANCE_PRODUCTS_OPTIONS',
-                'label' => $this->l('Product Selection'),
+                'type'    => 'select',
+                'name'    => 'FINANCE_PRODUCTS_OPTIONS',
+                'label'   => $this->l('Product Selection'),
+                'hint'    => $this->l('Customise which products can be financed'),
                 'options' => array(
                     'query' => $product_options,
-                    'id' => 'type',
-                    'name' => 'name',
+                    'id'    => 'type',
+                    'name'  => 'name',
                 ),
             );
             $form['form']['input'][] = array(
-                'type' => 'text',
-                'name' => 'FINANCE_PRODUCTS_MINIMUM',
-                'label' => $this->l('Product price minimum'),
+                'type'  => 'text',
+                'name'  => 'FINANCE_PRODUCTS_MINIMUM',
+                'label' => $this->l('Product Price Threshold'),
+                'hint'  => $this->l('The minimum amount a product must cost to be viable for finance')
             );
             $form['form']['input'][] = array(
                 'type' => 'html',
-                'name' => $this->l('FINANCE Response status mapping'),
+                'name' => $this->l('Change your order to a different status whenever the following notifications are sent by your finance provider').":",
             );
             foreach ($this->ApiOrderStatus as $ApiStatus) {
                 $form['form']['input'][] = array(
-                    'type' => 'select',
-                    'name' => 'FINANCE_STATUS_'.$ApiStatus['code'],
-                    'label' => $ApiStatus['code'],
+                    'type'    => 'select',
+                    'name'    => 'FINANCE_STATUS_'.$ApiStatus['code'],
+                    'label'   => $ApiStatus['code'],
                     'options' => array(
                         'query' => $orderStatus,
-                        'id' => 'id_order_state',
-                        'name' => 'name',
+                        'id'    => 'id_order_state',
+                        'name'  => 'name',
                     ),
                 );
             }
@@ -582,7 +589,7 @@ class FinancePayment extends PaymentModule
     protected function postProcess()
     {
         if (!Tools::getValue('FINANCE_API_KEY')) {
-            return $this->displayError($this->l('Api key Cannot be empty'));
+            return $this->displayError($this->l('The API key cannot be empty'));
         }
         $form_values = $this->getConfigFormValues();
 
@@ -749,7 +756,7 @@ class FinancePayment extends PaymentModule
         } else {
             $order = $params['order'];
             $total = sprintf(
-                $this->l('%1$s (tax incl.)'),
+                '%s ('.$this->l('tax inclusive').')',
                 Tools::displayPrice($order->getTotalPaid())
             );
         }
