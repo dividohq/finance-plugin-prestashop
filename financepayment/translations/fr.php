@@ -1,0 +1,58 @@
+<?php
+
+global $_MODULE;
+$_MODULE = array();
+$_MODULE['<{financepayment}prestashop>financepayment_d876ff8da67c3731ae25d8335a4168b4'] = 'clé API';
+$_MODULE['<{financepayment}prestashop>financepayment_1828469e95f13bc9cb87b264d11354a0'] = 'Secret partagé';
+$_MODULE['<{financepayment}prestashop>financepayment_3a3565996d77d19b2c0452b24f26005f'] = 'Titre de la caisse';
+$_MODULE['<{financepayment}prestashop>financepayment_96b39a8b5a8a19c4923f64f774ccc7db'] = 'Description de la caisse';
+$_MODULE['<{financepayment}prestashop>financepayment_0d3e02b76dd9a8e090e3e904eb7d696a'] = 'Seuil du panier';
+$_MODULE['<{financepayment}prestashop>financepayment_de7e5cc10d2edf53222c5ff2272f90de'] = 'Afficher le widget';
+$_MODULE['<{financepayment}prestashop>financepayment_63511fb8af096989ba2ecdc8077cd8ec'] = 'Afficher un widget pratique avec les options de financement sur la page de vos produits';
+$_MODULE['<{financepayment}prestashop>financepayment_4cbe2363687f2476ce49caa0041ef95d'] = 'La clé API doit être fournie par votre fournisseur de financement';
+$_MODULE['<{financepayment}prestashop>financepayment_68d3ae3d3dc339e430fe5e029d97bd84'] = 'Le secret partagé facultatif est un code convenu utilisé pour vérifier les informations entre vous et votre fournisseur de financement.';
+$_MODULE['<{financepayment}prestashop>financepayment_6339dda794bf7f280eb7c1299264c244'] = 'Activer la commande sur le statut';
+$_MODULE['<{financepayment}prestashop>financepayment_021c81b99952683f7f3ac479f87e7297'] = 'Informez votre prestataire de services financiers que la transaction est terminée';
+$_MODULE['<{financepayment}prestashop>financepayment_3976d42538c4637d1f535df1b3cb5003'] = 'Plans de limite';
+$_MODULE['<{financepayment}prestashop>financepayment_32b08c931b294859ec3f19c079d788b7'] = 'Choisissez les plans que vous souhaitez mettre à la disposition de vos clients';
+$_MODULE['<{financepayment}prestashop>financepayment_ffc22066730d3ed417e413e6c2a01c6c'] = 'Le montant minimum nécessaire pour que le panier soit total afin que le financement soit une option à la caisse';
+$_MODULE['<{financepayment}prestashop>payment_execution_3053d2027fc49352e45a8aefee5ed212'] = 'Votre panier semble être vide';
+$_MODULE['<{financepayment}prestashop>payment_execution_902b0d55fddef6f8d651fe1035b7d4bd'] = 'Erreur';
+$_MODULE['<{financepayment}prestashop>financepayment_5636fef3c674d8b61735b3a4d0b6ab65'] = 'Le nom de l\'option de paiement à la caisse';
+$_MODULE['<{financepayment}prestashop>financepayment_9359375454f853741f1cef3207aedd0d'] = 'La description de l\'option de paiement à la caisse';
+$_MODULE['<{financepayment}prestashop>financepayment_d49f00c8139e6be88627d67548bd789d'] = 'Selection de produit';
+$_MODULE['<{financepayment}prestashop>financepayment_6b4648dff99e8fac00bfac091eceb893'] = 'Affiner la liste des plans';
+$_MODULE['<{financepayment}prestashop>financepayment_b8dc2c8bfbffd01243fa849192742aee'] = 'Exiger que tout le panier soit disponible en finance';
+$_MODULE['<{financepayment}prestashop>financepayment_e019d4f7ec59dc0c9914b3aded2eb50a'] = 'Afficher tous les plans';
+$_MODULE['<{financepayment}prestashop>financepayment_7e6806b2d87cd71decc2fd075ecbe432'] = 'Sélectionner des plans spécifiques';
+$_MODULE['<{financepayment}prestashop>financepayment_40dec546414c1ebdfde8d9858f0938c3'] = 'Tous les produits';
+$_MODULE['<{financepayment}prestashop>financepayment_1e8492df1172ea4ada5e0257c93046df'] = 'Financer des produits spécifiques';
+$_MODULE['<{financepayment}prestashop>financepayment_4c05999e43797fec504805d60754c6a3'] = 'Tous les produits au dessus d\'un prix défini';
+$_MODULE['<{financepayment}prestashop>financepayment_c9cc8cce247e49bae79f15173ce97354'] = 'sauvegarder';
+$_MODULE['<{financepayment}prestashop>financepayment_e67528d8de4443b6fc2e8c9fa0fea3e9'] = 'Calculatrice de financement de produit';
+$_MODULE['<{financepayment}prestashop>financepayment_1dbf8fdff5efe28c4274ba4c61aeae68'] = 'Personnaliser les produits pouvant être financés';
+$_MODULE['<{financepayment}prestashop>financepayment_553e26731a3f48459d770c67514cf00c'] = 'Seuil de prix du produit';
+$_MODULE['<{financepayment}prestashop>financepayment_588ea35cf3a288ce662835a9976f47f9'] = 'Le montant minimum qu\'un produit doit coûter pour être viable pour le financement';
+$_MODULE['<{financepayment}prestashop>payment_execution_70d9be9b139893aa6c69b5e77e614311'] = 'Confirmer';
+$_MODULE['<{financepayment}prestashop>payment_execution_16bfbf9c462762cf1cba4134ec53c504'] = 'Chargement';
+$_MODULE['<{financepayment}prestashop>financepayment_24a37f7409700b7dc83f16ea066fbf85'] = 'Payer par les finances';
+$_MODULE['<{financepayment}prestashop>financepayment_3f17af736894ce65eb03707517525a91'] = 'Annuler la commande sur le statut';
+$_MODULE['<{financepayment}prestashop>financepayment_d2930b8be71548f04a6e75c8746ccf81'] = 'Avertissez votre prestataire de services financiers que la transaction a été annulée';
+$_MODULE['<{financepayment}prestashop>financepayment_5b54d78261fa21f40a9f410a98a10e35'] = 'Commande de remboursement sur statut';
+$_MODULE['<{financepayment}prestashop>financepayment_5fe77194287e8d07df70a50866c6a38d'] = 'Informez votre fournisseur de financement que la transaction a été remboursée';
+$_MODULE['<{financepayment}prestashop>financepayment_93cba07454f06a4a960172bbd6e2a435'] = 'Oui';
+$_MODULE['<{financepayment}prestashop>financepayment_bafd7322c6e97d25b6299b5d6fe8920b'] = 'Non';
+$_MODULE['<{financepayment}prestashop>financepayment_ed34c36bb7164b5882ea02dc54f1ef1f'] = 'TTC';
+$_MODULE['<{financepayment}prestashop>financepayment_6de0322c3a0f91b8a82e217c77e189b9'] = 'La clé API ne peut pas être vide';
+$_MODULE['<{financepayment}prestashop>financepayment_acbf7e00e6e0e979f40cc21457e7c323'] = 'En attente d\'une réponse financière';
+$_MODULE['<{financepayment}prestashop>financepayment_bb8956c67b82c7444a80c6b2433dd8b4'] = 'Êtes-vous sûr de vouloir désinstaller ce module?';
+$_MODULE['<{financepayment}prestashop>financepayment_0badecd86613ba308364c835514fd67e'] = 'Cette extension vous permet d\'accepter des paiements de financement dans votre magasin.';
+$_MODULE['<{financepayment}prestashop>financepayment_3e8d0e65cf5f9f8cd7630903b71d4fd5'] = 'Modifiez le statut de votre commande lorsque les notifications suivantes sont envoyées par votre fournisseur de services financiers.';
+$_MODULE['<{financepayment}prestashop>financepayment_f4f70727dc34561dfde1a3c529b6205c'] = 'Réglages';
+$_MODULE['<{financepayment}prestashop>response_ed13b3693357ebed3751cb71cb639e65'] = 'Aucun transporteur';
+$_MODULE['<{financepayment}prestashop>validation_c9f117ae3956d2a4f58eac8769139cb8'] = 'La demande de crédit n\'a pas pu être lancée.';
+$_MODULE['<{financepayment}prestashop>payment_execution_9094f1952f07610f453e07913d884547'] = 'Erreur de description';
+$_MODULE['<{financepayment}prestashop>payment_execution_8bac0eecf3228184d4e6cc06e3a12001'] = 'Cette commande n\'a pas pu être traitée en raison de l\'erreur suivante';
+$_MODULE['<{financepayment}prestashop>payment_execution_ffc45d96c3c51775135284a529305893'] = 'méthodes de paiement alternatives';
+
+ 
