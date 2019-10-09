@@ -113,7 +113,6 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_CANCELLATION_STATUS', Configuration::get('PS_OS_CANCELED'));
         Configuration::updateValue('FINANCE_REFUND_STATUS', Configuration::get('PS_OS_REFUNDED'));
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET', null);
-        Configuration::updateValue('FINANCE_PRODUCT_CALCULATOR', null);
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET_PREFIX', 'Finance From');
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET_SUFFIX', 'with');
         Configuration::updateValue('FINANCE_ALL_PLAN_SELECTION', true);
@@ -124,6 +123,7 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_CART_MAXIMUM', '0');
         Configuration::updateValue('FINANCE_PRODUCTS_OPTIONS', 'All');
         Configuration::updateValue('FINANCE_PRODUCTS_MINIMUM', '0');
+        Configuration::updateValue('FINANCE_THEME_COLOUR', '');
 
         foreach ($this->ApiOrderStatus as $ApiStatus) {
             switch ($ApiStatus['code']) {
@@ -239,7 +239,6 @@ class FinancePayment extends PaymentModule
         Configuration::deleteByName('FINANCE_REFUND_STATUS');
         Configuration::deleteByName('FINANCE_REFUNDED_STATUS');
         Configuration::deleteByName('FINANCE_PRODUCT_WIDGET');
-        Configuration::deleteByName('FINANCE_PRODUCT_CALCULATOR');
         Configuration::deleteByName('FINANCE_PRODUCT_WIDGET_PREFIX');
         Configuration::deleteByName('FINANCE_PRODUCT_WIDGET_SUFFIX');
         Configuration::deleteByName('FINANCE_ALL_PLAN_SELECTION');
@@ -250,6 +249,7 @@ class FinancePayment extends PaymentModule
         Configuration::deleteByName('FINANCE_CART_MAXIMUM');
         Configuration::deleteByName('FINANCE_PRODUCTS_OPTIONS');
         Configuration::deleteByName('FINANCE_PRODUCTS_MINIMUM');
+        Configuration::deleteByName('FINANCE_THEME_COLOUR');
 
         /*------------------Handle hooks according to version-------------------*/
         if (!$this->ps_below_7) {
@@ -380,6 +380,11 @@ class FinancePayment extends PaymentModule
                 );
             }
             $form['form']['input'][] = array(
+                'type' => 'text',
+                'name' => 'FINANCE_THEME_COLOUR',
+                'label' => $this->l('RGB optional theme colour'),
+            );
+            $form['form']['input'][] = array(
                 'type' => 'select',
                 'name' => 'FINANCE_ACTIVATION_STATUS',
                 'label' => $this->l('Activation status'),
@@ -458,34 +463,7 @@ class FinancePayment extends PaymentModule
                     )
                 ),
             );
-            $form['form']['input'][] = array(
-                'type' => 'switch',
-                'name' => 'FINANCE_PRODUCT_CALCULATOR',
-                'label' => $this->l('Calculator on product page'),
-                'is_bool' => true,
-                'values' => array(
-                    array(
-                        'id' => 'active_on',
-                        'value' => true,
-                        'label' => $this->l('Enabled')
-                    ),
-                    array(
-                        'id' => 'active_off',
-                        'value' => false,
-                        'label' => $this->l('Disabled')
-                    )
-                ),
-            );
-            $form['form']['input'][] = array(
-                'type' => 'text',
-                'name' => 'FINANCE_PRODUCT_WIDGET_PREFIX',
-                'label' => $this->l('Prefix'),
-            );
-            $form['form']['input'][] = array(
-                'type' => 'text',
-                'name' => 'FINANCE_PRODUCT_WIDGET_SUFFIX',
-                'label' => $this->l('Suffix'),
-            );
+
             $form['form']['input'][] = array(
                 'type' => 'switch',
                 'name' => 'FINANCE_WHOLE_CART',
@@ -585,7 +563,6 @@ class FinancePayment extends PaymentModule
             'FINANCE_ALL_PLAN_SELECTION' => Configuration::get('FINANCE_ALL_PLAN_SELECTION'),
             'FINANCE_PLAN_SELECTION' => explode(',', Configuration::get('FINANCE_PLAN_SELECTION')),
             'FINANCE_PRODUCT_WIDGET' => Configuration::get('FINANCE_PRODUCT_WIDGET'),
-            'FINANCE_PRODUCT_CALCULATOR' => Configuration::get('FINANCE_PRODUCT_CALCULATOR'),
             'FINANCE_PRODUCT_WIDGET_SUFFIX' => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
             'FINANCE_PRODUCT_WIDGET_PREFIX' => Configuration::get('FINANCE_PRODUCT_WIDGET_PREFIX'),
             'FINANCE_CART_MINIMUM' => Configuration::get('FINANCE_CART_MINIMUM'),
@@ -594,6 +571,7 @@ class FinancePayment extends PaymentModule
             'FINANCE_PRODUCTS_OPTIONS' => Configuration::get('FINANCE_PRODUCTS_OPTIONS'),
             'FINANCE_PRODUCTS_MINIMUM' => Configuration::get('FINANCE_PRODUCTS_MINIMUM'),
             'FINANCE_WHOLE_CART' => Configuration::get('FINANCE_WHOLE_CART'),
+            'FINANCE_THEME_COLOUR' => Configuration::get('FINANCE_THEME_COLOUR'),
         );
 
         if (!$this->ps_below_7) {
@@ -898,11 +876,9 @@ class FinancePayment extends PaymentModule
 
     public function hookDisplayFooterProduct($params)
     {
-        if (!Configuration::get('FINANCE_PRODUCT_CALCULATOR')) {
-            return;
-        }
+        return;
 
-        return $this->getWidgetData($params, 'calculator.tpl');
+       // return $this->getWidgetData($params, 'calculator.tpl');
     }
 
     /**
@@ -1000,7 +976,8 @@ class FinancePayment extends PaymentModule
             'finance_suffix'       => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
             'finance_environment'  => Configuration::get('FINANCE_ENVIRONMENT'),
             'api_key' => Tools::substr(Configuration::get('FINANCE_API_KEY'),  0,  strpos(Configuration::get('FINANCE_API_KEY'), ".")),
-            'lender' => $lender
+            'lender' => $lender,
+
             )
         );
 
