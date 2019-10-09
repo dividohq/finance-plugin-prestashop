@@ -123,7 +123,7 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_CART_MAXIMUM', '0');
         Configuration::updateValue('FINANCE_PRODUCTS_OPTIONS', 'All');
         Configuration::updateValue('FINANCE_PRODUCTS_MINIMUM', '0');
-        Configuration::updateValue('FINANCE_THEME_COLOUR', '');
+
 
         foreach ($this->ApiOrderStatus as $ApiStatus) {
             switch ($ApiStatus['code']) {
@@ -249,7 +249,7 @@ class FinancePayment extends PaymentModule
         Configuration::deleteByName('FINANCE_CART_MAXIMUM');
         Configuration::deleteByName('FINANCE_PRODUCTS_OPTIONS');
         Configuration::deleteByName('FINANCE_PRODUCTS_MINIMUM');
-        Configuration::deleteByName('FINANCE_THEME_COLOUR');
+
 
         /*------------------Handle hooks according to version-------------------*/
         if (!$this->ps_below_7) {
@@ -379,11 +379,6 @@ class FinancePayment extends PaymentModule
                     'label' => $this->l('Payment page description'),
                 );
             }
-            $form['form']['input'][] = array(
-                'type' => 'text',
-                'name' => 'FINANCE_THEME_COLOUR',
-                'label' => $this->l('RGB optional theme colour'),
-            );
             $form['form']['input'][] = array(
                 'type' => 'select',
                 'name' => 'FINANCE_ACTIVATION_STATUS',
@@ -571,7 +566,6 @@ class FinancePayment extends PaymentModule
             'FINANCE_PRODUCTS_OPTIONS' => Configuration::get('FINANCE_PRODUCTS_OPTIONS'),
             'FINANCE_PRODUCTS_MINIMUM' => Configuration::get('FINANCE_PRODUCTS_MINIMUM'),
             'FINANCE_WHOLE_CART' => Configuration::get('FINANCE_WHOLE_CART'),
-            'FINANCE_THEME_COLOUR' => Configuration::get('FINANCE_THEME_COLOUR'),
         );
 
         if (!$this->ps_below_7) {
