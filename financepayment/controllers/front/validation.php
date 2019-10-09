@@ -102,7 +102,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
     {
         $this->context = Context::getContext();
         $api_key   = Configuration::get('FINANCE_API_KEY');
-        $deposit = Tools::getValue('deposit');
+        $deposit = (int)Tools::getValue('deposit');
         $finance = Tools::getValue('finance');
         $cart = $this->context->cart;
 
@@ -191,7 +191,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             )
         )
         ->withOrderItems($products)
-        ->withDepositPercentage($deposit/100)
+        ->withDepositAmount($deposit)
         ->withFinalisationRequired(false)
         ->withMerchantReference('')
         ->withUrls(
