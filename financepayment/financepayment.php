@@ -119,7 +119,6 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
         Configuration::updateValue('FINANCE_WHOLE_CART', false);
         Configuration::updateValue('FINANCE_CART_MINIMUM', '0');
-        Configuration::updateValue('FINANCE_USE_CART_MAXIMUM', false);
         Configuration::updateValue('FINANCE_CART_MAXIMUM', '0');
         Configuration::updateValue('FINANCE_PRODUCTS_OPTIONS', 'All');
         Configuration::updateValue('FINANCE_PRODUCTS_MINIMUM', '0');
@@ -184,10 +183,7 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_AWAITING_STATUS', $state);
 
         /*------------------Handle hooks according to version-------------------*/
-        if ($this->ps_below_7 && !$this->registerHook('payment')) {
-            Configuration::updateValue('FINANCE_PAYMENT_DESCRIPTION', $this->displayName);
-            return false;
-        } elseif (!$this->ps_below_7 && !$this->registerHook('paymentOptions')) {
+        if (!$this->ps_below_7 && !$this->registerHook('paymentOptions')) {
             return false;
         }
 
@@ -245,16 +241,12 @@ class FinancePayment extends PaymentModule
         Configuration::deleteByName('FINANCE_PLAN_SELECTION');
         Configuration::deleteByName('FINANCE_WHOLE_CART');
         Configuration::deleteByName('FINANCE_CART_MINIMUM');
-        Configuration::deleteByName('FINANCE_USE_CART_MAXIMUM');
         Configuration::deleteByName('FINANCE_CART_MAXIMUM');
         Configuration::deleteByName('FINANCE_PRODUCTS_OPTIONS');
         Configuration::deleteByName('FINANCE_PRODUCTS_MINIMUM');
 
 
         /*------------------Handle hooks according to version-------------------*/
-        if (!$this->ps_below_7) {
-            Configuration::deleteByName('FINANCE_PAYMENT_DESCRIPTION');
-        }
 
         foreach ($this->ApiOrderStatus as $ApiStatus) {
             Configuration::deleteByName('FINANCE_STATUS_'.$ApiStatus['code']);
@@ -372,13 +364,6 @@ class FinancePayment extends PaymentModule
                 'name' => 'FINANCE_PAYMENT_TITLE',
                 'label' => $this->l('Title'),
             );
-            if (!$this->ps_below_7) {
-                $form['form']['input'][] = array(
-                    'type' => 'text',
-                    'name' => 'FINANCE_PAYMENT_DESCRIPTION',
-                    'label' => $this->l('Payment page description'),
-                );
-            }
             $form['form']['input'][] = array(
                 'type' => 'select',
                 'name' => 'FINANCE_ACTIVATION_STATUS',
@@ -484,24 +469,6 @@ class FinancePayment extends PaymentModule
                 'help' => $this->l('Minimum required amount in cart, for Finance to be available')
             );
             $form['form']['input'][] = array(
-                'type' => 'switch',
-                'name' => 'FINANCE_USE_CART_MAXIMUM',
-                'label' => $this->l('Require maxiumum cart threshold'),
-                'is_bool' => true,
-                'values' => array(
-                    array(
-                        'id' => 'active_on',
-                        'value' => true,
-                        'label' => $this->l('Yes')
-                    ),
-                    array(
-                        'id' => 'active_off',
-                        'value' => false,
-                        'label' => $this->l('No')
-                    )
-                ),
-            );
-            $form['form']['input'][] = array(
                 'type' => 'text',
                 'name' => 'FINANCE_CART_MAXIMUM',
                 'label' => $this->l('Cart amount maximum'),
@@ -562,7 +529,6 @@ class FinancePayment extends PaymentModule
             'FINANCE_PRODUCT_WIDGET_PREFIX' => Configuration::get('FINANCE_PRODUCT_WIDGET_PREFIX'),
             'FINANCE_CART_MINIMUM' => Configuration::get('FINANCE_CART_MINIMUM'),
             'FINANCE_CART_MAXIMUM' => Configuration::get('FINANCE_CART_MAXIMUM'),
-            'FINANCE_USE_CART_MAXIMUM' => Configuration::get('FINANCE_USE_CART_MAXIMUM'),
             'FINANCE_PRODUCTS_OPTIONS' => Configuration::get('FINANCE_PRODUCTS_OPTIONS'),
             'FINANCE_PRODUCTS_MINIMUM' => Configuration::get('FINANCE_PRODUCTS_MINIMUM'),
             'FINANCE_WHOLE_CART' => Configuration::get('FINANCE_WHOLE_CART'),
@@ -678,7 +644,6 @@ class FinancePayment extends PaymentModule
 
         $cart = $params['cart'];
         if ($cart->getOrderTotal() > Configuration::get('FINANCE_CART_MINIMUM')
-            && Configuration::get('FINANCE_USE_CART_MAXIMUM') === "1"
         ) {
             return;
         }
@@ -725,7 +690,6 @@ class FinancePayment extends PaymentModule
 
         if ((Configuration::get('FINANCE_CART_MAXIMUM')
                 && $cart->getOrderTotal() > Configuration::get('FINANCE_CART_MAXIMUM'))
-            && Configuration::get('FINANCE_USE_CART_MAXIMUM') === "1"
         ) {
             return;
         }
