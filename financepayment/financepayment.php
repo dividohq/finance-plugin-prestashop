@@ -112,12 +112,12 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_ACTIVATION_STATUS', Configuration::get('PS_OS_DELIVERED'));
         Configuration::updateValue('FINANCE_CANCELLATION_STATUS', Configuration::get('PS_OS_CANCELED'));
         Configuration::updateValue('FINANCE_REFUND_STATUS', Configuration::get('PS_OS_REFUNDED'));
-        Configuration::updateValue('FINANCE_PRODUCT_WIDGET', null);
+        Configuration::updateValue('FINANCE_PRODUCT_WIDGET', true);
         Configuration::updateValue('FINANCE_ALL_PLAN_SELECTION', true);
         Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
         Configuration::updateValue('FINANCE_WHOLE_CART', false);
         Configuration::updateValue('FINANCE_CART_MINIMUM', '0');
-        Configuration::updateValue('FINANCE_CART_MAXIMUM', '0');
+        Configuration::updateValue('FINANCE_CART_MAXIMUM', '');
         Configuration::updateValue('FINANCE_PRODUCTS_OPTIONS', 'All');
         Configuration::updateValue('FINANCE_PRODUCTS_MINIMUM', '0');
 
