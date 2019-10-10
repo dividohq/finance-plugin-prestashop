@@ -42,9 +42,6 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
         if ($cart->getOrderTotal() < Configuration::get('FINANCE_CART_MINIMUM')) {
             Tools::redirect('index.php?controller=order');
         }
-        if ($cart->getOrderTotal() > Configuration::get('FINANCE_CART_MAXIMUM')) {
-            Tools::redirect('index.php?controller=order');
-        }
 
         $payment_error = false;
         $responsetext = '';
