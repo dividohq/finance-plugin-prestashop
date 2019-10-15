@@ -142,10 +142,10 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             );
         }
 
-        $sub_total = $cart->getOrderTotal(true, Cart::BOTH);
-        $shiphandle = $cart->getOrderTotal(true, Cart::ONLY_SHIPPING);
-        $disounts = $cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS);
-        $discount = (float)$disounts;
+        $sub_total = (int)$cart->getOrderTotal(true, Cart::BOTH);
+        $shiphandle = (int)$cart->getOrderTotal(true, Cart::ONLY_SHIPPING);
+        $disounts = (int)$cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS);
+        $discount = (int)$disounts;
 
         $products[] = array(
             'name'     => 'Shipping & Handling',
