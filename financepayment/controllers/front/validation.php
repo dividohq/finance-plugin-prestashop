@@ -138,14 +138,14 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
                 'name' => $product['name'],
                 'quantity' => $product['quantity'],
-                'price' => $product['price_wt']*100,
+                'price' => (int)($product['price_wt']*100),
             );
         }
 
-        $sub_total = $cart->getOrderTotal(true, Cart::BOTH);
-        $shiphandle = $cart->getOrderTotal(true, Cart::ONLY_SHIPPING);
-        $disounts = $cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS);
-        $discount = (float)$disounts;
+        $sub_total = (int)$cart->getOrderTotal(true, Cart::BOTH);
+        $shiphandle = (int)$cart->getOrderTotal(true, Cart::ONLY_SHIPPING);
+        $disounts = (int)$cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS);
+        $discount = (int)$disounts;
 
         $products[] = array(
             'name'     => 'Shipping & Handling',
