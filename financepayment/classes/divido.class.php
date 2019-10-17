@@ -159,11 +159,9 @@ class FinanceApi
     {
         $settings = $this->getProductSettings($id_product);
 
+        $product_selection = Configuration::get('FINANCE_PRODUCTS_OPTIONS');
+        $price_threshold   = Configuration::get('FINANCE_PRODUCTS_MINIMUM');
 
-        if ($settings["display"] != "custom") {
-            $product_selection = Configuration::get('FINANCE_PRODUCTS_OPTIONS');
-            $price_threshold   = Configuration::get('FINANCE_PRODUCTS_MINIMUM');
-        }
 
         $plans = $this->getPlans(true);
 
@@ -220,8 +218,8 @@ class FinanceApi
     {
         $array       = explode('_', $key);
         $environment = Tools::strtoupper($array[0]);
-        return ('LIVE' == $environment) 
-            ? constant("Divido\MerchantSDK\Environment::PRODUCTION") 
+        return ('LIVE' == $environment)
+            ? constant("Divido\MerchantSDK\Environment::PRODUCTION")
             : constant("Divido\MerchantSDK\Environment::$environment");
     }
 
