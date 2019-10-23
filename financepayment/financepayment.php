@@ -87,12 +87,9 @@ class FinancePayment extends PaymentModule
 
         parent::__construct();
 
-        $this->displayName = $this->l('Pay by Finance');
-        $this->description = "'".$this->l(
-            'This extension allows you to accept finance payments in your store'
-        ).".'";
-
-        $this->confirmUninstall = $this->l('Are you sure you want to uninstall this module?');
+        $this->displayName = $this->l('plugin_title');
+        $this->description = $this->l('plugin_description');
+        $this->confirmUninstall = $this->l('uninstall_alert');
         /*------Version Check-------------*/
         $this->ps_below_7 = Tools::version_compare(_PS_VERSION_, '1.7', '<');
 
@@ -115,12 +112,13 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_REFUND_STATUS', Configuration::get('PS_OS_REFUNDED'));
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET', null);
         Configuration::updateValue('FINANCE_PRODUCT_CALCULATOR', null);
-        Configuration::updateValue('FINANCE_PRODUCT_WIDGET_PREFIX', 'Finance From');
-        Configuration::updateValue('FINANCE_PRODUCT_WIDGET_SUFFIX', 'with');
+        Configuration::updateValue('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT', 'PAY BY FINANCE');
+        Configuration::updateValue('FINANCE_PRODUCT_WIDGET_FOOTNOTE', '');
         Configuration::updateValue('FINANCE_ALL_PLAN_SELECTION', true);
         Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
         Configuration::updateValue('FINANCE_WHOLE_CART', false);
         Configuration::updateValue('FINANCE_CART_MINIMUM', '0');
+        Configuration::updateValue('FINANCE_CART_MAXIMUM', '10000');
         Configuration::updateValue('FINANCE_PRODUCTS_OPTIONS', 'All');
         Configuration::updateValue('FINANCE_PRODUCTS_MINIMUM', '0');
 
@@ -179,7 +177,7 @@ class FinancePayment extends PaymentModule
         $status['invoice'] = false;
         $status['unremovable'] = true;
         $status['paid'] = false;
-        $state = $this->addState($this->l('Awaiting finance response'), '#0404B4', $status);
+        $state = $this->addState($this->l('awaiting_finance_response'), '#0404B4', $status);
         Configuration::updateValue('FINANCE_AWAITING_STATUS', $state);
 
         /*------------------Handle hooks according to version-------------------*/
@@ -239,12 +237,13 @@ class FinancePayment extends PaymentModule
         Configuration::deleteByName('FINANCE_REFUNDED_STATUS');
         Configuration::deleteByName('FINANCE_PRODUCT_WIDGET');
         Configuration::deleteByName('FINANCE_PRODUCT_CALCULATOR');
-        Configuration::deleteByName('FINANCE_PRODUCT_WIDGET_PREFIX');
-        Configuration::deleteByName('FINANCE_PRODUCT_WIDGET_SUFFIX');
+        Configuration::deleteByName('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT');
+        Configuration::deleteByName('FINANCE_PRODUCT_WIDGET_FOOTNOTE');
         Configuration::deleteByName('FINANCE_ALL_PLAN_SELECTION');
         Configuration::deleteByName('FINANCE_PLAN_SELECTION');
         Configuration::deleteByName('FINANCE_WHOLE_CART');
         Configuration::deleteByName('FINANCE_CART_MINIMUM');
+        Configuration::deleteByName('FINANCE_CART_MAXIMUM');
         Configuration::deleteByName('FINANCE_PRODUCTS_OPTIONS');
         Configuration::deleteByName('FINANCE_PRODUCTS_MINIMUM');
 
@@ -321,18 +320,18 @@ class FinancePayment extends PaymentModule
         $form = array(
             'form' => array(
                 'legend' => array(
-                'title' => $this->l('Settings'),
+                'title' => $this->l('settings_label'),
                 'icon' => 'icon-cogs',
                 ),
                 'input' => array(
                     array(
                         'type' => 'text',
                         'name' => 'FINANCE_API_KEY',
-                        'label' => $this->l('API Key'),
+                        'label' => $this->l('api_key_label'),
                     )
                 ),
                 'submit' => array(
-                    'title' => $this->l('Save'),
+                    'title' => $this->l('save_label'),
                 ),
             ),
         );
@@ -347,42 +346,42 @@ class FinancePayment extends PaymentModule
             $product_options = array(
                 array(
                     'type' => 'All',
-                    'name' => $this->l('All products'),
+                    'name' => $this->l('finance_all_products_option'),
                 ),
                 array(
                     'type' => 'product_selected',
-                    'name' => $this->l('Finance specific products'),
+                    'name' => $this->l('finance_specific_products_option'),
                 ),
                 array(
                     'type' => 'min_price',
-                    'name' => $this->l('All products above a defined price'),
+                    'name' => $this->l('finance_threshold_products_option'),
                 ),
             );
             $form['form']['input'][] = array(
                 'type'  => 'text',
                 'name'  => 'FINANCE_HMAC',
-                'label' => $this->l('Shared Secret'),
-                'hint'  => $this->l('The optional shared secret is an agreed code used to verify information between you and your finance provider'),
+                'label' => $this->l('shared_secret_label'),
+                'hint'  => $this->l('shared_secret_description'),
             );
             $form['form']['input'][] = array(
                 'type'  => 'text',
                 'name'  => 'FINANCE_PAYMENT_TITLE',
-                'label' => $this->l('Checkout Title'),
-                'hint'  => $this->l('The name of the payment option at checkout'),
+                'label' => $this->l('checkout_title_label'),
+                'hint'  => $this->l('checkout_title_description'),
             );
             if (!$this->ps_below_7) {
                 $form['form']['input'][] = array(
                     'type'  => 'text',
                     'name'  => 'FINANCE_PAYMENT_DESCRIPTION',
-                    'label' => $this->l('Checkout Description'),
-                    'hint'  => $this->l('The description of the payment option at checkout'),
+                    'label' => $this->l('checkout_description_label'),
+                    'hint'  => $this->l('checkout_description_description'),
                 );
             }
             $form['form']['input'][] = array(
                 'type'    => 'select',
                 'name'    => 'FINANCE_ACTIVATION_STATUS',
-                'label'   => $this->l('Activate Order On Status'),
-                'hint'    => $this->l('Notify your finance provider that the transaction has been completed'),
+                'label'   => $this->l('activate_on_status_label'),
+                'hint'    => $this->l('activate_on_status_description'),
                 'options' => array(
                     'query' => $orderStatus,
                     'id'    => 'id_order_state',
@@ -392,8 +391,8 @@ class FinancePayment extends PaymentModule
             $form['form']['input'][] = array(
                 'type'    => 'select',
                 'name'    => 'FINANCE_CANCELLATION_STATUS',
-                'label'   => $this->l('Cancel Order On Status'),
-                'hint'    => $this->l('Notify your finance provider that the transaction has been cancelled'),
+                'label'   => $this->l('cancel_on_status_label'),
+                'hint'    => $this->l('cancel_on_status_description'),
                 'options' => array(
                     'query' => $orderStatus,
                     'id'    => 'id_order_state',
@@ -403,8 +402,8 @@ class FinancePayment extends PaymentModule
             $form['form']['input'][] = array(
                 'type'    => 'select',
                 'name'    => 'FINANCE_REFUND_STATUS',
-                'label'   => $this->l('Refund Order On Status'),
-                'hint'    => $this->l('Notify your finance provider that the transaction has been refunded'),
+                'label'   => $this->l('refund_on_status_label'),
+                'hint'    => $this->l('refund_on_status_description'),
                 'options' => array(
                     'query' => $orderStatus,
                     'id'    => 'id_order_state',
@@ -414,7 +413,7 @@ class FinancePayment extends PaymentModule
             $form['form']['input'][] = array(
                 'type'    => 'switch',
                 'name'    => 'FINANCE_ALL_PLAN_SELECTION',
-                'label'   => $this->l('Show all plans'),
+                'label'   => $this->l('show_all_plans_option'),
                 'is_bool' => true,
                 'values'  => array(
                     array(
@@ -432,7 +431,7 @@ class FinancePayment extends PaymentModule
             $form['form']['input'][] = array(
                 'type'    => 'swap',
                 'name'    => 'FINANCE_PLAN_SELECTION',
-                'label'   => $this->l('Refine Plans list'),
+                'label'   => $this->l('select_specific_plans_option'),
                 'options' => array(
                     'query' => $financePlans,
                     'name'  => 'text',
@@ -442,8 +441,8 @@ class FinancePayment extends PaymentModule
             $form['form']['input'][] = array(
                 'type'    => 'switch',
                 'name'    => 'FINANCE_PRODUCT_WIDGET',
-                'label'   => $this->l('Show Widget'),
-                'hint'    => $this->l('Show a handy widget with the finance options on your products page'),
+                'label'   => $this->l('show_widget_label'),
+                'hint'    => $this->l('show_widget_description'),
                 'is_bool' => true,
                 'values'  => array(
                     array(
@@ -461,7 +460,7 @@ class FinancePayment extends PaymentModule
             $form['form']['input'][] = array(
                 'type'    => 'switch',
                 'name'    => 'FINANCE_PRODUCT_CALCULATOR',
-                'label'   => $this->l('Calculator on product page'),
+                'label'   => $this->l('product_calculator_title'),
                 'is_bool' => true,
                 'values'  => array(
                     array(
@@ -478,19 +477,20 @@ class FinancePayment extends PaymentModule
             );
             $form['form']['input'][] = array(
                 'type'  => 'text',
-                'name'  => 'FINANCE_PRODUCT_WIDGET_PREFIX',
-                'label' => $this->l('Prefix'),
+                'name'  => 'FINANCE_PRODUCT_WIDGET_BUTTON_TEXT',
+                'label' => $this->l('widget_button_text_label'),
+                'hint'  => $this->l('widget_button_text_description'),
             );
             $form['form']['input'][] = array(
                 'type'  => 'text',
-                'name'  => 'FINANCE_PRODUCT_WIDGET_SUFFIX',
-                'label' => $this->l('Suffix'),
-                'hint'  => $this->l('')
+                'name'  => 'FINANCE_PRODUCT_WIDGET_FOOTNOTE',
+                'label' => $this->l('widget_footnote_label'),
+                'hint'  => $this->l('widget_footnote_description')
             );
             $form['form']['input'][] = array(
                 'type'    => 'switch',
                 'name'    => 'FINANCE_WHOLE_CART',
-                'label'   => $this->l('Require whole cart to be available on finance'),
+                'label'   => $this->l('cart_finance_label'),
                 'is_bool' => true,
                 'values'  => array(
                     array(
@@ -508,14 +508,21 @@ class FinancePayment extends PaymentModule
             $form['form']['input'][] = array(
                 'type'  => 'text',
                 'name'  => 'FINANCE_CART_MINIMUM',
-                'label' => $this->l('Cart Threshold'),
-                'help'  => $this->l('The minimum amount necessary for the cart to total in order for finance to be an option at checkout')
+                'label' => $this->l('cart_threshold_label'),
+                'help'  => $this->l('cart_threshold_description')
+            );
+
+            $form['form']['input'][] = array(
+                'type'  => 'text',
+                'name'  => 'FINANCE_CART_MAXIMUM',
+                'label' => $this->l('cart_maximum_label'),
+                'help'  => $this->l('cart_maximum_description')
             );
             $form['form']['input'][] = array(
                 'type'    => 'select',
                 'name'    => 'FINANCE_PRODUCTS_OPTIONS',
-                'label'   => $this->l('Product Selection'),
-                'hint'    => $this->l('Customise which products can be financed'),
+                'label'   => $this->l('product_selection_label'),
+                'hint'    => $this->l('product_selection_description'),
                 'options' => array(
                     'query' => $product_options,
                     'id'    => 'type',
@@ -525,12 +532,12 @@ class FinancePayment extends PaymentModule
             $form['form']['input'][] = array(
                 'type'  => 'text',
                 'name'  => 'FINANCE_PRODUCTS_MINIMUM',
-                'label' => $this->l('Product Price Threshold'),
-                'hint'  => $this->l('The minimum amount a product must cost to be viable for finance')
+                'label' => $this->l('product_price_threshold_label'),
+                'hint'  => $this->l('product_price_threshold_description')
             );
             $form['form']['input'][] = array(
                 'type' => 'html',
-                'name' => $this->l('Change your order to a different status whenever the following notifications are sent by your finance provider').":",
+                'name' => $this->l('map_statuses_description').":",
             );
             foreach ($this->ApiOrderStatus as $ApiStatus) {
                 $form['form']['input'][] = array(
@@ -589,7 +596,7 @@ class FinancePayment extends PaymentModule
     protected function postProcess()
     {
         if (!Tools::getValue('FINANCE_API_KEY')) {
-            return $this->displayError($this->l('The API key cannot be empty'));
+            return $this->displayError($this->l('api_key_empty_error'));
         }
         $form_values = $this->getConfigFormValues();
 
@@ -756,7 +763,7 @@ class FinancePayment extends PaymentModule
         } else {
             $order = $params['order'];
             $total = sprintf(
-                '%s ('.$this->l('tax inclusive').')',
+                '%s ('.$this->l('price_tax_inclusive').')',
                 Tools::displayPrice($order->getTotalPaid())
             );
         }

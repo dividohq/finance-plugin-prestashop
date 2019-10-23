@@ -57,7 +57,6 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
             Tools::redirect($url);
         }
 
-
         $data = array(
             'id_cart' => $cart_id,
             'id_module' => $this->module->id,
