@@ -16,3 +16,7 @@ All notable changes to this project will be documented in this file.
 ## [1.1.1.1] - 2019-06-12
 - Rollback caching of merchant plans
 - Fix translation issue with state generated at install
+
+## [1.1.2.1] - 2019-10-24
+- Translation Update
+- Fix Bug with Spanish Language passing
