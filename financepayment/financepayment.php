@@ -927,7 +927,7 @@ class FinancePayment extends PaymentModule
 
         // get lender name to set widget styling
         $lender =  $finance->getLender();
-        if(empty($lender)){
+        if (empty($lender)) {
             $lender = $finance->setLender();
         }
 
@@ -936,7 +936,11 @@ class FinancePayment extends PaymentModule
             'plans' => implode(',', array_keys($plans)),
             'raw_total' => $product_price,
             'finance_environment'  => Configuration::get('FINANCE_ENVIRONMENT'),
-            'api_key' => Tools::substr(Configuration::get('FINANCE_API_KEY'),  0,  strpos(Configuration::get('FINANCE_API_KEY'), ".")),
+            'api_key' => Tools::substr(
+                Configuration::get('FINANCE_API_KEY'),
+                0,
+                strpos(Configuration::get('FINANCE_API_KEY'), ".")
+            ),
             'lender' => $lender
             )
         );

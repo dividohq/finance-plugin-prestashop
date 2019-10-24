@@ -1,4 +1,7 @@
 {
+    "config": {
+        "prepend-autoloader": false
+    },
     "require": {
         "php": ">=5",
         "divido/merchant-sdk":"v2.1.1",

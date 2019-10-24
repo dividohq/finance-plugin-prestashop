@@ -224,7 +224,8 @@ class FinanceApi
     }
 
 
-    public function setLender(){
+    public function setLender()
+    {
 
         $api_key = Configuration::get('FINANCE_API_KEY');
         if (!$api_key) {
@@ -257,7 +258,8 @@ class FinanceApi
     /**
      * @return string
      */
-    public function getLender(){
+    public function getLender()
+    {
 
         return  Configuration::get('FINANCE_LENDER');
     }
