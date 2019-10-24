@@ -174,7 +174,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $application               = ( new \Divido\MerchantSDK\Models\Application() )
         ->withCountryId($country)
         ->withCurrencyId($currency)
-        ->withLanguageId($language)
         ->withFinancePlanId($finance)
         ->withApplicants(
             array(
