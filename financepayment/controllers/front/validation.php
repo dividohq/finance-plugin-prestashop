@@ -131,6 +131,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $lastname = $customer->lastname;
         $email = $customer->email;
         $postcode  = $address->postcode;
+        $phone = $address->phone;
 
         $products  = array();
         foreach ($cart->getProducts() as $product) {
@@ -179,6 +180,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 array(
                     'firstName'   => $firstname,
                     'lastName'    => $lastname,
+                    'phoneNumber' => $phone,
                     'email'       => $email,
                     'addresses'   => array(
                         array(
