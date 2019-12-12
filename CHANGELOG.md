@@ -20,3 +20,15 @@ All notable changes to this project will be documented in this file.
 ## [2.1.4] - 2019-10-24
 - Translation Update
 - Fix Bug with Spanish Language passing
+
+## [2.1.5] - 2019-10-24
+- Fix order rounding to nearest pound
+
+## [2.1.6] - 2019-10-24
+- pass customer phone to credit application
+
+## [2.1.7] - 2019-10-24
+- Round deposit to nearest cent/penny
+
+## [2.1.8] - 2019-10-24
+- Add address sanity check
