@@ -184,6 +184,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     'email'       => $email,
                     'addresses'   => array(
                         array(
+                            'postcode' => $postcode,
                             'text'     => $postcode . " " . $address->address1 . " " . $address->city,
                         ),
                     ),
