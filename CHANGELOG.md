@@ -35,6 +35,6 @@ All notable changes to this project will be documented in this file.
 
 ## [2.1.9] - 2020-03-24
 - Miss out phone number if empty
-
-## [2.1.10] - 2020-03-24
 - Rename plugin to "Powered By Divido"
+
+
