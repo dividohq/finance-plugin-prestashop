@@ -32,3 +32,6 @@ All notable changes to this project will be documented in this file.
 
 ## [2.1.8] - 2019-10-24
 - Add address sanity check
+
+## [2.1.9] - 2020-03-24
+- Miss out phone number if empty
