@@ -171,12 +171,22 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
         $this->saveHash($cart_id, $salt, $sub_total);
 
-        $application               = ( new \Divido\MerchantSDK\Models\Application() )
-        ->withCountryId($country)
-        ->withCurrencyId($currency)
-        ->withFinancePlanId($finance)
-        ->withApplicants(
-            array(
+        if(empty($phone)){
+            $applicant = array(
+                array(
+                    'firstName'   => $firstname,
+                    'lastName'    => $lastname,
+                    'email'       => $email,
+                    'addresses'   => array(
+                        array(
+                            'postcode' => $postcode,
+                            'text'     => $postcode . " " . $address->address1 . " " . $address->city,
+                        ),
+                    ),
+                ),
+            );
+        } else {
+            $applicant = array(
                 array(
                     'firstName'   => $firstname,
                     'lastName'    => $lastname,
@@ -189,7 +199,15 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                         ),
                     ),
                 ),
-            )
+            );
+        }
+
+        $application               = ( new \Divido\MerchantSDK\Models\Application() )
+        ->withCountryId($country)
+        ->withCurrencyId($currency)
+        ->withFinancePlanId($finance)
+        ->withApplicants(
+            $applicant
         )
         ->withOrderItems($products)
         ->withDepositAmount($deposit)
