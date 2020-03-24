@@ -87,7 +87,7 @@ class FinancePayment extends PaymentModule
 
         parent::__construct();
 
-        $this->displayName = $this->l('Finance');
+        $this->displayName = $this->l('Powered By Divido');
         $this->description = $this->l(
             'The Finance extension allows you to accept finance payments in your Prestashop store.'
         );
@@ -108,7 +108,7 @@ class FinancePayment extends PaymentModule
     {
         Configuration::updateValue('FINANCE_API_KEY', null);
         Configuration::updateValue('FINANCE_ENVIRONMENT', null);
-        Configuration::updateValue('FINANCE_PAYMENT_TITLE', $this->displayName);
+        Configuration::updateValue('FINANCE_PAYMENT_TITLE', "Pay in instalments");
         Configuration::updateValue('FINANCE_ACTIVATION_STATUS', Configuration::get('PS_OS_DELIVERED'));
         Configuration::updateValue('FINANCE_CANCELLATION_STATUS', Configuration::get('PS_OS_CANCELED'));
         Configuration::updateValue('FINANCE_REFUND_STATUS', Configuration::get('PS_OS_REFUNDED'));
