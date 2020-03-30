@@ -102,7 +102,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
     {
         $this->context = Context::getContext();
         $api_key   = Configuration::get('FINANCE_API_KEY');
-        $deposit = Tools::getValue('deposit');
+        $deposit = round(Tools::getValue('deposit'));
         $finance = Tools::getValue('finance');
         $cart = $this->context->cart;
 
@@ -131,6 +131,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $lastname = $customer->lastname;
         $email = $customer->email;
         $postcode  = $address->postcode;
+        $phone = $address->phone;
 
         $products  = array();
         foreach ($cart->getProducts() as $product) {
@@ -138,14 +139,13 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
                 'name' => $product['name'],
                 'quantity' => $product['quantity'],
-                'price' => $product['price_wt']*100,
+                'price' => (int)($product['price_wt']*100),
             );
         }
 
-        $sub_total = $cart->getOrderTotal(true, Cart::BOTH);
-        $shiphandle = $cart->getOrderTotal(true, Cart::ONLY_SHIPPING);
-        $disounts = $cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS);
-        $discount = (float)$disounts;
+        $sub_total = round((float)$cart->getOrderTotal(true, Cart::BOTH) , 2);
+        $shiphandle = round((float)$cart->getOrderTotal(true, Cart::ONLY_SHIPPING), 2);
+        $discount = round((float)$cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS), 2);
 
         $products[] = array(
             'name'     => 'Shipping & Handling',
@@ -171,27 +171,46 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
         $this->saveHash($cart_id, $salt, $sub_total);
 
-        $application               = ( new \Divido\MerchantSDK\Models\Application() )
-        ->withCountryId($country)
-        ->withCurrencyId($currency)
-        ->withLanguageId($language)
-        ->withFinancePlanId($finance)
-        ->withApplicants(
-            array(
+        if(empty($phone)){
+            $applicant = array(
                 array(
                     'firstName'   => $firstname,
                     'lastName'    => $lastname,
                     'email'       => $email,
                     'addresses'   => array(
                         array(
+                            'postcode' => $postcode,
                             'text'     => $postcode . " " . $address->address1 . " " . $address->city,
                         ),
                     ),
                 ),
-            )
+            );
+        } else {
+            $applicant = array(
+                array(
+                    'firstName'   => $firstname,
+                    'lastName'    => $lastname,
+                    'phoneNumber' => $phone,
+                    'email'       => $email,
+                    'addresses'   => array(
+                        array(
+                            'postcode' => $postcode,
+                            'text'     => $postcode . " " . $address->address1 . " " . $address->city,
+                        ),
+                    ),
+                ),
+            );
+        }
+
+        $application               = ( new \Divido\MerchantSDK\Models\Application() )
+        ->withCountryId($country)
+        ->withCurrencyId($currency)
+        ->withFinancePlanId($finance)
+        ->withApplicants(
+            $applicant
         )
         ->withOrderItems($products)
-        ->withDepositPercentage($deposit/100)
+        ->withDepositAmount($deposit)
         ->withFinalisationRequired(false)
         ->withMerchantReference('')
         ->withUrls(

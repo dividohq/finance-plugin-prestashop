@@ -30,7 +30,7 @@ $(document).on(
 
         var finance_elem = $('input[name="divido_plan"]');
         var total = $('input[name="divido_total"]').val();
-        var deposit = parseFloat($('input[name="divido_deposit"]').val()) / parseFloat($('input[name="divido_total"]').val());
+        var deposit = Math.round($('input[name="divido_deposit"]').val());
 
         var finance;
         if (finance_elem.length > 0) {

@@ -16,3 +16,22 @@ All notable changes to this project will be documented in this file.
 ## [1.1.1.1] - 2019-06-12
 - Rollback caching of merchant plans
 - Fix translation issue with state generated at install
+
+## [2.1.4] - 2019-10-24
+- Translation Update
+- Fix Bug with Spanish Language passing
+
+## [2.1.5] - 2019-10-24
+- Fix order rounding to nearest pound
+
+## [2.1.6] - 2019-10-24
+- pass customer phone to credit application
+
+## [2.1.7] - 2019-10-24
+- Round deposit to nearest cent/penny
+
+## [2.1.8] - 2019-10-24
+- Add address sanity check
+
+## [2.1.9] - 2020-03-24
+- Miss out phone number if empty

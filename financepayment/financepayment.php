@@ -78,7 +78,7 @@ class FinancePayment extends PaymentModule
     {
         $this->name = 'financepayment';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.0';
+        $this->version = '2.1.9';
         $this->author = 'Divido Financial Services Ltd';
         $this->need_instance = 0;
         $this->module_key = "71b50f7f5d75c244cd0a5635f664cd56";
@@ -692,6 +692,12 @@ class FinancePayment extends PaymentModule
             return;
         }
 
+        $cart = $params['cart'];
+        if ($cart->getOrderTotal() > Configuration::get('FINANCE_CART_MINIMUM')
+        ) {
+            return;
+        }
+
         // checks cache first to see if they are stored there
         $plans = $this->getPlansFromCart($this->context->cart);
 
@@ -728,6 +734,12 @@ class FinancePayment extends PaymentModule
         if ((Configuration::get('FINANCE_CART_MINIMUM')
             && $cart->getOrderTotal() < Configuration::get('FINANCE_CART_MINIMUM'))
             || $cart->id_address_delivery !== $cart->id_address_invoice
+        ) {
+            return;
+        }
+
+        if ((Configuration::get('FINANCE_CART_MAXIMUM')
+                && $cart->getOrderTotal() > Configuration::get('FINANCE_CART_MAXIMUM'))
         ) {
             return;
         }
@@ -872,11 +884,9 @@ class FinancePayment extends PaymentModule
 
     public function hookDisplayFooterProduct($params)
     {
-        if (!Configuration::get('FINANCE_PRODUCT_CALCULATOR')) {
-            return;
-        }
 
-        return $this->getWidgetData($params, 'calculator.tpl');
+        return;
+   //     return $this->getWidgetData($params, 'calculator.tpl');
     }
 
     /**
@@ -962,7 +972,7 @@ class FinancePayment extends PaymentModule
 
         // get lender name to set widget styling
         $lender =  $finance->getLender();
-        if(empty($lender)){
+        if (empty($lender)) {
             $lender = $finance->setLender();
         }
 
@@ -970,10 +980,12 @@ class FinancePayment extends PaymentModule
             array(
             'plans' => implode(',', array_keys($plans)),
             'raw_total' => $product_price,
-            'finance_prefix'       => Configuration::get('FINANCE_PRODUCT_WIDGET_PREFIX'),
-            'finance_suffix'       => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
             'finance_environment'  => Configuration::get('FINANCE_ENVIRONMENT'),
-            'api_key' => Tools::substr(Configuration::get('FINANCE_API_KEY'),  0,  strpos(Configuration::get('FINANCE_API_KEY'), ".")),
+            'api_key' => Tools::substr(
+                Configuration::get('FINANCE_API_KEY'),
+                0,
+                strpos(Configuration::get('FINANCE_API_KEY'), ".")
+            ),
             'lender' => $lender
             )
         );

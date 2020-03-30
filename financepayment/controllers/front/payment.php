@@ -67,7 +67,7 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
 
         // get lender name to set widget styling
         $lender = $api->getLender();
-        if(empty($lender)){
+        if (empty($lender)) {
             $lender =  $api->setLender();
         }
 
@@ -84,7 +84,11 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
                 'merchant_script' => "//cdn.divido.com/calculator/".$js_key.".js",
                 'plans' => implode(',', array_keys($plans)),
                 'validationLink' => $this->context->link->getModuleLink('financepayment', 'validation'),
-                'api_key' => Tools::substr(Configuration::get('FINANCE_API_KEY'),  0,  strpos(Configuration::get('FINANCE_API_KEY'), ".")),
+                'api_key' => Tools::substr(
+                    Configuration::get('FINANCE_API_KEY'),
+                    0,
+                    strpos(Configuration::get('FINANCE_API_KEY'), ".")
+                ),
                 'lender' => $lender
             )
         );

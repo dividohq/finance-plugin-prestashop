@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "5588c8e4095a96b7eed43921b254f318",
+    "content-hash": "0a49069f269fa8ec6e4cde2b1573e448",
     "packages": [
         {
             "name": "divido/merchant-sdk",
-            "version": "v2.1.0",
+            "version": "v2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dividohq/merchant-api-pub-sdk-php.git",
-                "reference": "3c4998a3482f2dea4fe3e740d8ed17c87a1b1c13"
+                "reference": "631984231ebc5606187eb40ec446256651b79dcf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dividohq/merchant-api-pub-sdk-php/zipball/3c4998a3482f2dea4fe3e740d8ed17c87a1b1c13",
-                "reference": "3c4998a3482f2dea4fe3e740d8ed17c87a1b1c13",
+                "url": "https://api.github.com/repos/dividohq/merchant-api-pub-sdk-php/zipball/631984231ebc5606187eb40ec446256651b79dcf",
+                "reference": "631984231ebc5606187eb40ec446256651b79dcf",
                 "shasum": ""
             },
             "require": {
@@ -47,7 +47,7 @@
                     "email": "code@neilmcgibbon.com"
                 }
             ],
-            "time": "2019-02-19T08:48:11+00:00"
+            "time": "2019-04-01T15:30:39+00:00"
         },
         {
             "name": "divido/merchant-sdk-guzzle-5",

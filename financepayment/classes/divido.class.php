@@ -116,8 +116,9 @@ class FinanceApi
                 $plan_copy->interest_rate = $plan->interest_rate_percentage;
                 $plan_copy->deferral_period = $plan->deferral_period_months;
                 $plan_copy->agreement_duration = $plan->agreement_duration_months;
-
-                $plans_plain[$plan->id] = $plan_copy;
+                if($plan->active){
+                    $plans_plain[$plan->id] = $plan_copy;
+                }
             }
             return $plans_plain;
         } catch (\Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException $e) {
@@ -159,11 +160,9 @@ class FinanceApi
     {
         $settings = $this->getProductSettings($id_product);
 
+        $product_selection = Configuration::get('FINANCE_PRODUCTS_OPTIONS');
+        $price_threshold   = Configuration::get('FINANCE_PRODUCTS_MINIMUM');
 
-        if ($settings["display"] != "custom") {
-            $product_selection = Configuration::get('FINANCE_PRODUCTS_OPTIONS');
-            $price_threshold   = Configuration::get('FINANCE_PRODUCTS_MINIMUM');
-        }
 
         $plans = $this->getPlans(true);
 
@@ -220,18 +219,14 @@ class FinanceApi
     {
         $array       = explode('_', $key);
         $environment = Tools::strtoupper($array[0]);
-        switch ($environment) {
-            case 'LIVE':
-                return constant("Divido\MerchantSDK\Environment::$environment");
-            case 'SANDBOX':
-                return constant("Divido\MerchantSDK\Environment::$environment");
-            default:
-                return constant("Divido\MerchantSDK\Environment::SANDBOX");
-        }
+        return ('LIVE' == $environment)
+            ? constant("Divido\MerchantSDK\Environment::PRODUCTION")
+            : constant("Divido\MerchantSDK\Environment::$environment");
     }
 
 
-    public function setLender(){
+    public function setLender()
+    {
 
         $api_key = Configuration::get('FINANCE_API_KEY');
         if (!$api_key) {
@@ -264,7 +259,8 @@ class FinanceApi
     /**
      * @return string
      */
-    public function getLender(){
+    public function getLender()
+    {
 
         return  Configuration::get('FINANCE_LENDER');
     }
