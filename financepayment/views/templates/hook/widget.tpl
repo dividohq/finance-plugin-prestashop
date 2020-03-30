@@ -45,12 +45,6 @@
 ></div>
 {literal}
     <script type="text/javascript"  src="https://cdn.divido.com/widget/dist/{/literal}{$finance_environment|escape:'htmlall':'UTF-8'}{literal}.calculator.js" ></script>
-    <script>
-        document.getElementById("dividoWidget").onload = function(element){
-            console.log(element)
-            console.log(element.getElementsByTagName("button").length);
-        }
-    </script>
 {/literal}
 
 
