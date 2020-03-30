@@ -31,7 +31,12 @@
         }
     </script>
 {/literal}
-<div data-calculator-widget
+<style>
+#dividoWidget div{
+    margin-bottom: 0;
+}
+</style>
+<div id="dividoWidget" onload="doThis" data-calculator-widget
     data-mode='{$data_mode}'
     {if $data_button_text}data-button-text='{$data_button_text}'{/if}
     {if $data_footnote}data-footnote='{$data_footnote}'{/if}
@@ -40,6 +45,12 @@
 ></div>
 {literal}
     <script type="text/javascript"  src="https://cdn.divido.com/widget/dist/{/literal}{$finance_environment|escape:'htmlall':'UTF-8'}{literal}.calculator.js" ></script>
+    <script>
+        document.getElementById("dividoWidget").onload = function(element){
+            console.log(element)
+            console.log(element.getElementsByTagName("button").length);
+        }
+    </script>
 {/literal}
 
 
