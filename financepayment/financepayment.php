@@ -78,7 +78,7 @@ class FinancePayment extends PaymentModule
     {
         $this->name = 'financepayment';
         $this->tab = 'payments_gateways';
-        $this->version = '2.1.9';
+        $this->version = '2.2.0';
         $this->author = 'Divido Financial Services Ltd';
         $this->need_instance = 0;
         $this->module_key = "71b50f7f5d75c244cd0a5635f664cd56";
@@ -976,6 +976,19 @@ class FinancePayment extends PaymentModule
             $lender = $finance->setLender();
         }
 
+        $data_mode = (!empty(Configuration::get('FINANCE_PRODUCT_CALCULATOR')) && 1 == Configuration::get('FINANCE_PRODUCT_CALCULATOR'))
+        ? 'calculator'
+        : 'lightbox';
+
+        $data_footnote = (empty(Configuration::get('FINANCE_PRODUCT_WIDGET_FOOTNOTE')))
+            ? false
+            : Configuration::get('FINANCE_PRODUCT_WIDGET_FOOTNOTE');
+        
+        $data_button_text = (empty(Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT')))
+            ? false 
+            : Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT');
+        
+
         $this->context->smarty->assign(
             array(
             'plans' => implode(',', array_keys($plans)),
@@ -986,7 +999,10 @@ class FinancePayment extends PaymentModule
                 0,
                 strpos(Configuration::get('FINANCE_API_KEY'), ".")
             ),
-            'lender' => $lender
+            'lender' => $lender,
+            'data_button_text' => $data_button_text,
+            'data_mode' => $data_mode,
+            'data_footnote' => $data_footnote
             )
         );
 
