@@ -40,8 +40,8 @@ $_MODULE['<{financepayment}prestashop>financepayment_ff233c2f306c31658b1a876d661
 $_MODULE['<{financepayment}prestashop>financepayment_8711fabeeee8e30ba3fbfd7cd513d748'] = 'Notify your finance provider that the transaction has been cancelled';
 $_MODULE['<{financepayment}prestashop>financepayment_b0410ec0096165e59d31aa975e4acd48'] = 'Refund Order On Status';
 $_MODULE['<{financepayment}prestashop>financepayment_e3d3f0537872a50e8aa23015cde1da25'] = 'Notify your finance provider that the transaction has been refunded';
-$_MODULE['<{financepayment}prestashop>financepayment_93cba07454f06a4a960172bbd6e2a435'] = 'Yes';
-$_MODULE['<{financepayment}prestashop>financepayment_bafd7322c6e97d25b6299b5d6fe8920b'] = 'No';
+$_MODULE['<{financepayment}prestashop>financepayment_a6105c0a611b41b08f1209506350279e'] = 'Yes';
+$_MODULE['<{financepayment}prestashop>financepayment_7fa3b767c460b54a2be4d49030b349c7'] = 'No';
 $_MODULE['<{financepayment}prestashop>financepayment_a853e064b5982e15e682117c6383c242'] = 'tax inclusive';
 $_MODULE['<{financepayment}prestashop>financepayment_a59d715d291ab6d07417decbfdf406b0'] = 'The API key cannot be empty';
 $_MODULE['<{financepayment}prestashop>financepayment_a8dca9ed5806c8a425dced579e8df889'] = 'Awaiting finance response';

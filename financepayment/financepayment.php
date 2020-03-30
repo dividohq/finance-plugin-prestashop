@@ -325,9 +325,10 @@ class FinancePayment extends PaymentModule
                 ),
                 'input' => array(
                     array(
-                        'type' => 'text',
-                        'name' => 'FINANCE_API_KEY',
+                        'type'  => 'text',
+                        'name'  => 'FINANCE_API_KEY',
                         'label' => $this->l('api_key_label'),
+                        'hint'  => $this->l('api_key_description'),
                     )
                 ),
                 'submit' => array(
@@ -509,14 +510,14 @@ class FinancePayment extends PaymentModule
                 'type'  => 'text',
                 'name'  => 'FINANCE_CART_MINIMUM',
                 'label' => $this->l('cart_threshold_label'),
-                'help'  => $this->l('cart_threshold_description')
+                'hint'  => $this->l('cart_threshold_description')
             );
 
             $form['form']['input'][] = array(
                 'type'  => 'text',
                 'name'  => 'FINANCE_CART_MAXIMUM',
                 'label' => $this->l('cart_maximum_label'),
-                'help'  => $this->l('cart_maximum_description')
+                'hint'  => $this->l('cart_maximum_description')
             );
             $form['form']['input'][] = array(
                 'type'    => 'select',
@@ -574,7 +575,10 @@ class FinancePayment extends PaymentModule
             'FINANCE_PRODUCT_CALCULATOR' => Configuration::get('FINANCE_PRODUCT_CALCULATOR'),
             'FINANCE_PRODUCT_WIDGET_SUFFIX' => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
             'FINANCE_PRODUCT_WIDGET_PREFIX' => Configuration::get('FINANCE_PRODUCT_WIDGET_PREFIX'),
+            'FINANCE_PRODUCT_WIDGET_BUTTON_TEXT' => Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT'),
+            'FINANCE_PRODUCT_WIDGET_FOOTNOTE' => Configuration::get('FINANCE_PRODUCT_WIDGET_FOOTNOTE'),
             'FINANCE_CART_MINIMUM' => Configuration::get('FINANCE_CART_MINIMUM'),
+            'FINANCE_CART_MAXIMUM' => Configuration::get('FINANCE_CART_MAXIMUM'),
             'FINANCE_PRODUCTS_OPTIONS' => Configuration::get('FINANCE_PRODUCTS_OPTIONS'),
             'FINANCE_PRODUCTS_MINIMUM' => Configuration::get('FINANCE_PRODUCTS_MINIMUM'),
             'FINANCE_WHOLE_CART' => Configuration::get('FINANCE_WHOLE_CART'),
