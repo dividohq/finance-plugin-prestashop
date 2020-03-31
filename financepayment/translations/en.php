@@ -51,6 +51,8 @@ $_MODULE['<{financepayment}prestashop>financepayment_67275ef9bb05b471e8d9653f202
 $_MODULE['<{financepayment}prestashop>financepayment_d605968955ca9339bba88439c30755a8'] = 'Settings';
 $_MODULE['<{financepayment}prestashop>financepayment_80b150ad0c829f30fc424670e36130e4'] = 'Cart Maximum';
 $_MODULE['<{financepayment}prestashop>financepayment_1aa86bba71e6ad6b491a0b0ff27faa55'] = 'The maximum amount that a cart can total in order for finance to be an option at checkout';
+$_MODULE['<{financepayment}prestashop>financepayment_6c91586db92b999302face422dc0ae25'] = 'Available on Finance';
+$_MODULE['<{financepayment}prestashop>financepayment_e1e94923500d26fd6f7070c2bf24bd61'] = 'Selected Plans';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Your cart appears to be empty';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Error';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Confirm';
@@ -60,3 +62,10 @@ $_MODULE['<{financepayment}prestashop>payment_execution_dcb48c3b3f3ece548bbf76a2
 $_MODULE['<{financepayment}prestashop>payment_execution_06aac4613b9f633ef86feb5dd00d08f3'] = 'alternative payment methods';
 $_MODULE['<{financepayment}prestashop>response_ca6e4a020267ba107c8c8c1b739987eb'] = 'No carrier';
 $_MODULE['<{financepayment}prestashop>validation_1e39f8a44130c5805e4c856cb2dff64c'] = 'Credit request could not be initiated.';
+$_MODULE['<{financepayment}prestashop>confirmation_cdce43fb06daa15673e7c9f472ab636a'] = 'Order ID';
+$_MODULE['<{financepayment}prestashop>confirmation_92596d61ad0dfa676c13a903fa16b985'] = 'Total Amount';
+$_MODULE['<{financepayment}prestashop>confirmation_2a3894e5526f69a6ff09eefb624d555d'] = 'Your order is complete';
+$_MODULE['<{financepayment}prestashop>confirmation_da1151c13d531f00efb8878c49715758'] = 'Your order has not been accepted';
+$_MODULE['<{financepayment}prestashop>confirmation_b60b60251d256928e99bf8fc7a5f56df'] = 'An email has been sent with this information';
+$_MODULE['<{financepayment}prestashop>confirmation_b06f8d83aa6caf21c48108eaa94ff6a5'] = 'If you have questions, comments or concerns, please contact our customer support team';
+$_MODULE['<{financepayment}prestashop>confirmation_c877aa8e9f18cf16cb4add7f6f950ffa'] = 'Please try again';

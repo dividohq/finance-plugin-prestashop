@@ -51,6 +51,8 @@ $_MODULE['<{financepayment}prestashop>financepayment_67275ef9bb05b471e8d9653f202
 $_MODULE['<{financepayment}prestashop>financepayment_d605968955ca9339bba88439c30755a8'] = 'Indstillinger';
 $_MODULE['<{financepayment}prestashop>financepayment_80b150ad0c829f30fc424670e36130e4'] = 'Maksimal kurv';
 $_MODULE['<{financepayment}prestashop>financepayment_1aa86bba71e6ad6b491a0b0ff27faa55'] = 'Det maksimale beløb, som en kurv kan udgøre, for at finansiering kan være en mulighed ved kassen';
+$_MODULE['<{financepayment}prestashop>financepayment_6c91586db92b999302face422dc0ae25'] = 'Fås på Finance';
+$_MODULE['<{financepayment}prestashop>financepayment_e1e94923500d26fd6f7070c2bf24bd61'] = 'Udvalgte planer';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Din kurv ser ud til at være tom';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Fejl';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Bekræfte';
@@ -60,3 +62,10 @@ $_MODULE['<{financepayment}prestashop>payment_execution_dcb48c3b3f3ece548bbf76a2
 $_MODULE['<{financepayment}prestashop>payment_execution_06aac4613b9f633ef86feb5dd00d08f3'] = 'alternative betalingsmetoder';
 $_MODULE['<{financepayment}prestashop>response_ca6e4a020267ba107c8c8c1b739987eb'] = 'Ingen transportør';
 $_MODULE['<{financepayment}prestashop>validation_1e39f8a44130c5805e4c856cb2dff64c'] = 'Kreditanmodning kunne ikke startes.';
+$_MODULE['<{financepayment}prestashop>confirmation_cdce43fb06daa15673e7c9f472ab636a'] = 'Ordre ID';
+$_MODULE['<{financepayment}prestashop>confirmation_92596d61ad0dfa676c13a903fa16b985'] = 'Total beløb';
+$_MODULE['<{financepayment}prestashop>confirmation_2a3894e5526f69a6ff09eefb624d555d'] = 'Din ordre er færdig';
+$_MODULE['<{financepayment}prestashop>confirmation_da1151c13d531f00efb8878c49715758'] = 'Din ordre er ikke blevet accepteret';
+$_MODULE['<{financepayment}prestashop>confirmation_b60b60251d256928e99bf8fc7a5f56df'] = 'Der er sendt en e-mail med disse oplysninger';
+$_MODULE['<{financepayment}prestashop>confirmation_b06f8d83aa6caf21c48108eaa94ff6a5'] = 'Hvis du har spørgsmål, kommentarer eller bekymringer, skal du kontakte vores kundesupportteam';
+$_MODULE['<{financepayment}prestashop>confirmation_c877aa8e9f18cf16cb4add7f6f950ffa'] = 'Prøv igen';

@@ -58,7 +58,7 @@
 <div class="buttons">
     <p class="cart_navigation clearfix">
         <a class="btn btn-primary pull-xs-left" href="{url entity=order}">
-            <i class="icon-chevron-left"></i>{l s='alternative payment methods' mod='financepayment'}
+            <i class="icon-chevron-left"></i>{l s='alt_payment_methods_label' mod='financepayment'}
         </a>
         <input type="hidden" name="divido_total" value="{$raw_total|escape:'htmlall':'UTF-8'}">
         <input type="button" class="btn btn-primary pull-xs-right" value="{l s='confirm_label' mod='financepayment'}" id="button-confirm-finance" class="btn btn-primary" data-loading-text="{l s='loading_label' mod='financepayment'}" data-confirm-text="{l s='confirm_label' mod='financepayment'}"/>
