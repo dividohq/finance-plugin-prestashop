@@ -25,21 +25,21 @@
 
 <div class="box">
     {if (isset($status) == true) && ($status == 'ok')}
-        <h3>{l s='Your order on ' mod='financepayment'}{$shop_name|escape:'htmlall':'UTF-8'}{l s=' is complete.' mod='financepayment'}</h3>
+        <h3>{l s='order_complete_header' mod='financepayment'}</h3>
         <hr />
         <p>
-            <br />- {l s='Amount' mod='financepayment'} : <span class="price"><strong>{$total|escape:'htmlall':'UTF-8'}</strong></span>
-            <br />- {l s='Reference' mod='financepayment'} : <span class="reference"><strong>{$reference|escape:'html':'UTF-8'}</strong></span>
-            <br /><br />{l s='An email has been sent with this information.' mod='financepayment'}
-            <br /><br />{l s='If you have questions, comments or concerns, please contact our' mod='financepayment'} <a href="{$link->getPageLink('contact', true)|escape:'html':'UTF-8'}">{l s='expert customer support team.' mod='financepayment'}</a>
+            <br />- {l s='total_amount_label' mod='financepayment'}: <span class="price"><strong>{$total|escape:'htmlall':'UTF-8'}</strong></span>
+            <br />- {l s='order_id_label' mod='financepayment'}: <span class="reference"><strong>{$reference|escape:'html':'UTF-8'}</strong></span>
+            <br /><br />{l s='email_sent_msg' mod='financepayment'}
+            <br /><br /><a href="{$link->getPageLink('contact', true)|escape:'html':'UTF-8'}">{l s='customer_support_msg' mod='financepayment'}</a>
         </p>
     {else}
-        <h3>{l s='Your order on ' mod='financepayment'}{$shop_name|escape:'htmlall':'UTF-8'}{l s=' has not been accepted.' mod='financepayment'}</h3>
+        <h3>{l s='order_incomplete_header' mod='financepayment'}</h3>
         <hr />
         <p>
-            <br />- {l s='Reference' mod='financepayment'} <span class="reference"> <strong>{$reference|escape:'html':'UTF-8'}</strong></span>
-            <br /><br />{l s='Please, try to order again.' mod='financepayment'}
-            <br /><br />{l s='If you have questions, comments or concerns, please contact our' mod='financepayment'} <a href="{$link->getPageLink('contact', true)|escape:'html':'UTF-8'}">{l s='expert customer support team.' mod='financepayment'}</a>
+            <br />- {l s='order_id_label' mod='financepayment'}: <span class="reference"> <strong>{$reference|escape:'html':'UTF-8'}</strong></span>
+            <br /><br />{l s='try_again_msg' mod='financepayment'}.
+            <br /><br /><a href="{$link->getPageLink('contact', true)|escape:'html':'UTF-8'}">{l s='customer_support_msg' mod='financepayment'}</a>
         </p>
     {/if}
 </div>

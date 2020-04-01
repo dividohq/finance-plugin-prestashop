@@ -46,7 +46,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
         $response = array(
             'status' => false,
-            'message' => $this->module->l('Credit request could not be initiated.'),
+            'message' => $this->module->l('credit_initiation_error'),
         );
 
         /**

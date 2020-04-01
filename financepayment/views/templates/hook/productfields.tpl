@@ -27,7 +27,7 @@
     <div class="col-md-12">
     	<div class="row form-group">
 			<div class="form-group  col-md-4">
-				<label class="form-control-label">{l s='Available for finance?' mod='financepayment'}</label>
+				<label class="form-control-label">{l s='available_on_finance_label' mod='financepayment'}?</label>
 				<select name="FINANCE_display" class="form-control display_plans">
 					<option value="default">{l s='No' mod='financepayment'}</option>
 					<option value="custom" {if isset($product_settings['display']) && $product_settings['display'] == 'custom'} selected="selected" {/if}>{l s='Selected' mod='financepayment'}</option>
@@ -36,7 +36,7 @@
     	</div>
     	<div class="row form-group finance_plans_wrapper">
 			<div class="form-group  col-md-4">
-				<label class="form-control-label">{l s='Selected Plans' mod='financepayment'}</label>
+				<label class="form-control-label">{l s='selected_plans_label' mod='financepayment'}</label>
 				<select name="FINANCE_plans[]" multiple="multiple" class="form-control select_plans">
 					{foreach from=$plans item=plan}
 						<option value="{$plan->id|escape:'htmlall':'UTF-8'}" {if $plan->id|in_array:$product_settings.plans} selected="selected" {/if}>{$plan->text|escape:'htmlall':'UTF-8'}</option>
