@@ -983,11 +983,11 @@ class FinancePayment extends PaymentModule
         $data_footnote = (empty(Configuration::get('FINANCE_PRODUCT_WIDGET_FOOTNOTE')))
             ? false
             : Configuration::get('FINANCE_PRODUCT_WIDGET_FOOTNOTE');
-        
+
         $data_button_text = (empty(Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT')))
-            ? false 
+            ? false
             : Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT');
-        
+
 
         $this->context->smarty->assign(
             array(
@@ -1082,7 +1082,6 @@ class FinancePayment extends PaymentModule
         ];
         // Create a new application activation model.
         $applicationCancel = ( new \Divido\MerchantSDK\Models\ApplicationCancellation() )
-            ->withAmount($items[0]['price'])
             ->withOrderItems($items);
         // Create a new activation for the application.
         $env                      = FinanceApi::getEnvironment($api_key);
@@ -1122,7 +1121,6 @@ class FinancePayment extends PaymentModule
         ];
         // Create a new application activation model.
         $applicationRefund = ( new \Divido\MerchantSDK\Models\ApplicationRefund() )
-            ->withAmount($items[0]['price'])
             ->withOrderItems($items);
         // Create a new activation for the application.
         $env                      = FinanceApi::getEnvironment($api_key);
