@@ -508,7 +508,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 '{date}' => Tools::displayDate($order->date_add, null, 1),
                 '{carrier}' => (
                     $virtual_product || !isset($carrier->name)
-                ) ? $this->module->l('No carrier') : $carrier->name,
+                ) ? $this->module->l('no_carrier') : $carrier->name,
                 '{payment}' => Tools::substr($order->payment, 0, 255),
                 '{products}' => $product_list_html,
                 '{products_txt}' => $product_list_txt,

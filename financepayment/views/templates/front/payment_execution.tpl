@@ -27,17 +27,17 @@
 {block name='content_wrapper'}
 {if $payment_error}
     <p class="alert alert-warning">
-        {l s='Order can not processed because of error occurred.' mod='financepayment'}
+        {l s='order_error_description_prefix' mod='financepayment'}:
         <br>
-        {l s='Error:'  mod='financepayment'} {$responsetext|escape:'htmlall':'UTF-8'}
+        {l s='error_title_short' mod='financepayment'}: {$responsetext|escape:'htmlall':'UTF-8'}
         <br>
-        {l s='Error Description:'  mod='financepayment'} {$responsedes|escape:'htmlall':'UTF-8'}
+        {l s='error_description_label'  mod='financepayment'}: {$responsedes|escape:'htmlall':'UTF-8'}
     </p>
 {/if}
 
 {if $nbProducts <= 0}
     <p class="alert alert-warning">
-        {l s='Your shopping cart is empty.' mod='financepayment'}
+        {l s='empty_cart_error_msg' mod='financepayment'}
     </p>
 {else}
 {literal}
@@ -58,10 +58,10 @@
 <div class="buttons">
     <p class="cart_navigation clearfix">
         <a class="btn btn-primary pull-xs-left" href="{url entity=order}">
-            <i class="icon-chevron-left"></i>{l s='Other payment methods' mod='financepayment'}
+            <i class="icon-chevron-left"></i>{l s='alt_payment_methods_label' mod='financepayment'}
         </a>
         <input type="hidden" name="divido_total" value="{$raw_total|escape:'htmlall':'UTF-8'}">
-        <input type="button" class="btn btn-primary pull-xs-right" value="{l s='I confirm my order' mod='financepayment'}" id="button-confirm-finance" class="btn btn-primary" data-loading-text="{l s='Loading...' mod='financepayment'}" data-confirm-text="{l s='I confirm my order' mod='financepayment'}"/>
+        <input type="button" class="btn btn-primary pull-xs-right" value="{l s='confirm_label' mod='financepayment'}" id="button-confirm-finance" class="btn btn-primary" data-loading-text="{l s='loading_label' mod='financepayment'}" data-confirm-text="{l s='confirm_label' mod='financepayment'}"/>
     </p>
 </div>
 {/if}

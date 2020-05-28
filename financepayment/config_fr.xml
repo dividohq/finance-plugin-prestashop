@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <module>
     <name>financepayment</name>
-    <displayName><![CDATA[Pay By Finance]]></displayName>
+    <displayName><![CDATA[Payer par les finances]]></displayName>
     <version><![CDATA[2.2.0]]></version>
-    <description><![CDATA[The Finance extension allows you to accept finance payments in your Prestashop store.]]></description>
+    <description><![CDATA[Cette extension vous permet d&#039;accepter des paiements de financement dans votre magasin.]]></description>
     <author><![CDATA[Divido Financial Services Ltd]]></author>
     <tab><![CDATA[payments_gateways]]></tab>
-	<confirmUninstall><![CDATA[Are you sure you want to uninstall this module?]]></confirmUninstall>
+	<confirmUninstall><![CDATA[Êtes-vous sûr de vouloir désinstaller ce module?]]></confirmUninstall>
     <is_configurable>1</is_configurable>
     <need_instance>0</need_instance>
 	<limited_countries></limited_countries>
