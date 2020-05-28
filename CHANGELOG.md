@@ -39,3 +39,6 @@ All notable changes to this project will be documented in this file.
 ## [2.2.0] - 2020-04-01
 - Adds language packs for French, German, Spanish, Danish and English (and British)
 - Adds footnote, mode and button text feature
+
+## [2.2.1] - 2020-05-28
+- Fix: Cancel and Refund webhooks with a deposit
