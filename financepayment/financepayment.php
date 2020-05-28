@@ -87,9 +87,10 @@ class FinancePayment extends PaymentModule
 
         parent::__construct();
 
-        $this->displayName = $this->l('plugin_title');
+        $this->displayName = $this->l('Powered By Divido');
         $this->description = $this->l('plugin_description');
         $this->confirmUninstall = $this->l('uninstall_alert');
+
         /*------Version Check-------------*/
         $this->ps_below_7 = Tools::version_compare(_PS_VERSION_, '1.7', '<');
 

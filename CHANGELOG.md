@@ -35,6 +35,7 @@ All notable changes to this project will be documented in this file.
 
 ## [2.1.9] - 2020-03-24
 - Miss out phone number if empty
+- Rename plugin to "Powered By Divido"
 
 ## [2.2.0] - 2020-04-01
 - Adds language packs for French, German, Spanish, Danish and English (and British)
