@@ -212,7 +212,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         ->withOrderItems($products)
         ->withDepositAmount($deposit)
         ->withFinalisationRequired(false)
-        ->withMerchantReference('')
+        ->withMerchantReference((string)$cart_id)
         ->withUrls(
             array (
                 'merchant_redirect_url' => $redirect_url,
