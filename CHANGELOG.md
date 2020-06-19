@@ -43,3 +43,7 @@ All notable changes to this project will be documented in this file.
 
 ## [2.2.1] - 2020-05-28
 - Fix: Cancel and Refund webhooks with a deposit
+
+## [2.2.2] - 2020-05-28
+- Chore: Add order id to merchant reference
+- Chore: Add additional info to meta-data
