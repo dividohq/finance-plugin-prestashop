@@ -230,6 +230,7 @@ class FinancePayment extends PaymentModule
     public function uninstall()
     {
         Configuration::deleteByName('FINANCE_API_KEY');
+        Configuration::deleteByName('FINANCE_HMAC');
         Configuration::deleteByName('FINANCE_ENVIRONMENT');
         Configuration::deleteByName('FINANCE_PAYMENT_TITLE');
         Configuration::deleteByName('FINANCE_ACTIVATION_STATUS');
