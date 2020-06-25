@@ -107,13 +107,14 @@ class FinancePayment extends PaymentModule
     {
         Configuration::updateValue('FINANCE_API_KEY', null);
         Configuration::updateValue('FINANCE_ENVIRONMENT', null);
+        Configuration::updateValue('FINANCE_HMAC', null);
         Configuration::updateValue('FINANCE_PAYMENT_TITLE', $this->displayName);
         Configuration::updateValue('FINANCE_ACTIVATION_STATUS', Configuration::get('PS_OS_DELIVERED'));
         Configuration::updateValue('FINANCE_CANCELLATION_STATUS', Configuration::get('PS_OS_CANCELED'));
         Configuration::updateValue('FINANCE_REFUND_STATUS', '7');
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET', null);
         Configuration::updateValue('FINANCE_PRODUCT_CALCULATOR', null);
-        Configuration::updateValue('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT', 'PAY BY FINANCE');
+        Configuration::updateValue('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT', null);
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET_FOOTNOTE', '');
         Configuration::updateValue('FINANCE_ALL_PLAN_SELECTION', true);
         Configuration::updateValue('FINANCE_PLAN_SELECTION', null);
