@@ -353,11 +353,7 @@ class FinancePayment extends PaymentModule
                 array(
                     'type' => 'product_selected',
                     'name' => $this->l('finance_specific_products_option'),
-                ),
-                array(
-                    'type' => 'min_price',
-                    'name' => $this->l('finance_threshold_products_option'),
-                ),
+                )
             );
             $form['form']['input'][] = array(
                 'type'  => 'text',
