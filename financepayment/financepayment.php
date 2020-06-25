@@ -88,7 +88,8 @@ class FinancePayment extends PaymentModule
         parent::__construct();
 
         $this->displayName = $this->l('Powered By Divido');
-        $this->description = $this->l('plugin_description');
+        $this->checkoutTitleDefault = $this->l('Pay in instalments');
+        $this->checkoutDescriptionDefault = $this->l('Break your purchase down into smaller payments');
         $this->confirmUninstall = $this->l('uninstall_alert');
 
         /*------Version Check-------------*/
@@ -108,7 +109,8 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_API_KEY', null);
         Configuration::updateValue('FINANCE_ENVIRONMENT', null);
         Configuration::updateValue('FINANCE_HMAC', null);
-        Configuration::updateValue('FINANCE_PAYMENT_TITLE', $this->displayName);
+        Configuration::updateValue('FINANCE_PAYMENT_TITLE', $this->checkoutTitleDefault);
+        Configuration::updateValue('FINANCE_PAYMENT_DESCRIPTION', $this->checkoutDescriptionDefault);
         Configuration::updateValue('FINANCE_ACTIVATION_STATUS', Configuration::get('PS_OS_DELIVERED'));
         Configuration::updateValue('FINANCE_CANCELLATION_STATUS', Configuration::get('PS_OS_CANCELED'));
         Configuration::updateValue('FINANCE_REFUND_STATUS', '7');
