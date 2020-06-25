@@ -131,15 +131,12 @@ class FinanceApi
 
     public function getCartPlans($cart)
     {
-        $exclusive = Configuration::get('FINANCE_WHOLE_CART');
         $plans     = array();
         $products  = $cart->getProducts();
         foreach ($products as $product) {
             $product_plans = $this->getProductPlans($product['total_wt'], $product['id_product']);
             if ($product_plans) {
                 $plans = array_merge($plans, $product_plans);
-            } elseif (!$product_plans && $exclusive) {
-                return array();
             }
         }
         return $plans;
