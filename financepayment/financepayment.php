@@ -110,7 +110,7 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_PAYMENT_TITLE', $this->displayName);
         Configuration::updateValue('FINANCE_ACTIVATION_STATUS', Configuration::get('PS_OS_DELIVERED'));
         Configuration::updateValue('FINANCE_CANCELLATION_STATUS', Configuration::get('PS_OS_CANCELED'));
-        Configuration::updateValue('FINANCE_REFUND_STATUS', Configuration::get('PS_OS_REFUNDED'));
+        Configuration::updateValue('FINANCE_REFUND_STATUS', '7');
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET', null);
         Configuration::updateValue('FINANCE_PRODUCT_CALCULATOR', null);
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT', 'PAY BY FINANCE');
