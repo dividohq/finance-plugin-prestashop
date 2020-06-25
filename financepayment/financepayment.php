@@ -108,9 +108,9 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_API_KEY', null);
         Configuration::updateValue('FINANCE_ENVIRONMENT', null);
         Configuration::updateValue('FINANCE_PAYMENT_TITLE', $this->displayName);
-        Configuration::updateValue('FINANCE_ACTIVATION_STATUS', Configuration::get('PS_OS_DELIVERED'));
-        Configuration::updateValue('FINANCE_CANCELLATION_STATUS', Configuration::get('PS_OS_CANCELED'));
-        Configuration::updateValue('FINANCE_REFUND_STATUS', Configuration::get('PS_OS_REFUNDED'));
+        Configuration::updateValue('FINANCE_ACTIVATION_STATUS', true);
+        Configuration::updateValue('FINANCE_CANCELLATION_STATUS', true);
+        Configuration::updateValue('FINANCE_REFUND_STATUS', true);
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET', null);
         Configuration::updateValue('FINANCE_PRODUCT_CALCULATOR', null);
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT', 'PAY BY FINANCE');
@@ -380,37 +380,58 @@ class FinancePayment extends PaymentModule
                 );
             }
             $form['form']['input'][] = array(
-                'type'    => 'select',
+                'type'    => 'switch',
                 'name'    => 'FINANCE_ACTIVATION_STATUS',
-                'label'   => $this->l('activate_on_status_label'),
-                'hint'    => $this->l('activate_on_status_description'),
-                'options' => array(
-                    'query' => $orderStatus,
-                    'id'    => 'id_order_state',
-                    'name'  => 'name',
-                ),
+                'label'   => 'Enable Automatic Activation?',
+                'hint'    => "Automatically notify the lender that the order is activated whenever an order's status is set to shipped or delivered",
+                'values'  => array(
+                    array(
+                        'id'    => 'active_on',
+                        'value' => true,
+                        'label' => $this->l('Yes')
+                    ),
+                    array(
+                        'id'    => 'active_off',
+                        'value' => false,
+                        'label' => $this->l('No')
+                    ))
             );
             $form['form']['input'][] = array(
-                'type'    => 'select',
+                'type'    => 'switch',
                 'name'    => 'FINANCE_CANCELLATION_STATUS',
-                'label'   => $this->l('cancel_on_status_label'),
-                'hint'    => $this->l('cancel_on_status_description'),
-                'options' => array(
-                    'query' => $orderStatus,
-                    'id'    => 'id_order_state',
-                    'name'  => 'name',
-                ),
+                'label'   => 'Enable Automatic Cancellation?',
+                'hint'    => 'Automatically notify the lender that the order is cancelled whenever an order\'s status is set to cancelled',
+                'is_bool' => true,
+                'values'  => array(
+                    array(
+                        'id'    => 'active_on',
+                        'value' => true,
+                        'label' => $this->l('Yes')
+                    ),
+                    array(
+                        'id'    => 'active_off',
+                        'value' => false,
+                        'label' => $this->l('No')
+                    ))
             );
             $form['form']['input'][] = array(
-                'type'    => 'select',
+                'type'    => 'switch',
                 'name'    => 'FINANCE_REFUND_STATUS',
-                'label'   => $this->l('refund_on_status_label'),
-                'hint'    => $this->l('refund_on_status_description'),
-                'options' => array(
-                    'query' => $orderStatus,
-                    'id'    => 'id_order_state',
-                    'name'  => 'name',
-                ),
+                'label'   => 'Enable Automatic Refunds?',
+                'hint'    => 'Automatically notify the lender that the order is refunded whenever an order\'s status is set to refunded',
+                'is_bool' => true,
+                'values'  => array(
+                    array(
+                        'id'    => 'active_on',
+                        'value' => true,
+                        'label' => $this->l('Yes')
+                    ),
+                    array(
+                        'id'    => 'active_off',
+                        'value' => false,
+                        'label' => $this->l('No')
+                    )
+                )
             );
             $form['form']['input'][] = array(
                 'type'    => 'switch',
@@ -489,24 +510,7 @@ class FinancePayment extends PaymentModule
                 'label' => $this->l('widget_footnote_label'),
                 'hint'  => $this->l('widget_footnote_description')
             );
-            $form['form']['input'][] = array(
-                'type'    => 'switch',
-                'name'    => 'FINANCE_WHOLE_CART',
-                'label'   => $this->l('cart_finance_label'),
-                'is_bool' => true,
-                'values'  => array(
-                    array(
-                        'id'    => 'active_on',
-                        'value' => true,
-                        'label' => $this->l('Yes')
-                    ),
-                    array(
-                        'id'    => 'active_off',
-                        'value' => false,
-                        'label' => $this->l('No')
-                    )
-                ),
-            );
+
             $form['form']['input'][] = array(
                 'type'  => 'text',
                 'name'  => 'FINANCE_CART_MINIMUM',
@@ -581,8 +585,7 @@ class FinancePayment extends PaymentModule
             'FINANCE_CART_MINIMUM' => Configuration::get('FINANCE_CART_MINIMUM'),
             'FINANCE_CART_MAXIMUM' => Configuration::get('FINANCE_CART_MAXIMUM'),
             'FINANCE_PRODUCTS_OPTIONS' => Configuration::get('FINANCE_PRODUCTS_OPTIONS'),
-            'FINANCE_PRODUCTS_MINIMUM' => Configuration::get('FINANCE_PRODUCTS_MINIMUM'),
-            'FINANCE_WHOLE_CART' => Configuration::get('FINANCE_WHOLE_CART'),
+            'FINANCE_PRODUCTS_MINIMUM' => Configuration::get('FINANCE_PRODUCTS_MINIMUM')
         );
 
         if (!$this->ps_below_7) {
@@ -916,7 +919,7 @@ class FinancePayment extends PaymentModule
         );
 
 
-        if ($orderStatus->id == Configuration::get('FINANCE_ACTIVATION_STATUS') && $orderPaymanet) {
+        if (($orderStatus->id ==='5'|| $orderStatus->id ==='4') && !empty(Configuration::get('FINANCE_ACTIVATION_STATUS')) && $orderPaymanet) {
             try {
                 $this->setFulfilled($orderPaymanet['transaction_id'], $total_price, $id_order);
                 return true;
@@ -924,7 +927,7 @@ class FinancePayment extends PaymentModule
                 return $e->message;
             }
             PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int)$id_order, true);
-        } elseif ($orderStatus->id == Configuration::get('FINANCE_CANCELLATION_STATUS') && $orderPaymanet) {
+        } elseif ($orderStatus->id ==='6' && !empty(Configuration::get('FINANCE_CANCELLATION_STATUS')) && $orderPaymanet) {
             try {
                 $this->setCancelled($orderPaymanet['transaction_id'], $total_price, $id_order);
                 return true;
@@ -932,7 +935,7 @@ class FinancePayment extends PaymentModule
                 return $e->message;
             }
             PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int)$id_order, true);
-        } elseif ($orderStatus->id == Configuration::get('FINANCE_REFUND_STATUS') && $orderPaymanet) {
+        } elseif ($orderStatus->id ==='7' && !empty(Configuration::get('FINANCE_REFUND_STATUS'))  && $orderPaymanet) {
             try {
                 $this->setRefunded($orderPaymanet['transaction_id'], $total_price, $id_order);
                 return true;
