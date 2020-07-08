@@ -52,3 +52,6 @@ All notable changes to this project will be documented in this file.
 - Chore: Remove "Require whole cart to be on finance" option
 - Chore: Update to V3 calculator
 - Chore: Set correct refunded status
+
+## [2.2.3] - 2020-07-08
+- Feat: Add order id to meta-data
