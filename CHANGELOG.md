@@ -53,5 +53,5 @@ All notable changes to this project will be documented in this file.
 - Chore: Update to V3 calculator
 - Chore: Set correct refunded status
 
-## [2.2.3] - 2020-07-08
+## [2.2.4] - 2020-07-08
 - Feat: Add order id to meta-data
