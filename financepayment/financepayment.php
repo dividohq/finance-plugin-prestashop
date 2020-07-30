@@ -74,11 +74,13 @@ class FinancePayment extends PaymentModule
         ),
     );
 
+    const SUPPORTED_LANGUAGES = ['gb', 'no', 'fi', 'da', 'fr', 'es', 'pe', 'en', 'de'];
+
     public function __construct()
     {
         $this->name = 'financepayment';
         $this->tab = 'payments_gateways';
-        $this->version = '2.2.4';
+        $this->version = '2.3.0';
         $this->author = 'Divido Financial Services Ltd';
         $this->need_instance = 0;
         $this->module_key = "71b50f7f5d75c244cd0a5635f664cd56";
@@ -243,6 +245,7 @@ class FinancePayment extends PaymentModule
         Configuration::deleteByName('FINANCE_PRODUCT_CALCULATOR');
         Configuration::deleteByName('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT');
         Configuration::deleteByName('FINANCE_PRODUCT_WIDGET_FOOTNOTE');
+        Configuration::deleteByName('FINANCE_LANGUAGE_OVERRIDE');
         Configuration::deleteByName('FINANCE_ALL_PLAN_SELECTION');
         Configuration::deleteByName('FINANCE_PLAN_SELECTION');
         Configuration::deleteByName('FINANCE_CART_MINIMUM');
@@ -480,6 +483,25 @@ class FinancePayment extends PaymentModule
                 ),
             );
             $form['form']['input'][] = array(
+                'type'    => 'switch',
+                'name'    => 'FINANCE_LANGUAGE_OVERRIDE',
+                'hint'    => $this->l('use_store_language_description'),
+                'label'   => $this->l('use_store_language_label'),
+                'is_bool' => true,
+                'values'  => array(
+                    array(
+                        'id'    => 'active_on',
+                        'value' => true,
+                        'label' => $this->l('Yes')
+                    ),
+                    array(
+                        'id'    => 'active_off',
+                        'value' => false,
+                        'label' => $this->l('No')
+                    )
+                ),
+            );
+            $form['form']['input'][] = array(
                 'type'  => 'text',
                 'name'  => 'FINANCE_PRODUCT_WIDGET_BUTTON_TEXT',
                 'label' => $this->l('widget_button_text_label'),
@@ -558,6 +580,7 @@ class FinancePayment extends PaymentModule
             'FINANCE_PLAN_SELECTION' => explode(',', Configuration::get('FINANCE_PLAN_SELECTION')),
             'FINANCE_PRODUCT_WIDGET' => Configuration::get('FINANCE_PRODUCT_WIDGET'),
             'FINANCE_PRODUCT_CALCULATOR' => Configuration::get('FINANCE_PRODUCT_CALCULATOR'),
+            'FINANCE_LANGUAGE_OVERRIDE' => Configuration::get('FINANCE_LANGUAGE_OVERRIDE'),
             'FINANCE_PRODUCT_WIDGET_SUFFIX' => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
             'FINANCE_PRODUCT_WIDGET_PREFIX' => Configuration::get('FINANCE_PRODUCT_WIDGET_PREFIX'),
             'FINANCE_PRODUCT_WIDGET_BUTTON_TEXT' => Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT'),
@@ -960,9 +983,11 @@ class FinancePayment extends PaymentModule
             $lender = $finance->setLender();
         }
 
-        $data_mode = (!empty(Configuration::get('FINANCE_PRODUCT_CALCULATOR')) && 1 == Configuration::get('FINANCE_PRODUCT_CALCULATOR'))
-        ? 'calculator'
-        : 'lightbox';
+        $data_mode = (
+            !empty(Configuration::get('FINANCE_PRODUCT_CALCULATOR')) 
+            && 1 == Configuration::get('FINANCE_PRODUCT_CALCULATOR'))
+                ? 'calculator'
+                : 'lightbox';
 
         $data_footnote = (empty(Configuration::get('FINANCE_PRODUCT_WIDGET_FOOTNOTE')))
             ? false
@@ -971,6 +996,17 @@ class FinancePayment extends PaymentModule
         $data_button_text = (empty(Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT')))
             ? false
             : Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT');
+
+        $data_language = false;
+        if(
+            !empty(Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT')) 
+            && 1 == Configuration::get('FINANCE_PRODUCT_CALCULATOR')
+        ){
+            $language = $this->context->language->iso_code;
+            if(in_array($language, self::SUPPORTED_LANGUAGES)){
+                $data_language = $language;
+            }
+        }
 
 
         $this->context->smarty->assign(
@@ -986,7 +1022,8 @@ class FinancePayment extends PaymentModule
             'lender' => $lender,
             'data_button_text' => $data_button_text,
             'data_mode' => $data_mode,
-            'data_footnote' => $data_footnote
+            'data_footnote' => $data_footnote,
+            'data_language' => $data_language
             )
         );
 
