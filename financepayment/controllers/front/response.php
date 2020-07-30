@@ -44,11 +44,11 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             }
         }
 
-        if (!isset($data->status) || !isset($data->metadata->cart_id)) {
+        if (!isset($data->status) || !isset($data->metadata->merchant_reference)) {
             die;
         }
 
-        $cart_id   = $data->metadata->cart_id;
+        $cart_id   = $data->metadata->merchant_reference;
 
         $result = Db::getInstance()->getRow(
             'SELECT * FROM `'._DB_PREFIX_.'divido_requests` WHERE `cart_id` = "'.(int)$cart_id.'"'
