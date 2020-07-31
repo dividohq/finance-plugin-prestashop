@@ -53,6 +53,8 @@ $_MODULE['<{financepayment}prestashop>financepayment_80b150ad0c829f30fc424670e36
 $_MODULE['<{financepayment}prestashop>financepayment_1aa86bba71e6ad6b491a0b0ff27faa55'] = 'Det maksimale beløb, som en kurv kan udgøre, for at finansiering kan være en mulighed ved kassen';
 $_MODULE['<{financepayment}prestashop>financepayment_6c91586db92b999302face422dc0ae25'] = 'Fås på Finance';
 $_MODULE['<{financepayment}prestashop>financepayment_e1e94923500d26fd6f7070c2bf24bd61'] = 'Udvalgte planer';
+$_MODULE['<{financepayment}prestashop>financepayment_d1b27f6cadd2a8f096ddcd5b7695927a'] = 'Brug butikssprog?';
+$_MODULE['<{financepayment}prestashop>financepayment_86593094a845811c626d151a057394fd'] = 'Overstyr sproget på finansregnemaskinen med sprog i butikens sprog';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Din kurv ser ud til at være tom';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Fejl';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Bekræfte';

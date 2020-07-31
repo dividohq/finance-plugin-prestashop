@@ -53,6 +53,8 @@ $_MODULE['<{financepayment}prestashop>financepayment_80b150ad0c829f30fc424670e36
 $_MODULE['<{financepayment}prestashop>financepayment_1aa86bba71e6ad6b491a0b0ff27faa55'] = 'The maximum amount that a cart can total in order for finance to be an option at checkout';
 $_MODULE['<{financepayment}prestashop>financepayment_6c91586db92b999302face422dc0ae25'] = 'Available on Finance';
 $_MODULE['<{financepayment}prestashop>financepayment_e1e94923500d26fd6f7070c2bf24bd61'] = 'Selected Plans';
+$_MODULE['<{financepayment}prestashop>financepayment_d1b27f6cadd2a8f096ddcd5b7695927a'] = 'Use store language?';
+$_MODULE['<{financepayment}prestashop>financepayment_86593094a845811c626d151a057394fd'] = 'Override the language of the finance calculator with store locale language';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Your cart appears to be empty';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Error';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Confirm';

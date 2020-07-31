@@ -55,3 +55,6 @@ All notable changes to this project will be documented in this file.
 
 ## [2.2.4] - 2020-07-08
 - Feat: Add order id to meta-data
+
+## [2.3.0] - 2020-07-08
+- Feat: Adds Language Override Feature

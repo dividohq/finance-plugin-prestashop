@@ -229,13 +229,12 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         )
         ->withMetadata(
             array (
-                'cart_id'      => $cart_id,
                 'cart_hash'    => $hash,
                 'ecom_platform' => 'prestashop',
                 'ecom_platform_version' => _PS_VERSION_,
                 'ecom_base_url'   => htmlspecialchars_decode($checkout_url),
                 'plugin_version'  => $this->plugin_version,
-                'merchant_reference' => (string)$cart_id
+                'merchant_reference' => $cart_id
             )
         );
 //Note: If creating an application on a merchant with a shared secret, you will have to pass in a valid hmac

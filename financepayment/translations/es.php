@@ -53,6 +53,8 @@ $_MODULE['<{financepayment}prestashop>financepayment_80b150ad0c829f30fc424670e36
 $_MODULE['<{financepayment}prestashop>financepayment_1aa86bba71e6ad6b491a0b0ff27faa55'] = 'La cantidad máxima que un carrito puede totalizar para que las finanzas sean una opción al momento de pagar';
 $_MODULE['<{financepayment}prestashop>financepayment_6c91586db92b999302face422dc0ae25'] = 'Disponible en finanzas';
 $_MODULE['<{financepayment}prestashop>financepayment_e1e94923500d26fd6f7070c2bf24bd61'] = 'Planes seleccionados';
+$_MODULE['<{financepayment}prestashop>financepayment_d1b27f6cadd2a8f096ddcd5b7695927a'] = '¿Usar el idioma de la tienda?';
+$_MODULE['<{financepayment}prestashop>financepayment_86593094a845811c626d151a057394fd'] = 'Anule el idioma de la calculadora financiera con el idioma de la tienda';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Tu carrito parece estar vacío';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Error';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Confirmar';
