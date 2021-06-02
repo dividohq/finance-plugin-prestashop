@@ -32,6 +32,26 @@ use GuzzleHttp\Client as Guzzle;
 
 class FinanceApi
 {
+
+    const CONFIGURATION = [
+
+        'testing' => [
+            'base_uri' => 'https://merchant-api-pub.testing.ing.poweredbydivido.com',
+        ],
+        'user-acceptance-testing' => [
+            'base_uri' => 'https://merchant-api-pub.uat.ing.poweredbydivido.com',
+        ],
+        'staging' => [
+            'base_uri' => 'https://merchant-api-pub.staging.ing.poweredbydivido.com',
+        ],
+        'sandbox' => [
+            'base_uri' => 'https://merchant-portal-web-pub.sandbox.ing.poweredbydivido.com',
+        ],
+        'production' => [
+            'base_uri' => 'https://merchant-portal-web-pub.ing.poweredbydivido.com',
+        ],
+    ];
+
     public function getGlobalSelectedPlans()
     {
         $all_plans     = $this->getAllPlans();
@@ -54,29 +74,9 @@ class FinanceApi
     }
 
 
-    public function getFinanceEnv($api_key)
+    public function getFinanceEnv()
     {
-        $api_key = Configuration::get('FINANCE_API_KEY');
-        if (!$api_key) {
-            return array();
-        }
-
-        $client = new Guzzle();
-        $env = $this->getEnvironment($api_key);
-        $httpClientWrapper = new HttpClientWrapper(
-            new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
-            $api_key
-        );
-
-        $sdk = new Client($httpClientWrapper, $env);
-
-        $response = $sdk->platformEnvironments()->getPlatformEnvironment();
-        $finance_env = $response->getBody()->getContents();
-        $decoded =json_decode($finance_env);
-
-
-        return $decoded->data->environment;
+        return "ing";
     }
 
     public function getAllPlans()
@@ -93,7 +93,7 @@ class FinanceApi
 
         $httpClientWrapper = new HttpClientWrapper(
             new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
+            self::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
 
@@ -216,9 +216,18 @@ class FinanceApi
     {
         $array       = explode('_', $key);
         $environment = Tools::strtoupper($array[0]);
+        if( $environment != "LIVE" &&
+            $environment != "PRODUCTION" &&
+            $environment != "SANDBOX" &&
+            $environment != "STAGING" &&
+            $environment != "USER-ACCEPTANCE-TESTING" &&
+            $environment != "TESTING"
+        ) {
+            return "";
+        }
         return ('LIVE' == $environment)
-            ? constant("Divido\MerchantSDK\Environment::PRODUCTION")
-            : constant("Divido\MerchantSDK\Environment::$environment");
+            ? "production"
+            : Tools::strtolower($environment);
     }
 
 
@@ -234,7 +243,7 @@ class FinanceApi
         $env = $this->getEnvironment($api_key);
         $httpClientWrapper = new HttpClientWrapper(
             new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
+            self::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
 

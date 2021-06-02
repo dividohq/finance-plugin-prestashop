@@ -347,7 +347,7 @@ class FinancePayment extends PaymentModule
         if (Configuration::get('FINANCE_API_KEY')) {
             $api = new FinanceApi();
             $api_key = Configuration::get('FINANCE_API_KEY');
-            Configuration::updateValue('FINANCE_ENVIRONMENT', $api->getFinanceEnv($api_key));
+            Configuration::updateValue('FINANCE_ENVIRONMENT', $api->getFinanceEnv());
             $financePlans = $this->getPlans();
             $orderStatus = OrderState::getOrderStates($this->context->language->id);
             $product_options = array(
@@ -984,7 +984,7 @@ class FinancePayment extends PaymentModule
         }
 
         $data_mode = (
-            !empty(Configuration::get('FINANCE_PRODUCT_CALCULATOR')) 
+            !empty(Configuration::get('FINANCE_PRODUCT_CALCULATOR'))
             && 1 == Configuration::get('FINANCE_PRODUCT_CALCULATOR'))
                 ? 'calculator'
                 : 'lightbox';
@@ -999,7 +999,7 @@ class FinancePayment extends PaymentModule
 
         $data_language = false;
         if(
-            !empty(Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT')) 
+            !empty(Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT'))
             && 1 == Configuration::get('FINANCE_PRODUCT_CALCULATOR')
         ){
             $language = $this->context->language->iso_code;
@@ -1066,7 +1066,7 @@ class FinancePayment extends PaymentModule
         $client = new \GuzzleHttp\Client();
         $httpClientWrapper = new HttpClientWrapper(
             new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
+            FinanceApi::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
         $sdk                      = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
@@ -1109,7 +1109,7 @@ class FinancePayment extends PaymentModule
         $client                   = new \GuzzleHttp\Client();
         $httpClientWrapper        = new HttpClientWrapper(
             new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
+            FinanceApi::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
         $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
@@ -1148,7 +1148,7 @@ class FinancePayment extends PaymentModule
         $client                   = new \GuzzleHttp\Client();
         $httpClientWrapper        = new HttpClientWrapper(
             new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
+            FinanceApi::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
 

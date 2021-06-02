@@ -242,7 +242,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 $client = new Guzzle();
                 $httpClientWrapper = new HttpClientWrapper(
                     new GuzzleAdapter($client),
-                    Environment::CONFIGURATION[$env]['base_uri'],
+                    FinanceApi::CONFIGURATION[$env]['base_uri'],
                     $api_key
                 );
 
