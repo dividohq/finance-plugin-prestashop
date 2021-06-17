@@ -142,12 +142,12 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
         $products  = array();
         foreach ($cart->getProducts() as $product) {
+            $reference = (empty($product['reference'])) ? $product['id_product'] : $product['reference'];
             $products[] = array(
-
                 'name' => $product['name'],
                 'quantity' => $product['quantity'],
                 'price' => (int)($product['price_wt']*100),
-                'sku' => $product['reference']
+                'sku' => $reference
             );
         }
 
@@ -172,7 +172,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 'sku'      => 'DSCNT'
             );
         }
-        
+
         $response_url = $this->context->link->getModuleLink($this->module->name, 'response');
         $redirect_url = $this->context->link->getModuleLink(
             $this->module->name,
