@@ -147,6 +147,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 'name' => $product['name'],
                 'quantity' => $product['quantity'],
                 'price' => (int)($product['price_wt']*100),
+                'sku' => $product['reference']
             );
         }
 
