@@ -155,17 +155,24 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $shiphandle = round((float)$cart->getOrderTotal(true, Cart::ONLY_SHIPPING), 2);
         $discount = round((float)$cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS), 2);
 
-        $products[] = array(
-            'name'     => 'Shipping & Handling',
-            'quantity' => 1,
-            'price'    => $shiphandle*100,
-        );
+        if($shiphandle > 0){        
+            $products[] = array(
+                'name'     => 'Shipping & Handling',
+                'quantity' => 1,
+                'price'    => $shiphandle*100,
+                'sku'      => 'SHPNG'
+            );
+        }
 
-        $products[] = array(
-            'name'     => 'Discount',
-            'quantity' => 1,
-            'price'    => -$discount*100,
-        );
+        if($discount > 0){
+            $products[] = array(
+                'name'     => 'Discount',
+                'quantity' => 1,
+                'price'    => -$discount*100,
+                'sku'      => 'DSCNT'
+            );
+        }
+        
         $response_url = $this->context->link->getModuleLink($this->module->name, 'response');
         $redirect_url = $this->context->link->getModuleLink(
             $this->module->name,
