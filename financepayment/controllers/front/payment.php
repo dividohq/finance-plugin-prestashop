@@ -71,11 +71,16 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
             $lender =  $api->setLender();
         }
 
+        $calculator_url = (explode('_', Configuration::get('FINANCE_API_KEY'))[0] === 'user-acceptance-testing') 
+            ? "https://s3.eu-west-1.amazonaws.com/content.divido.com/widget/v3/".Configuration::get('FINANCE_ENVIRONMENT').".uat.calculator.js"
+            : "https://cdn.divido.com/widget/v3/".Configuration::get('FINANCE_ENVIRONMENT').".calculator.js";
+
         $this->context->smarty->assign(
             array(
                 'payment_error' => $payment_error,
                 'responsetext' => $responsetext,
                 'finance_environment' => Configuration::get('FINANCE_ENVIRONMENT'),
+                'calculator_url' => $calculator_url,
                 'nbProducts' => $cart->nbProducts(),
                 'responsedes' => $responsedes,
                 'cust_currency' => $cart->id_currency,
