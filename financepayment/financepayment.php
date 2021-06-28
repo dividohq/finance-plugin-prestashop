@@ -1008,12 +1008,17 @@ class FinancePayment extends PaymentModule
             }
         }
 
+        $finance_env = filter_var(Configuration::get('FINANCE_ENVIRONMENT'), FILTER_SANITIZE_STRIPPED);
+        $calculator_url = (explode('_', Configuration::get('FINANCE_API_KEY'))[0] === 'user-acceptance-testing') 
+            ? "https://s3.eu-west-1.amazonaws.com/content.divido.com/widget/v3/{$finance_env}.uat.calculator.js"
+            : "https://cdn.divido.com/widget/v3/{$finance_env}.calculator.js";
 
         $this->context->smarty->assign(
             array(
             'plans' => implode(',', array_keys($plans)),
             'raw_total' => $product_price,
             'finance_environment'  => Configuration::get('FINANCE_ENVIRONMENT'),
+            'calculator_url' => $calculator_url,
             'api_key' => Tools::substr(
                 Configuration::get('FINANCE_API_KEY'),
                 0,
