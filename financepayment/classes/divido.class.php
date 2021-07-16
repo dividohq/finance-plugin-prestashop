@@ -45,10 +45,10 @@ class FinanceApi
             'base_uri' => 'https://merchant-api-pub.staging.ing.poweredbydivido.com',
         ],
         'sandbox' => [
-            'base_uri' => 'https://merchant-portal-web-pub.sandbox.ing.poweredbydivido.com',
+            'base_uri' => 'https://merchant-api-pub.sandbox.ing.poweredbydivido.com',
         ],
         'production' => [
-            'base_uri' => 'https://merchant-portal-web-pub.ing.poweredbydivido.com',
+            'base_uri' => 'https://merchant-api-pub.ing.poweredbydivido.com',
         ],
     ];
 
