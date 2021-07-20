@@ -39,53 +39,132 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         if (!empty(Configuration::get('FINANCE_HMAC')) && !empty($callback_sign)) {
             $secret = $this->createSignature($input, Configuration::get('FINANCE_HMAC'));
             if ($secret != $callback_sign) {
+                PrestaShopLogger::addLog(
+                    'Invalid hash',
+                    1
+                );
                 echo "Invalid Hash";
                 die;
             }
         }
 
-        if (!isset($data->status) || !isset($data->metadata->merchant_reference)) {
+        if (!isset($data->metadata->merchant_reference)) {
+            PrestaShopLogger::addLog(
+                'Order not received in payload',
+                1
+            );
+            echo "Merchant Reference not found in payload";
             die;
         }
 
         $cart_id   = $data->metadata->merchant_reference;
+        
+        if (!isset($data->status)) {
+            PrestaShopLogger::addLog(
+                'Status not found in payload',
+                1,
+                null,
+                'Cart',
+                (int)$cart_id,
+                true
+            );
+            echo "Status not found in payload";
+            die;
+        }
 
         $result = Db::getInstance()->getRow(
             'SELECT * FROM `'._DB_PREFIX_.'divido_requests` WHERE `cart_id` = "'.(int)$cart_id.'"'
         );
 
         if (!$result) {
+            PrestaShopLogger::addLog(
+                'Status not found in payload',
+                1,
+                null,
+                'Cart',
+                (int)$cart_id,
+                true
+            );
+            echo "Could not find Divido Request";
             die;
         }
 
         $hash = hash('sha256', $result['cart_id'].$result['hash']);
 
         if ($hash !== $data->metadata->cart_hash) {
+            PrestaShopLogger::addLog(
+                'Payload hash does not match expected',
+                1,
+                null,
+                'Cart',
+                (int)$cart_id,
+                true
+            );
+            echo "Payload hash does not match expected";
             die;
         }
 
         $cart = new Cart($cart_id);
         if (!Validate::isLoadedObject($cart)) {
+            PrestaShopLogger::addLog(
+                'Could not load cart',
+                1,
+                null,
+                'Cart',
+                (int)$cart_id,
+                true
+            );
+            echo "Could not load cart";
             die;
         }
         $status = Configuration::get('FINANCE_STATUS_'.$data->status);
 
         if (!$status) {
+            PrestaShopLogger::addLog(
+                "Status {$data->status} not recognised",
+                1,
+                null,
+                'Cart',
+                (int)$cart_id,
+                true
+            );
+            echo "Update status {$data->status} not recognised";
             die;
         }
 
         $total = $cart->getOrderTotal();
 
         if ($total != $result['total']) {
+            PrestaShopLogger::addLog(
+                'Totals do not match',
+                1,
+                null,
+                'Cart',
+                (int)$cart_id,
+                true
+            );
+            echo "Total did not match expected";
             $status = Configuration::get('PS_OS_ERROR');
         }
         if (!$cart->OrderExists()) {
+            PrestaShopLogger::addLog(
+                'Order could not be found',
+                1,
+                null,
+                'Cart',
+                (int)$cart_id,
+                true
+            );
+            echo "Order could not be found";
             die;
         }
         $order = new Order(Order::getOrderByCartId($cart_id));
         if ($order->current_state != Configuration::get('FINANCE_AWAITING_STATUS')) {
             if ($status != $order->current_state) {
+                echo "Order status updated to {$status}";
                 $this->setCurrentState($order, $status);
+            }else{
+                echo "Order status already {$status}";
             }
         } elseif ($status != $order->current_state) {
             $extra_vars = array('transaction_id' => $data->application);
@@ -97,7 +176,16 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $status,
                 $extra_vars
             );
+            echo "Order status updated to {$status}";
         }
+        PrestaShopLogger::addLog(
+            "Order status updated to {$status}",
+            1,
+            null,
+            'Cart',
+            (int)$cart_id,
+            true
+        );
         die;
     }
 
