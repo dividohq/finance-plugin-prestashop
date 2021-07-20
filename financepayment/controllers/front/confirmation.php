@@ -28,6 +28,7 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
 {
     public function init()
     {
+        sleep(2);
         $cart_id = Tools::getValue('cart_id');
         $cart = new Cart($cart_id);
         if (!Validate::isLoadedObject($cart)) {
@@ -52,7 +53,7 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
                 (int)$cart_id,
                 true
             );
-            $url = $context->link->getModuleLink($this->module->name, 'payment', array('error' => true));
+            $url = $context->link->getModuleLink($this->module->name, 'payment', array('error' => true, "responsetext"=>"Order could not be found"));
             Tools::redirect($url);
         }
         $order = new Order(Order::getOrderByCartId($cart_id));
@@ -77,8 +78,8 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
                 $this->context->cart = $response['cart'];
                 $this->context->updateCustomer($customer);
             }
-            $url = $context->link->getModuleLink($this->module->name, 'payment', array('error' => true));
-            Tools::redirect($url);
+            $url = $context->link->getModuleLink($this->module->name, 'payment', array('error' => true, "responsetext"=>"Order still awaiting status"));
+            //Tools::redirect($url);
         }
 
         $data = array(
