@@ -39,53 +39,69 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         if (!empty(Configuration::get('FINANCE_HMAC')) && !empty($callback_sign)) {
             $secret = $this->createSignature($input, Configuration::get('FINANCE_HMAC'));
             if ($secret != $callback_sign) {
-                echo "Invalid Hash";
-                die;
+                return $this->respond(401, "Invalid hash in header", true);
             }
         }
 
-        if (!isset($data->status) || !isset($data->metadata->merchant_reference)) {
-            die;
+        if (!isset($data->metadata->merchant_reference)) {
+            return $this->respond(400, "Merchant Reference not found in payload", true);
         }
 
-        $cart_id   = $data->metadata->merchant_reference;
+        $cart_id = (int) $data->metadata->merchant_reference;
+
+        if (!isset($data->status)) {
+            return $this->respond(400, "Status {$data->status} not found in payload", true, 'Cart', $cart_id);
+        }
 
         $result = Db::getInstance()->getRow(
-            'SELECT * FROM `'._DB_PREFIX_.'divido_requests` WHERE `cart_id` = "'.(int)$cart_id.'"'
+            "SELECT * FROM `"._DB_PREFIX_."divido_requests` WHERE `cart_id` = '{$cart_id}'"
         );
 
         if (!$result) {
-            die;
+            return $this->respond(404, "Could not find Divido Request", true, 'Cart', $cart_id);
         }
 
         $hash = hash('sha256', $result['cart_id'].$result['hash']);
 
         if ($hash !== $data->metadata->cart_hash) {
-            die;
+            return $this->respond(401, "Payload hash does not match expected", true, 'Cart', $cart_id);
         }
 
         $cart = new Cart($cart_id);
         if (!Validate::isLoadedObject($cart)) {
-            die;
+            return $this->respond(500, "Could not load cart", true, 'Cart', $cart_id);
         }
         $status = Configuration::get('FINANCE_STATUS_'.$data->status);
 
         if (!$status) {
-            die;
+            return $this->respond(200, "Update status {$data->status} not used", true, 'Cart', $cart_id);
+        }
+        
+        if (!$cart->OrderExists()) {
+            return $this->respond(404, "Order could not be found", true, 'Cart', $cart_id);
         }
 
         $total = $cart->getOrderTotal();
 
         if ($total != $result['total']) {
+            PrestaShopLogger::addLog(
+                'Totals do not match',
+                1,
+                null,
+                'Cart',
+                $cart_id,
+                true
+            );
             $status = Configuration::get('PS_OS_ERROR');
         }
-        if (!$cart->OrderExists()) {
-            die;
-        }
+        
         $order = new Order(Order::getOrderByCartId($cart_id));
         if ($order->current_state != Configuration::get('FINANCE_AWAITING_STATUS')) {
             if ($status != $order->current_state) {
+                $message = "Order status updated to {$status}";
                 $this->setCurrentState($order, $status);
+            }else{
+                $message = "Order status already {$status}";
             }
         } elseif ($status != $order->current_state) {
             $extra_vars = array('transaction_id' => $data->application);
@@ -97,8 +113,11 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $status,
                 $extra_vars
             );
+            $message = "Order status updated to {$status}";
+        }else{
+            $message = "Order is Awaiting Status or the same as update status";
         }
-        die;
+        return $this->respond(200, $message, true, 'Cart', $cart_id);
     }
 
     public function setCurrentState($order, $id_order_state, $id_employee = 0)
@@ -629,8 +648,8 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
     /**
      * Generate a HMAC signature based on the config secret
      *
-     * @param  [type] $payload
-     * @param  [type] $secret
+     * @param  string $payload
+     * @param  string $secret
      * @return void
      */
     protected function createSignature($payload, $secret)
@@ -638,5 +657,32 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $hmac      = hash_hmac('sha256', $payload, $secret, true);
         $signature = base64_encode($hmac);
         return $signature;
+    }
+
+    /**
+     * Send a Webhook response
+     *
+     * @param integer $response_code The http response code
+     * @param string $message The response message
+     * @param boolean $log_response Whether to log the message
+     * @param string|null $objectType The object to log
+     * @param integer $objectId The ID of the object to log
+     * @return void
+     */
+    protected function respond(int $response_code, string $message, bool $log_response=false, ?string $objectType=null, int $objectId=null)
+    {
+        if($log_response){
+            PrestaShopLogger::addLog(
+                $message,
+                1,
+                null,
+                $objectType,
+                $objectId,
+                true
+            );
+        }
+        http_response_code($response_code);
+        echo $message;
+        return;
     }
 }

@@ -793,10 +793,34 @@ class FinancePayment extends PaymentModule
         $id_state = $order->current_state;
 
         if ($id_state == Configuration::get('PS_OS_ERROR')) {
+            PrestaShopLogger::addLog(
+                'Confirmation Order State matched error state: '.Configuration::get('PS_OS_ERROR'),
+                1,
+                null, 
+                'Order', 
+                (int)$order->id, 
+                true
+            );
             $this->smarty->assign('status', 'not');
         } elseif ($id_state == Configuration::get('PS_OS_CANCELED')) {
+            PrestaShopLogger::addLog(
+                'Confirmation Order State matched cancelled state: '.Configuration::get('PS_OS_CANCELED'),
+                1,
+                null, 
+                'Order', 
+                (int)$order->id, 
+                true
+            );
             $this->smarty->assign('status', 'not');
         } else {
+            PrestaShopLogger::addLog(
+                "Customer successfully returned with order state: {$id_state}",
+                1,
+                null, 
+                'Order', 
+                (int)$order->id, 
+                true
+            );
             $this->smarty->assign('status', 'ok');
         }
         $this->smarty->assign(

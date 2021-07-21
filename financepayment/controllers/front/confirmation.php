@@ -31,12 +31,28 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
         $cart_id = Tools::getValue('cart_id');
         $cart = new Cart($cart_id);
         if (!Validate::isLoadedObject($cart)) {
+            PrestaShopLogger::addLog(
+                'Could not load cart',
+                1,
+                null,
+                'Cart',
+                (int)$cart_id,
+                true
+            );
             $url = $this->context->link->getPageLink('index');
             Tools::redirect($url);
         }
         $context = Context::getContext();
         if (!$cart->OrderExists()) {
-            $url = $context->link->getModuleLink($this->module->name, 'payment', array('error' => true));
+            PrestaShopLogger::addLog(
+                'Order could not be found',
+                1,
+                null,
+                'Cart',
+                (int)$cart_id,
+                true
+            );
+            $url = $context->link->getModuleLink($this->module->name, 'payment', array('error' => true, "responsetext"=>$this->module->l("The order could not be found")));
             Tools::redirect($url);
         }
         $order = new Order(Order::getOrderByCartId($cart_id));
@@ -46,6 +62,14 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
         }
 
         if ($order->current_state == Configuration::get('FINANCE_AWAITING_STATUS')) {
+            PrestaShopLogger::addLog(
+                'Order still awaiting status update',
+                1,
+                null,
+                'Cart',
+                (int)$cart_id,
+                true
+            );
             $this->context->cart = $cart;
             $response = $cart->duplicate();
             if ($response['success']) {
@@ -53,7 +77,7 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
                 $this->context->cart = $response['cart'];
                 $this->context->updateCustomer($customer);
             }
-            $url = $context->link->getModuleLink($this->module->name, 'payment', array('error' => true));
+            $url = $context->link->getModuleLink($this->module->name, 'payment', array('error' => true, "responsetext"=>$this->module->l("Order awaiting application completion")));
             Tools::redirect($url);
         }
 
