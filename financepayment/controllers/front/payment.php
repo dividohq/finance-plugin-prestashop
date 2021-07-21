@@ -72,9 +72,15 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
         }
 
         $finance_env = filter_var(Configuration::get('FINANCE_ENVIRONMENT'), FILTER_SANITIZE_STRIPPED);
-        $calculator_url = (explode('_', Configuration::get('FINANCE_API_KEY'))[0] === 'user-acceptance-testing') 
-            ? "https://s3.eu-west-1.amazonaws.com/content.divido.com/widget/v3/{$finance_env}.uat.calculator.js"
-            : "https://cdn.divido.com/widget/v3/{$finance_env}.calculator.js";
+        $calculator_url = "https://cdn.divido.com/widget/v3/{$finance_env}.calculator.js";
+        switch(explode('_', Configuration::get('FINANCE_API_KEY'))[0]){
+            case 'user-acceptance-testing':
+                $calculator_url = "https://s3.eu-west-1.amazonaws.com/content.divido.com/widget/v3/{$finance_env}.uat.calculator.js";
+                break;
+            case 'testing':
+                $calculator_url = "https://s3.eu-west-1.amazonaws.com/content.divido.com/widget/v3/{$finance_env}.testing.calculator.js";
+                break;
+        }
 
         $this->context->smarty->assign(
             array(
