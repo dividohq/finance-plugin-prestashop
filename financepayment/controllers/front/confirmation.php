@@ -77,8 +77,6 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
                 $this->context->cart = $response['cart'];
                 $this->context->updateCustomer($customer);
             }
-            $url = $context->link->getModuleLink($this->module->name, 'payment', array('error' => true, "responsetext"=>$this->module->l("Order awaiting application completion")));
-            Tools::redirect($url);
         }
 
         $data = array(
