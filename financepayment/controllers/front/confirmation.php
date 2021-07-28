@@ -61,22 +61,18 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
             unset($context->cookie->id_cart);
         }
         
-        $signed = false;
         $waiting = 6;
-        while (!$signed || $waiting){
-            $request = Db::getInstance()->getRow(
-                '
-                SELECT `status`
-                FROM `'._DB_PREFIX_.'divido_requests`
-                WHERE `cart_id` = '.(int)$cart_id
-            );
+        $signed = $this->isOrderComplete($cart_id);
 
-            if(in_array($request['status'], ['READY', 'SIGNED'])) {
+        while (!$signed || $waiting){
+            sleep(1);
+            if($this->isOrderComplete($cart_id)) {
                 $signed = true;
             } else {
                 $waiting--;
             }
         }
+        
         if(!$signed) {
             $url = $context->link->getModuleLink(
                 $this->module->name, 
@@ -112,5 +108,20 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
         );
         $url = $context->link->getPageLink('order-confirmation', null, null, $data);
         Tools::redirect($url);
+    }
+
+    private function isOrderComplete($cart_id) {
+        $request = Db::getInstance()->getRow(
+            '
+            SELECT `status`
+            FROM `'._DB_PREFIX_.'divido_requests`
+            WHERE `cart_id` = '.(int)$cart_id
+        );
+
+        if(in_array($request['status'], ['READY', 'SIGNED'])) {
+            return true;
+        }
+
+        return false;
     }
 }
