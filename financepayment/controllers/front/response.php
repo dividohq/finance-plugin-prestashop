@@ -73,6 +73,8 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         }
         $status = Configuration::get('FINANCE_STATUS_'.$data->status);
 
+        Db::getInstance()->update('divido_requests', ['status' => $data->status], '`cart_id` = "'.(int)$cart_id.'"');
+
         if (!$status) {
             return $this->respond(200, "Update status {$data->status} not used", true, 'Cart', $cart_id);
         }

@@ -42,6 +42,8 @@ $sql[] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'finance_product` (
     PRIMARY KEY  (`id_finance_product`)
 ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
 
+$sql[] = 'ALTER TABLE `'._DB_PREFIX_.'divido_requests` ADD COLUMN IF NOT EXISTS `status` VARCHAR(25);';
+
 foreach ($sql as $query) {
     if (Db::getInstance()->execute($query) == false) {
         return false;

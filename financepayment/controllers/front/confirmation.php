@@ -60,6 +60,31 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
         if ($context->cookie->id_cart == $cart_id) {
             unset($context->cookie->id_cart);
         }
+        
+        $signed = false;
+        $waiting = 6;
+        while (!$signed || $waiting){
+            $request = Db::getInstance()->getRow(
+                '
+                SELECT `status`
+                FROM `'._DB_PREFIX_.'divido_requests`
+                WHERE `cart_id` = '.(int)$cart_id
+            );
+
+            if(in_array($request['status'], ['READY', 'SIGNED'])) {
+                $signed = true;
+            } else {
+                $waiting--;
+            }
+        }
+        if(!$signed) {
+            $url = $context->link->getModuleLink(
+                $this->module->name, 
+                'payment', 
+                array('error' => true, "responsetext"=>$this->module->l("Order awaiting application completion"))
+            );
+            Tools::redirect($url);
+        }
 
         if ($order->current_state == Configuration::get('FINANCE_AWAITING_STATUS')) {
             PrestaShopLogger::addLog(
