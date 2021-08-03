@@ -28,7 +28,17 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
 {
     public function init()
     {
-        $cart_id = Tools::getValue('cart_id');
+        $cart_id = (int)Tools::getValue('cart_id');
+
+        PrestaShopLogger::addLog(
+            'Arrived at confirmation',
+            1,
+            null,
+            'Cart',
+            $cart_id,
+            true
+        );
+
         $cart = new Cart($cart_id);
         if (!Validate::isLoadedObject($cart)) {
             PrestaShopLogger::addLog(
@@ -36,7 +46,7 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
                 1,
                 null,
                 'Cart',
-                (int)$cart_id,
+                $cart_id,
                 true
             );
             $url = $this->context->link->getPageLink('index');
@@ -72,7 +82,7 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
                 $waiting--;
             }
         }
-        
+
         if(!$signed) {
             $url = $context->link->getModuleLink(
                 $this->module->name, 
