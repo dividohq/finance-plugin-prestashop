@@ -79,7 +79,7 @@ class FinancePayment extends PaymentModule
     {
         $this->name = 'financepayment';
         $this->tab = 'payments_gateways';
-        $this->version = 'ING-v.2.2.5';
+        $this->version = 'ING-v.1.2.5';
         $this->author = 'Divido Financial Services Ltd';
         $this->need_instance = 0;
         $this->module_key = "71b50f7f5d75c244cd0a5635f664cd56";
@@ -1032,10 +1032,11 @@ class FinancePayment extends PaymentModule
             }
         }
 
-        $finance_env = filter_var(Configuration::get('FINANCE_ENVIRONMENT'), FILTER_SANITIZE_STRIPPED);
+        $lender = filter_var(Configuration::get('FINANCE_ENVIRONMENT'), FILTER_SANITIZE_STRIPPED);
+        $env = FinanceApi::getEnvironment(Configuration::get("FINANCE_API_KEY"));
         $calculator_url = (explode('_', Configuration::get('FINANCE_API_KEY'))[0] === 'user-acceptance-testing') 
-            ? "https://s3.eu-west-1.amazonaws.com/content.divido.com/widget/v3/{$finance_env}.uat.calculator.js"
-            : "https://cdn.divido.com/widget/v3/{$finance_env}.calculator.js";
+            ? "https://s3.eu-west-1.amazonaws.com/content.divido.com/widget/v3/{$lender}.uat.calculator.js"
+            : "https://cdn.divido.com/widget/v3/{$lender}.{$env}.calculator.js";
 
         $this->context->smarty->assign(
             array(

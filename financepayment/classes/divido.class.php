@@ -34,21 +34,20 @@ class FinanceApi
 {
 
     const CONFIGURATION = [
-
+        'dev' => [
+            'base_uri' => 'https://merchant-api-pub.api.dev.divido.net',
+        ],
         'testing' => [
-            'base_uri' => 'https://merchant-api-pub.testing.ing.poweredbydivido.com',
-        ],
-        'user-acceptance-testing' => [
-            'base_uri' => 'https://merchant-api-pub.uat.ing.poweredbydivido.com',
-        ],
-        'staging' => [
-            'base_uri' => 'https://merchant-api-pub.staging.ing.poweredbydivido.com',
+            'base_uri' => 'https://merchant-api-pub.api.testing.divido.net',
         ],
         'sandbox' => [
-            'base_uri' => 'https://merchant-api-pub.sandbox.ing.poweredbydivido.com',
+            'base_uri' => 'https://merchant.api.sandbox.divido.net',
+        ],
+        'staging' => [
+            'base_uri' => 'https://merchant-api-pub.api.staging.divido.net',
         ],
         'production' => [
-            'base_uri' => 'https://merchant-api-pub.ing.poweredbydivido.com',
+            'base_uri' => 'https://merchant.api.divido.com',
         ],
     ];
 
@@ -76,7 +75,7 @@ class FinanceApi
 
     public function getFinanceEnv()
     {
-        return "ing";
+        return "divido";
     }
 
     public function getAllPlans()
