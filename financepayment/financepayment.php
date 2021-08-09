@@ -32,7 +32,6 @@ require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/classes/divido.class.php';
 
 use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
-use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 
 class FinancePayment extends PaymentModule
@@ -80,7 +79,7 @@ class FinancePayment extends PaymentModule
     {
         $this->name = 'financepayment';
         $this->tab = 'payments_gateways';
-        $this->version = '2.3.0';
+        $this->version = 'ING-v.2.2.5';
         $this->author = 'Divido Financial Services Ltd';
         $this->need_instance = 0;
         $this->module_key = "71b50f7f5d75c244cd0a5635f664cd56";
@@ -126,6 +125,7 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_CART_MAXIMUM', '10000');
         Configuration::updateValue('FINANCE_PRODUCTS_OPTIONS', 'All');
         Configuration::updateValue('FINANCE_PRODUCTS_MINIMUM', '0');
+        Configuration::updateValue('PLUGIN_VERSION', $this->version);
 
         foreach ($this->ApiOrderStatus as $ApiStatus) {
             switch ($ApiStatus['code']) {

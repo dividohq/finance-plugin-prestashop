@@ -33,19 +33,13 @@ use GuzzleHttp\Client as Guzzle;
 class FinancePaymentValidationModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = false;
-
-    /**
-     * @var
-     */
-    private $plugin_version;
-
+    
     /**
      * This class should be use by your Instant Payment
      * Notification system to validate the order remotely
      */
     public function postProcess()
     {
-        $this->plugin_version = "2.2.2";
 
         if (!(Tools::getIsset('total') && Tools::getIsset('deposit') && Tools::getIsset('finance'))) {
             Tools::redirect($this->context->link->getPageLink('index'));
@@ -241,7 +235,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 'ecom_platform' => 'prestashop',
                 'ecom_platform_version' => _PS_VERSION_,
                 'ecom_base_url'   => htmlspecialchars_decode($checkout_url),
-                'plugin_version'  => $this->plugin_version,
+                'plugin_version'  => Configuration::get('PLUGIN_VERSION'),
                 'merchant_reference' => $cart_id
             )
         );

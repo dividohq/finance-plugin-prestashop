@@ -26,26 +26,27 @@
 
 $sql = array();
 
-$sql[] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'divido_requests` (
+$sql[] = ['CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'divido_requests` (
     `id_divido_requests` int(11) NOT NULL AUTO_INCREMENT,
     `cart_id` int(11) NOT NULL,
     `hash` text NOT NULL,
     `total` text NOT NULL,
     PRIMARY KEY  (`id_divido_requests`)
-) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
+) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;', false];
 
-$sql[] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'finance_product` (
+$sql[] = ['CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'finance_product` (
     `id_finance_product` int(11) NOT NULL AUTO_INCREMENT,
     `id_product` int(11) NOT NULL,
     `display` text NOT NULL,
     `plans` text NOT NULL,
     PRIMARY KEY  (`id_finance_product`)
-) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
+) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;', false];
 
-$sql[] = 'ALTER TABLE `'._DB_PREFIX_.'divido_requests` ADD COLUMN IF NOT EXISTS `status` VARCHAR(25);';
+$sql[] = ['ALTER TABLE `'._DB_PREFIX_.'divido_requests` ADD COLUMN `status` VARCHAR(15);', false];
+$sql[] = ['ALTER TABLE `'._DB_PREFIX_.'divido_requests` ADD COLUMN `complete` BOOLEAN NOT NULL DEFAULT false;', false];
 
 foreach ($sql as $query) {
-    if (Db::getInstance()->execute($query) == false) {
+    if (Db::getInstance()->execute($query[0]) == false && true === $query[1]) {
         return false;
     }
 }

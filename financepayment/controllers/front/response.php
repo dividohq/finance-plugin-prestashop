@@ -24,9 +24,15 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+use GuzzleHttp\Client;
+use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
+use Divido\MerchantSDK\Environment;
+use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
+
 class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = true;
+    const COMPLETE_STATUS = 'SIGNED';
 
 
     public function postProcess()
@@ -71,11 +77,22 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         if (!Validate::isLoadedObject($cart)) {
             return $this->respond(500, "Could not load cart", true, 'Cart', $cart_id);
         }
-        $status = Configuration::get('FINANCE_STATUS_'.$data->status);
 
-        Db::getInstance()->update('divido_requests', ['status' => $data->status], '`cart_id` = "'.(int)$cart_id.'"');
+        $order = new Order(Order::getOrderByCartId($cart_id));
 
-        if (!$status) {
+        $internal_status = Configuration::get('FINANCE_STATUS_'.$data->status);
+
+        $update_array = ['status' => $data->status];
+        // logs if order completed, regardless of any proceeding status changes
+        if($data->status == self::COMPLETE_STATUS){
+            $update_array['complete'] = true;
+
+            $this->updateMerchantReference($data->application, $order->id, $cart_id);
+        }
+
+        Db::getInstance()->update('divido_requests', $update_array, '`cart_id` = "'.(int)$cart_id.'"');
+
+        if (!$internal_status) {
             return $this->respond(200, "Update status {$data->status} not used", true, 'Cart', $cart_id);
         }
         
@@ -94,28 +111,27 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $cart_id,
                 true
             );
-            $status = Configuration::get('PS_OS_ERROR');
+            $internal_status = Configuration::get('PS_OS_ERROR');
         }
         
-        $order = new Order(Order::getOrderByCartId($cart_id));
         if ($order->current_state != Configuration::get('FINANCE_AWAITING_STATUS')) {
-            if ($status != $order->current_state) {
-                $message = "Order status updated to {$status}";
-                $this->setCurrentState($order, $status);
+            if ($internal_status != $order->current_state) {
+                $message = "Order status updated to {$internal_status}";
+                $this->setCurrentState($order, $internal_status);
             }else{
-                $message = "Order status already {$status}";
+                $message = "Order status already {$internal_status}";
             }
-        } elseif ($status != $order->current_state) {
+        } elseif ($internal_status != $order->current_state) {
             $extra_vars = array('transaction_id' => $data->application);
             $order->addOrderPayment($result['total'], null, $data->application);
-            $this->setCurrentState($order, $status);
+            $this->setCurrentState($order, $internal_status);
 
             $this->updateOrder(
                 $cart_id,
-                $status,
+                $internal_status,
                 $extra_vars
             );
-            $message = "Order status updated to {$status}";
+            $message = "Order status updated to {$internal_status}";
         }else{
             $message = "Order is Awaiting Status or the same as update status";
         }
@@ -684,7 +700,53 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             );
         }
         http_response_code($response_code);
-        echo $message;
-        return;
+        header('Content-Type: application/json');
+        $plugin_version = Configuration::get('PLUGIN_VERSION');
+        echo "{\"status\":{$response_code}, \"message\": \"{$message}\", \"version\": \"{$plugin_version}\"}";
+        die();
+    }
+
+    protected function updateMerchantReference(string $application_id, int $order_id, int $cart_id) {
+        PrestaShopLogger::addLog(
+            'Updating Merchant Reference to {$application_id}',
+            1,
+            null,
+            'Cart',
+            $cart_id,
+            true
+        );
+
+        $api_key = Configuration::get('FINANCE_API_KEY');
+        $env = FinanceApi::getEnvironment($api_key);
+        $base_uri = FinanceApi::CONFIGURATION[$env]['base_uri'];
+
+        $client = new Client();
+        $url = "{$base_uri}/applications/{$application_id}";
+        $body = [
+            "id" => $application_id,
+            "merchant_reference" => (string)$order_id
+        ];
+        $headers = [
+            "Accept" => "application/json",
+            "Content-Type" => "application/json",
+            "X-DIVIDO-API-KEY" => Configuration::get('FINANCE_API_KEY')
+        ];
+        try{
+            $client->patch($url, [
+                'headers'         => $headers,
+                'body'            => json_encode($body),
+                'allow_redirects' => false,
+                'timeout'         => 5
+            ]);
+        } catch (RequestException $e) {
+            PrestaShopLogger::addLog(
+                $e->getRequest().": ".$e->getResponse(),
+                1,
+                null,
+                'Cart',
+                $cart_id,
+                true
+            );
+        }
     }
 }

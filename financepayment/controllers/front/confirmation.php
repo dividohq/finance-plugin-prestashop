@@ -71,19 +71,18 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
             unset($context->cookie->id_cart);
         }
         
-        $waiting = 6;
-        $signed = $this->isOrderComplete($cart_id);
-
-        while (!$signed || $waiting){
-            sleep(1);
-            if($this->isOrderComplete($cart_id)) {
-                $signed = true;
-            } else {
-                $waiting--;
+        $complete = false;
+        for ($x=1; $x<6; $x++){
+            $request = $this->getOrder($cart_id);
+            if($request['complete']) {
+                $complete = true;
+                break;
+            }else{
+                sleep(1);
             }
         }
 
-        if(!$signed) {
+        if(!$complete) {
             $url = $context->link->getModuleLink(
                 $this->module->name, 
                 'payment', 
@@ -120,18 +119,15 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
         Tools::redirect($url);
     }
 
-    private function isOrderComplete($cart_id) {
+    private function getOrder($cart_id) {
         $request = Db::getInstance()->getRow(
-            '
-            SELECT `status`
-            FROM `'._DB_PREFIX_.'divido_requests`
-            WHERE `cart_id` = '.(int)$cart_id
+            "
+            SELECT *
+            FROM `"._DB_PREFIX_."divido_requests`
+            WHERE `cart_id` = '{$cart_id}'
+            "
         );
 
-        if(in_array($request['status'], ['READY', 'SIGNED'])) {
-            return true;
-        }
-
-        return false;
+        return $request;
     }
 }
