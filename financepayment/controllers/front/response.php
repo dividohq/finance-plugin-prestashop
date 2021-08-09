@@ -708,7 +708,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 
     protected function updateMerchantReference(string $application_id, int $order_id, int $cart_id) {
         PrestaShopLogger::addLog(
-            'Updating Merchant Reference to {$application_id}',
+            "Updating Merchant Reference to {$application_id}",
             1,
             null,
             'Cart',

@@ -1074,6 +1074,14 @@ class FinancePayment extends PaymentModule
         $shipping_method = null,
         $tracking_numbers = null
     ) {
+        PrestaShopLogger::addLog(
+            "Activating Application {$application_id}",
+            1,
+            null,
+            'Order',
+            $order_id,
+            true
+        );
         // First get the application you wish to create an activation for.
         $api_key   = Configuration::get('FINANCE_API_KEY');
         $application = (new \Divido\MerchantSDK\Models\Application())
@@ -1104,6 +1112,14 @@ class FinancePayment extends PaymentModule
             $application_activation
         );
         $activation_response_body = $response->getBody()->getContents();
+        PrestaShopLogger::addLog(
+            $activation_response_body,
+            1,
+            null,
+            'Order',
+            $order_id,
+            true
+        );
         return $activation_response_body;
     }
 
@@ -1118,7 +1134,14 @@ class FinancePayment extends PaymentModule
         $order_total,
         $order_id
     ) {
-
+        PrestaShopLogger::addLog(
+            "Cancelling Application {$application_id}",
+            1,
+            null,
+            'Order',
+            $order_id,
+            true
+        );
         // First get the application you wish to create an activation for.
         $api_key   = Configuration::get('FINANCE_API_KEY');
         $application = ( new \Divido\MerchantSDK\Models\Application() )
@@ -1144,6 +1167,14 @@ class FinancePayment extends PaymentModule
         $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
         $response = $sdk->applicationCancellations()->createApplicationCancellation($application, $applicationCancel);
         $cancellation_response_body = $response->getBody()->getContents();
+        PrestaShopLogger::addLog(
+            $cancellation_response_body,
+            1,
+            null,
+            'Order',
+            $order_id,
+            true
+        );
         return $cancellation_response_body;
     }
 
@@ -1158,6 +1189,14 @@ class FinancePayment extends PaymentModule
         $order_total,
         $order_id
     ) {
+        PrestaShopLogger::addLog(
+            "Refunding Application {$application_id}",
+            1,
+            null,
+            'Order',
+            $order_id,
+            true
+        );
         // First get the application you wish to create an activation for.
         $api_key   = Configuration::get('FINANCE_API_KEY');
         $application = ( new \Divido\MerchantSDK\Models\Application() )
@@ -1184,6 +1223,14 @@ class FinancePayment extends PaymentModule
         $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
         $response = $sdk->applicationRefunds()->createApplicationRefund($application, $applicationRefund);
         $cancellation_response_body = $response->getBody()->getContents();
+        PrestaShopLogger::addLog(
+            $cancellation_response_body,
+            1,
+            null,
+            'Order',
+            $order_id,
+            true
+        );
         return $cancellation_response_body;
     }
 
