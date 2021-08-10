@@ -71,25 +71,6 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
             unset($context->cookie->id_cart);
         }
         
-        $complete = false;
-        for ($x=1; $x<6; $x++){
-            $request = $this->getOrder($cart_id);
-            if($request['complete']) {
-                $complete = true;
-                break;
-            }else{
-                sleep(1);
-            }
-        }
-
-        if(!$complete) {
-            $url = $context->link->getModuleLink(
-                $this->module->name, 
-                'payment', 
-                array('error' => true, "responsetext"=>$this->module->l("Order awaiting application completion"))
-            );
-            Tools::redirect($url);
-        }
 
         if ($order->current_state == Configuration::get('FINANCE_AWAITING_STATUS')) {
             PrestaShopLogger::addLog(
@@ -129,5 +110,27 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
         );
 
         return $request;
+    }
+
+    private function completeCheck($cart_id) {
+        $complete = false;
+        for ($x=1; $x<6; $x++){
+            $request = $this->getOrder($cart_id);
+            if($request['complete']) {
+                $complete = true;
+                break;
+            }else{
+                sleep(1);
+            }
+        }
+
+        if(!$complete) {
+            $url = $context->link->getModuleLink(
+                $this->module->name, 
+                'payment', 
+                array('error' => true, "responsetext"=>$this->module->l("Order awaiting application completion"))
+            );
+            Tools::redirect($url);
+        }
     }
 }

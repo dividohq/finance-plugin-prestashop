@@ -85,7 +85,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $update_array = ['status' => $data->status];
         // logs if order completed, regardless of any proceeding status changes
         if($data->status == self::COMPLETE_STATUS){
-            $update_array['complete'] = true;
+            $update_array['complete'] = 1;
 
             $this->updateMerchantReference($data->application, $order->id, $cart_id);
         }
@@ -116,10 +116,10 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         
         if ($order->current_state != Configuration::get('FINANCE_AWAITING_STATUS')) {
             if ($internal_status != $order->current_state) {
-                $message = "Order status updated to {$internal_status}";
+                $message = "Order status updated to {$internal_status}: ".$data->status;
                 $this->setCurrentState($order, $internal_status);
             }else{
-                $message = "Order status already {$internal_status}";
+                $message = "Order status already {$internal_status}: ".$data->status;
             }
         } elseif ($internal_status != $order->current_state) {
             $extra_vars = array('transaction_id' => $data->application);
@@ -131,7 +131,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $internal_status,
                 $extra_vars
             );
-            $message = "Order status updated to {$internal_status}";
+            $message = "Order status updated to {$internal_status}: ".$data->status;
         }else{
             $message = "Order is Awaiting Status or the same as update status";
         }
