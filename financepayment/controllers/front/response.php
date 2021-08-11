@@ -59,6 +59,15 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             return $this->respond(400, "Status {$data->status} not found in payload", true, 'Cart', $cart_id);
         }
 
+        PrestaShopLogger::addLog(
+            'Status webhook received: '.$data->status,
+            1,
+            null,
+            'Cart',
+            $cart_id,
+            true
+        );
+
         $result = Db::getInstance()->getRow(
             "SELECT * FROM `"._DB_PREFIX_."divido_requests` WHERE `cart_id` = '{$cart_id}'"
         );
@@ -90,7 +99,15 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             $this->updateMerchantReference($data->application, $order->id, $cart_id);
         }
 
-        Db::getInstance()->update('divido_requests', $update_array, '`cart_id` = "'.(int)$cart_id.'"');
+        $update = Db::getInstance()->update('divido_requests', $update_array, '`cart_id` = "'.(int)$cart_id.'"');
+        PrestaShopLogger::addLog(
+            json_encode($update),
+            1,
+            null,
+            'Cart',
+            $cart_id,
+            true
+        );
 
         if (!$internal_status) {
             return $this->respond(200, "Update status {$data->status} not used", true, 'Cart', $cart_id);
@@ -116,10 +133,10 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         
         if ($order->current_state != Configuration::get('FINANCE_AWAITING_STATUS')) {
             if ($internal_status != $order->current_state) {
-                $message = "Order status updated to {$internal_status}: ".$data->status;
+                $message = "Order status updated to {$internal_status}";
                 $this->setCurrentState($order, $internal_status);
             }else{
-                $message = "Order status already {$internal_status}: ".$data->status;
+                $message = "Order status already {$internal_status}";
             }
         } elseif ($internal_status != $order->current_state) {
             $extra_vars = array('transaction_id' => $data->application);
@@ -131,7 +148,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $internal_status,
                 $extra_vars
             );
-            $message = "Order status updated to {$internal_status}: ".$data->status;
+            $message = "Order status updated to {$internal_status}";
         }else{
             $message = "Order is Awaiting Status or the same as update status";
         }
