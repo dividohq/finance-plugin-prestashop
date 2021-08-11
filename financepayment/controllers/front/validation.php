@@ -75,6 +75,16 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         }
 
         $id_cus = $cart->id_customer;
+
+        PrestaShopLogger::addLog(
+            'Customer ID: '.$id_cus,
+            1,
+            null, 
+            'Cart', 
+            $cart->id, 
+            true
+        );
+
         $id_add = $cart->id_address_delivery;
         if ($id_cus == 0 || $id_add == 0 || $cart->id_address_invoice == 0) {
             echo Tools::jsonEncode($response);
