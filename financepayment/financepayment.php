@@ -79,7 +79,7 @@ class FinancePayment extends PaymentModule
     {
         $this->name = 'financepayment';
         $this->tab = 'payments_gateways';
-        $this->version = 'ING-v.1.2.7.3';
+        $this->version = 'ING-v.1.2.7';
         $this->author = 'Divido Financial Services Ltd';
         $this->need_instance = 0;
         $this->module_key = "71b50f7f5d75c244cd0a5635f664cd56";
