@@ -79,6 +79,12 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
         }
         
         $customer = new Customer($cart->id_customer);
+
+        if($this->context->customer->id !== $customer->id){
+            $customer->logged = 1;
+            $this->context->customer = $customer;
+            $this->context->cookie->id_customer = $customer->id;
+        }
         if ($context->cookie->id_cart == $cart_id) {
             unset($context->cookie->id_cart);
         }
