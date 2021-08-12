@@ -66,11 +66,22 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
             Tools::redirect($url);
         }
         $order = new Order(Order::getOrderByCartId($cart_id));
-        $customer = new Customer($cart->id_customer);
-        if ($context->cookie->id_cart == $cart_id) {
-            unset($context->cookie->id_cart);
+        if (!Validate::isLoadedObject($order)){
+            PrestaShopLogger::addLog(
+                'Waiting for order to load',
+                1,
+                null,
+                'Order',
+                $order->id,
+                true
+            );
+            sleep(2);
         }
         
+        $customer = new Customer($cart->id_customer);/*
+        if ($context->cookie->id_cart == $cart_id) {
+            unset($context->cookie->id_cart);
+        }*/
 
         if ($order->current_state == Configuration::get('FINANCE_AWAITING_STATUS')) {
             PrestaShopLogger::addLog(

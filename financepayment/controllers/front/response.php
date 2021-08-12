@@ -25,9 +25,7 @@
 */
 
 use GuzzleHttp\Client;
-use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
-use Divido\MerchantSDK\Environment;
-use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
+use GuzzleHttp\Exception\RequestException;
 
 class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 {
@@ -99,7 +97,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             $this->updateMerchantReference($data->application, $order->id, $cart_id);
         }
 
-        $update = Db::getInstance()->update('divido_requests', $update_array, '`cart_id` = "'.(int)$cart_id.'"');
+        $update = Db::getInstance()->update('divido_requests', $update_array, '`cart_id` = "'.$cart_id.'"');
         PrestaShopLogger::addLog(
             json_encode($update),
             1,
@@ -148,7 +146,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $internal_status,
                 $extra_vars
             );
-            $message = "Order status updated to {$internal_status}";
+            $message = "Order created and status updated to {$internal_status}";
         }else{
             $message = "Order is Awaiting Status or the same as update status";
         }
@@ -757,7 +755,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             ]);
         } catch (RequestException $e) {
             PrestaShopLogger::addLog(
-                $e->getRequest().": ".$e->getResponse(),
+                $e->getResponse(),
                 1,
                 null,
                 'Cart',
@@ -765,5 +763,6 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 true
             );
         }
+        return;
     }
 }
