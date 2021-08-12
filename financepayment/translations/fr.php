@@ -16,6 +16,7 @@ $_MODULE['<{financepayment}prestashop>financepayment_55b514b537dff8bab844630b2a3
 $_MODULE['<{financepayment}prestashop>financepayment_d5dca379ade9be2637ab1e09dd300435'] = 'Plans de limite';
 $_MODULE['<{financepayment}prestashop>financepayment_c18a091d9d0379ada62141baccba01fa'] = 'Choisissez les plans que vous souhaitez mettre à la disposition de vos clients';
 $_MODULE['<{financepayment}prestashop>financepayment_27cf3c510542ac742814857f45abf924'] = 'Le montant minimum nécessaire pour que le panier soit total afin que le financement soit une option à la caisse';
+$_MODULE['<{financepayment}prestashop>financepayment_e40d5af75723b9acf16aae5f2db66fcc'] = 'La commande n\'a pas pu être créée';
 $_MODULE['<{financepayment}prestashop>financepayment_1e7d6684c57db504040bea99826622fe'] = 'Le nom de l\'option de paiement à la caisse';
 $_MODULE['<{financepayment}prestashop>financepayment_00d68226061e477ca1966317da675107'] = 'La description de l\'option de paiement à la caisse';
 $_MODULE['<{financepayment}prestashop>financepayment_d5cd0f49bac62a9cbd22bd9d5ff176cb'] = 'Selection de produit';
@@ -53,8 +54,11 @@ $_MODULE['<{financepayment}prestashop>financepayment_80b150ad0c829f30fc424670e36
 $_MODULE['<{financepayment}prestashop>financepayment_1aa86bba71e6ad6b491a0b0ff27faa55'] = 'Le montant maximum qu\'un panier peut totaliser pour que le financement soit une option à la caisse';
 $_MODULE['<{financepayment}prestashop>financepayment_6c91586db92b999302face422dc0ae25'] = 'Disponible sur Finance';
 $_MODULE['<{financepayment}prestashop>financepayment_e1e94923500d26fd6f7070c2bf24bd61'] = 'Plans sélectionnés';
+$_MODULE['<{financepayment}prestashop>financepayment_c877aa8e9f18cf16cb4add7f6f950ffa'] = 'Veuillez réessayer';
 $_MODULE['<{financepayment}prestashop>financepayment_d1b27f6cadd2a8f096ddcd5b7695927a'] = 'Utiliser la langue du magasin?';
 $_MODULE['<{financepayment}prestashop>financepayment_86593094a845811c626d151a057394fd'] = 'Remplacer la langue de la calculatrice financière par la langue des paramètres régionaux du magasin';
+$_MODULE['<{financepayment}prestashop>financepayment_e73cc93e976ab46446bc48407bd4cf8b'] = 'La commande est introuvable';
+$_MODULE['<{financepayment}prestashop>financepayment_4937a114e5c2734a8459f6d5a5c9472b'] = 'Commande en attente d\'achèvement de la demande';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Votre panier semble être vide';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Erreur';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Confirmer';

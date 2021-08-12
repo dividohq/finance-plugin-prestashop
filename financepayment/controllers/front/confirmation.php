@@ -78,10 +78,10 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
             sleep(2);
         }
         
-        $customer = new Customer($cart->id_customer);/*
+        $customer = new Customer($cart->id_customer);
         if ($context->cookie->id_cart == $cart_id) {
             unset($context->cookie->id_cart);
-        }*/
+        }
 
         if ($order->current_state == Configuration::get('FINANCE_AWAITING_STATUS')) {
             PrestaShopLogger::addLog(
