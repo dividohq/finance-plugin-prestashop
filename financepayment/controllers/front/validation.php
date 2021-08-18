@@ -174,7 +174,10 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             'confirmation',
             array('cart_id' => $cart_id)
         );
-        $checkout_url = $this->context->link->getPageLink('cart').'?return=true';
+        $checkout_url = $this->context->link->getModuleLink(
+            $this->module->name,
+            'return'
+        );
 
         $salt = uniqid('', true);
         $hash = hash('sha256', $cart_id.$salt);
