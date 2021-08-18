@@ -173,7 +173,6 @@ class FinancePayment extends PaymentModule
             || !$this->registerHook('actionProductUpdate')
             || !$this->registerHook('actionOrderStatusUpdate')
             || !$this->registerHook('paymentReturn')
-            || !$this->registerHook('displayShoppingCartFooter')
         ) {
             return false;
         }
@@ -834,17 +833,6 @@ class FinancePayment extends PaymentModule
             )
         );
         return $this->display(__FILE__, 'confirmation.tpl');
-    }
-
-    public function hookDisplayShoppingCartFooter()
-    {
-        $this->smarty->assign([
-            'layout' => Tools::getValue('return'),
-            'title' => $this->l('order_creation_error_msg'),
-            'message' => $this->l('try_again_msg') 
-        ]);
-        return $this->display(__FILE__, 'warning.tpl');
-        
     }
 
     /**
