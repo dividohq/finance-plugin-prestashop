@@ -89,24 +89,6 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
             unset($context->cookie->id_cart);
         }
 
-        if ($order->current_state == Configuration::get('FINANCE_AWAITING_STATUS')) {
-            PrestaShopLogger::addLog(
-                'Order still awaiting status update',
-                1,
-                null,
-                'Cart',
-                (int)$cart_id,
-                true
-            );
-            $this->context->cart = $cart;
-            $response = $cart->duplicate();
-            if ($response['success']) {
-                $this->context->cookie->id_cart = $response['cart']->id;
-                $this->context->cart = $response['cart'];
-                $this->context->updateCustomer($customer);
-            }
-        }
-
         $data = array(
             'id_cart' => $cart_id,
             'id_module' => $this->module->id,
