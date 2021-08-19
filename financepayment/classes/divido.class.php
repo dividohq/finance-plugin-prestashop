@@ -126,6 +126,7 @@ class FinanceApi
             // $e->getCode() | eg 400401
             // $e->getMessage() | eg resource not found
             // $e->getContext()
+            return array();
         }
     }
 
@@ -145,12 +146,10 @@ class FinanceApi
     public function getPlans($default_plans = false)
     {
         if ($default_plans) {
-            $plans = $this->getGlobalSelectedPlans();
+            return $this->getGlobalSelectedPlans();
         } else {
-            $plans = $this->getAllPlans();
+            return $this->getAllPlans();
         }
-
-        return $plans;
     }
 
     public function getProductPlans($product_price, $id_product)

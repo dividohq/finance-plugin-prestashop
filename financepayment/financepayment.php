@@ -1253,12 +1253,12 @@ class FinancePayment extends PaymentModule
      * available to the merchant via an API call
      * or null if no plans are available
      *
-     * @return array|null Array of plans or null if no plans
+     * @return array Array of plans
      */
     public function getPlans()
     {
         $FinanceApi = new FinanceApi();
         $plans  = $FinanceApi->getPlans();
-        return (count($plans) > 0) ? $plans : null;
+        return $plans;
     }
 }
