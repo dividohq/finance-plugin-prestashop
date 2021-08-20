@@ -44,6 +44,7 @@ $sql[] = ['CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'finance_product` (
 
 $sql[] = ['ALTER TABLE `'._DB_PREFIX_.'divido_requests` ADD COLUMN `status` VARCHAR(15);', false];
 $sql[] = ['ALTER TABLE `'._DB_PREFIX_.'divido_requests` ADD COLUMN `complete` BOOLEAN NOT NULL DEFAULT false;', false];
+$sql[] = ['ALTER TABLE `'._DB_PREFIX_.'divido_requests` ADD COLUMN `token` VARCHAR(64);', false];
 
 foreach ($sql as $query) {
     if (Db::getInstance()->execute($query[0]) == false && true === $query[1]) {

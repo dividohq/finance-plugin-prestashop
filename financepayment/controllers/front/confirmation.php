@@ -80,13 +80,22 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
         
         $customer = new Customer($cart->id_customer);
 
-        if($this->context->customer->id !== $customer->id && $customer->isGuest()){
-            $customer->logged = 1;
-            $this->context->customer = $customer;
-            $this->context->cookie->id_customer = $customer->id;
-        }
-        if ($context->cookie->id_cart == $cart_id) {
-            unset($context->cookie->id_cart);
+        if($this->context->customer->id !== $customer->id){
+            $token = Tools::getValue('token');
+            if($this->validateToken($token, $cart_id)){
+                $customer->logged = 1;
+                $this->context->customer = $customer;
+                $this->context->cookie->id_customer = $customer->id;  
+            } else {
+                PrestaShopLogger::addLog(
+                    'Could not validate confirmation token',
+                    1,
+                    null,
+                    'Order',
+                    $order->id,
+                    true
+                );
+            }
         }
 
         $data = array(
@@ -131,5 +140,13 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
             );
             Tools::redirect($url);
         }
+    }
+
+    private function validateToken($token, $cart_id){
+        $divido_request = $this->getOrder($cart_id);
+        if($divido_request['token'] !== $token){
+            return false;
+        }
+        return true;
     }
 }

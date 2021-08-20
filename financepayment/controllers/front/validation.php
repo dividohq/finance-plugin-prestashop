@@ -167,12 +167,12 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 'sku'      => 'DSCNT'
             );
         }
-
+        $token = bin2hex(random_bytes(16));
         $response_url = $this->context->link->getModuleLink($this->module->name, 'response');
         $redirect_url = $this->context->link->getModuleLink(
             $this->module->name,
             'confirmation',
-            array('cart_id' => $cart_id)
+            array('cart_id' => $cart_id, 'token' => $token)
         );
         $checkout_url = $this->context->link->getModuleLink(
             $this->module->name,
@@ -182,7 +182,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $salt = uniqid('', true);
         $hash = hash('sha256', $cart_id.$salt);
 
-        $this->saveHash($cart_id, $salt, $sub_total);
+        $this->saveHash($cart_id, $salt, $sub_total, $token);
 
         if(empty($phone)){
             $applicant = array(
@@ -288,12 +288,13 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
          return $data;
     }
 
-    public function saveHash($cart_id, $salt, $total)
+    public function saveHash($cart_id, $salt, $total, $token)
     {
         $data = array(
             'cart_id' => (int)$cart_id,
             'hash' => pSQL($salt),
             'total' => pSQL($total),
+            'token' => pSQL($token)
         );
         $result = Db::getInstance()->getRow(
             'SELECT * FROM `'._DB_PREFIX_.'divido_requests` WHERE `cart_id` = "'.(int)$cart_id.'"'
