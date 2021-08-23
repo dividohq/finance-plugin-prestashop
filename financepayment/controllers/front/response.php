@@ -47,11 +47,11 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             }
         }
 
-        if (!isset($data->metadata->merchant_reference)) {
-            return $this->respond(400, "Merchant Reference not found in payload", true);
+        if (!isset($data->metadata->cart_id)) {
+            return $this->respond(400, "Cart ID not found in payload", true);
         }
 
-        $cart_id = (int) $data->metadata->merchant_reference;
+        $cart_id = (int) $data->metadata->cart_id;
 
         if (!isset($data->status)) {
             return $this->respond(400, "Status {$data->status} not found in payload", true, 'Cart', $cart_id);
