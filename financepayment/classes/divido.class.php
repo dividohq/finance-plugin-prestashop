@@ -26,7 +26,6 @@
 
 use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\Client;
-use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 use GuzzleHttp\Client as Guzzle;
 
@@ -56,8 +55,10 @@ class FinanceApi
 
     public function getFinanceEnv($api_key)
     {
+        $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
         $api_key = Configuration::get('FINANCE_API_KEY');
-        if (!$api_key) {
+
+        if (!$environment_url || !$api_key) {
             return array();
         }
 
@@ -65,7 +66,7 @@ class FinanceApi
         $env = $this->getEnvironment($api_key);
         $httpClientWrapper = new HttpClientWrapper(
             new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
+            $environment_url,
             $api_key
         );
 
@@ -81,10 +82,12 @@ class FinanceApi
 
     public function getAllPlans()
     {
+        $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
+
         // Decide the env set by admin somehow...
 
         $api_key = Configuration::get('FINANCE_API_KEY');
-        if (!$api_key) {
+        if (!$environment_url || !$api_key) {
             return array();
         }
 
@@ -93,7 +96,7 @@ class FinanceApi
 
         $httpClientWrapper = new HttpClientWrapper(
             new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
+            $environment_url,
             $api_key
         );
 
@@ -224,9 +227,9 @@ class FinanceApi
 
     public function setLender()
     {
-
+        $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
         $api_key = Configuration::get('FINANCE_API_KEY');
-        if (!$api_key) {
+        if (!$environment_url || !$api_key) {
             return array();
         }
 
@@ -234,7 +237,7 @@ class FinanceApi
         $env = $this->getEnvironment($api_key);
         $httpClientWrapper = new HttpClientWrapper(
             new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
+            $environment_url,
             $api_key
         );
 
