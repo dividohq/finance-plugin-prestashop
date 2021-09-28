@@ -28,33 +28,74 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
 {
     public function init()
     {
-        $cart_id = Tools::getValue('cart_id');
+        $cart_id = (int)Tools::getValue('cart_id');
+
+        PrestaShopLogger::addLog(
+            'Arrived at confirmation',
+            1,
+            null,
+            'Cart',
+            $cart_id,
+            true
+        );
+
         $cart = new Cart($cart_id);
         if (!Validate::isLoadedObject($cart)) {
+            PrestaShopLogger::addLog(
+                'Could not load cart',
+                1,
+                null,
+                'Cart',
+                $cart_id,
+                true
+            );
             $url = $this->context->link->getPageLink('index');
             Tools::redirect($url);
         }
         $context = Context::getContext();
         if (!$cart->OrderExists()) {
-            $url = $context->link->getModuleLink($this->module->name, 'payment', array('error' => true));
+            PrestaShopLogger::addLog(
+                'Order could not be found',
+                1,
+                null,
+                'Cart',
+                (int)$cart_id,
+                true
+            );
+            $url = $context->link->getModuleLink($this->module->name, 'payment', array('error' => true, "responsetext"=>$this->module->l("The order could not be found")));
             Tools::redirect($url);
         }
         $order = new Order(Order::getOrderByCartId($cart_id));
-        $customer = new Customer($cart->id_customer);
-        if ($context->cookie->id_cart == $cart_id) {
-            unset($context->cookie->id_cart);
+        if (!Validate::isLoadedObject($order)){
+            PrestaShopLogger::addLog(
+                'Waiting for order to load',
+                1,
+                null,
+                'Order',
+                $order->id,
+                true
+            );
+            sleep(2);
         }
+        
+        $customer = new Customer($cart->id_customer);
 
-        if ($order->current_state == Configuration::get('FINANCE_AWAITING_STATUS')) {
-            $this->context->cart = $cart;
-            $response = $cart->duplicate();
-            if ($response['success']) {
-                $this->context->cookie->id_cart = $response['cart']->id;
-                $this->context->cart = $response['cart'];
-                $this->context->updateCustomer($customer);
+        if($this->context->customer->id !== $customer->id){
+            $token = Tools::getValue('token');
+            if($this->validateToken($token, $cart_id)){
+                $customer->logged = 1;
+                $this->context->customer = $customer;
+                $this->context->cookie->id_customer = $customer->id;  
+            } else {
+                PrestaShopLogger::addLog(
+                    'Could not validate confirmation token',
+                    1,
+                    null,
+                    'Order',
+                    $order->id,
+                    true
+                );
             }
-            $url = $context->link->getModuleLink($this->module->name, 'payment', array('error' => true));
-            Tools::redirect($url);
         }
 
         $data = array(
@@ -65,5 +106,47 @@ class FinancePaymentConfirmationModuleFrontController extends ModuleFrontControl
         );
         $url = $context->link->getPageLink('order-confirmation', null, null, $data);
         Tools::redirect($url);
+    }
+
+    private function getOrder($cart_id) {
+        $request = Db::getInstance()->getRow(
+            "
+            SELECT *
+            FROM `"._DB_PREFIX_."divido_requests`
+            WHERE `cart_id` = '{$cart_id}'
+            "
+        );
+
+        return $request;
+    }
+
+    private function completeCheck($cart_id) {
+        $complete = false;
+        for ($x=1; $x<6; $x++){
+            $request = $this->getOrder($cart_id);
+            if($request['complete']) {
+                $complete = true;
+                break;
+            }else{
+                sleep(1);
+            }
+        }
+
+        if(!$complete) {
+            $url = $context->link->getModuleLink(
+                $this->module->name, 
+                'payment', 
+                array('error' => true, "responsetext"=>$this->module->l("Order awaiting application completion"))
+            );
+            Tools::redirect($url);
+        }
+    }
+
+    private function validateToken($token, $cart_id){
+        $divido_request = $this->getOrder($cart_id);
+        if($divido_request['token'] !== $token){
+            return false;
+        }
+        return true;
     }
 }

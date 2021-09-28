@@ -33,19 +33,13 @@ use GuzzleHttp\Client as Guzzle;
 class FinancePaymentValidationModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = false;
-
-    /**
-     * @var
-     */
-    private $plugin_version;
-
+    
     /**
      * This class should be use by your Instant Payment
      * Notification system to validate the order remotely
      */
     public function postProcess()
     {
-        $this->plugin_version = "2.2.2";
 
         if (!(Tools::getIsset('total') && Tools::getIsset('deposit') && Tools::getIsset('finance'))) {
             Tools::redirect($this->context->link->getPageLink('index'));
@@ -81,6 +75,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         }
 
         $id_cus = $cart->id_customer;
+
         $id_add = $cart->id_address_delivery;
         if ($id_cus == 0 || $id_add == 0 || $cart->id_address_invoice == 0) {
             echo Tools::jsonEncode($response);
@@ -172,19 +167,22 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 'sku'      => 'DSCNT'
             );
         }
-
+        $token = bin2hex(random_bytes(16));
         $response_url = $this->context->link->getModuleLink($this->module->name, 'response');
         $redirect_url = $this->context->link->getModuleLink(
             $this->module->name,
             'confirmation',
-            array('cart_id' => $cart_id)
+            array('cart_id' => $cart_id, 'token' => $token)
         );
-        $checkout_url = $this->context->link->getPageLink('order');
+        $checkout_url = $this->context->link->getModuleLink(
+            $this->module->name,
+            'return'
+        );
 
         $salt = uniqid('', true);
         $hash = hash('sha256', $cart_id.$salt);
 
-        $this->saveHash($cart_id, $salt, $sub_total);
+        $this->saveHash($cart_id, $salt, $sub_total, $token);
 
         if(empty($phone)){
             $applicant = array(
@@ -241,8 +239,8 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 'ecom_platform' => 'prestashop',
                 'ecom_platform_version' => _PS_VERSION_,
                 'ecom_base_url'   => htmlspecialchars_decode($checkout_url),
-                'plugin_version'  => $this->plugin_version,
-                'merchant_reference' => $cart_id
+                'plugin_version'  => Configuration::get('PLUGIN_VERSION'),
+                'cart_id' => $cart_id
             )
         );
 //Note: If creating an application on a merchant with a shared secret, you will have to pass in a valid hmac
@@ -290,12 +288,13 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
          return $data;
     }
 
-    public function saveHash($cart_id, $salt, $total)
+    public function saveHash($cart_id, $salt, $total, $token)
     {
         $data = array(
             'cart_id' => (int)$cart_id,
             'hash' => pSQL($salt),
             'total' => pSQL($total),
+            'token' => pSQL($token)
         );
         $result = Db::getInstance()->getRow(
             'SELECT * FROM `'._DB_PREFIX_.'divido_requests` WHERE `cart_id` = "'.(int)$cart_id.'"'

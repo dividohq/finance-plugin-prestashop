@@ -32,7 +32,6 @@ require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/classes/divido.class.php';
 
 use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
-use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 
 class FinancePayment extends PaymentModule
@@ -80,7 +79,7 @@ class FinancePayment extends PaymentModule
     {
         $this->name = 'financepayment';
         $this->tab = 'payments_gateways';
-        $this->version = '2.3.0';
+        $this->version = 'ING-v.1.3.2';
         $this->author = 'Divido Financial Services Ltd';
         $this->need_instance = 0;
         $this->module_key = "71b50f7f5d75c244cd0a5635f664cd56";
@@ -126,6 +125,7 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_CART_MAXIMUM', '10000');
         Configuration::updateValue('FINANCE_PRODUCTS_OPTIONS', 'All');
         Configuration::updateValue('FINANCE_PRODUCTS_MINIMUM', '0');
+        Configuration::updateValue('PLUGIN_VERSION', $this->version);
 
         foreach ($this->ApiOrderStatus as $ApiStatus) {
             switch ($ApiStatus['code']) {
@@ -793,10 +793,34 @@ class FinancePayment extends PaymentModule
         $id_state = $order->current_state;
 
         if ($id_state == Configuration::get('PS_OS_ERROR')) {
+            PrestaShopLogger::addLog(
+                'Confirmation Order State matched error state: '.Configuration::get('PS_OS_ERROR'),
+                1,
+                null, 
+                'Order', 
+                (int)$order->id, 
+                true
+            );
             $this->smarty->assign('status', 'not');
         } elseif ($id_state == Configuration::get('PS_OS_CANCELED')) {
+            PrestaShopLogger::addLog(
+                'Confirmation Order State matched cancelled state: '.Configuration::get('PS_OS_CANCELED'),
+                1,
+                null, 
+                'Order', 
+                (int)$order->id, 
+                true
+            );
             $this->smarty->assign('status', 'not');
         } else {
+            PrestaShopLogger::addLog(
+                "Customer successfully returned with order state: {$id_state}",
+                1,
+                null, 
+                'Order', 
+                (int)$order->id, 
+                true
+            );
             $this->smarty->assign('status', 'ok');
         }
         $this->smarty->assign(
@@ -1050,6 +1074,14 @@ class FinancePayment extends PaymentModule
         $shipping_method = null,
         $tracking_numbers = null
     ) {
+        PrestaShopLogger::addLog(
+            "Activating Application {$application_id}",
+            1,
+            null,
+            'Order',
+            $order_id,
+            true
+        );
         // First get the application you wish to create an activation for.
         $api_key   = Configuration::get('FINANCE_API_KEY');
         $application = (new \Divido\MerchantSDK\Models\Application())
@@ -1080,6 +1112,14 @@ class FinancePayment extends PaymentModule
             $application_activation
         );
         $activation_response_body = $response->getBody()->getContents();
+        PrestaShopLogger::addLog(
+            $activation_response_body,
+            1,
+            null,
+            'Order',
+            $order_id,
+            true
+        );
         return $activation_response_body;
     }
 
@@ -1094,7 +1134,14 @@ class FinancePayment extends PaymentModule
         $order_total,
         $order_id
     ) {
-
+        PrestaShopLogger::addLog(
+            "Cancelling Application {$application_id}",
+            1,
+            null,
+            'Order',
+            $order_id,
+            true
+        );
         // First get the application you wish to create an activation for.
         $api_key   = Configuration::get('FINANCE_API_KEY');
         $application = ( new \Divido\MerchantSDK\Models\Application() )
@@ -1120,6 +1167,14 @@ class FinancePayment extends PaymentModule
         $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
         $response = $sdk->applicationCancellations()->createApplicationCancellation($application, $applicationCancel);
         $cancellation_response_body = $response->getBody()->getContents();
+        PrestaShopLogger::addLog(
+            $cancellation_response_body,
+            1,
+            null,
+            'Order',
+            $order_id,
+            true
+        );
         return $cancellation_response_body;
     }
 
@@ -1134,6 +1189,14 @@ class FinancePayment extends PaymentModule
         $order_total,
         $order_id
     ) {
+        PrestaShopLogger::addLog(
+            "Refunding Application {$application_id}",
+            1,
+            null,
+            'Order',
+            $order_id,
+            true
+        );
         // First get the application you wish to create an activation for.
         $api_key   = Configuration::get('FINANCE_API_KEY');
         $application = ( new \Divido\MerchantSDK\Models\Application() )
@@ -1160,6 +1223,14 @@ class FinancePayment extends PaymentModule
         $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
         $response = $sdk->applicationRefunds()->createApplicationRefund($application, $applicationRefund);
         $cancellation_response_body = $response->getBody()->getContents();
+        PrestaShopLogger::addLog(
+            $cancellation_response_body,
+            1,
+            null,
+            'Order',
+            $order_id,
+            true
+        );
         return $cancellation_response_body;
     }
 
@@ -1182,12 +1253,12 @@ class FinancePayment extends PaymentModule
      * available to the merchant via an API call
      * or null if no plans are available
      *
-     * @return array|null Array of plans or null if no plans
+     * @return array Array of plans
      */
     public function getPlans()
     {
         $FinanceApi = new FinanceApi();
         $plans  = $FinanceApi->getPlans();
-        return (count($plans) > 0) ? $plans : null;
+        return $plans;
     }
 }
