@@ -108,6 +108,7 @@ class FinancePayment extends PaymentModule
      */
     public function install()
     {
+        Configuration::updateValue('FINANCE_ENVIRONMENT_URL', null);
         Configuration::updateValue('FINANCE_API_KEY', null);
         Configuration::updateValue('FINANCE_ENVIRONMENT', null);
         Configuration::updateValue('FINANCE_HMAC', null);
@@ -233,6 +234,7 @@ class FinancePayment extends PaymentModule
      */
     public function uninstall()
     {
+        Configuration::deleteByName('FINANCE_ENVIRONMENT_URL');
         Configuration::deleteByName('FINANCE_API_KEY');
         Configuration::deleteByName('FINANCE_HMAC');
         Configuration::deleteByName('FINANCE_ENVIRONMENT');
@@ -332,9 +334,17 @@ class FinancePayment extends PaymentModule
                 'input' => array(
                     array(
                         'type'  => 'text',
+                        'name'  => 'FINANCE_ENVIRONMENT_URL',
+                        'label' => $this->l('environment_url_label'),
+                        'hint'  => $this->l('environment_url_description'),
+                        'required' => true,
+                    ),
+                    array(
+                        'type'  => 'text',
                         'name'  => 'FINANCE_API_KEY',
                         'label' => $this->l('api_key_label'),
                         'hint'  => $this->l('api_key_description'),
+                        'required' => true,
                     )
                 ),
                 'submit' => array(
@@ -569,6 +579,7 @@ class FinancePayment extends PaymentModule
     protected function getConfigFormValues()
     {
         $form_values = array(
+            'FINANCE_ENVIRONMENT_URL'=> Configuration::get('FINANCE_ENVIRONMENT_URL'),
             'FINANCE_API_KEY' => Configuration::get('FINANCE_API_KEY'),
             'FINANCE_HMAC' => Configuration::get('FINANCE_HMAC'),
             'FINANCE_ENVIRONMENT' => Configuration::get('FINANCE_ENVIRONMENT'),
