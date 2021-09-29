@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0a49069f269fa8ec6e4cde2b1573e448",
+    "content-hash": "08ec27f5de44036036d9c9fc5e5430ae",
     "packages": [
         {
             "name": "divido/merchant-sdk",
-            "version": "v2.1.1",
+            "version": "v2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dividohq/merchant-api-pub-sdk-php.git",
-                "reference": "631984231ebc5606187eb40ec446256651b79dcf"
+                "reference": "5e8f9ff7ef6b47d74225bed6fd5f4992ec438b89"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dividohq/merchant-api-pub-sdk-php/zipball/631984231ebc5606187eb40ec446256651b79dcf",
-                "reference": "631984231ebc5606187eb40ec446256651b79dcf",
+                "url": "https://api.github.com/repos/dividohq/merchant-api-pub-sdk-php/zipball/5e8f9ff7ef6b47d74225bed6fd5f4992ec438b89",
+                "reference": "5e8f9ff7ef6b47d74225bed6fd5f4992ec438b89",
                 "shasum": ""
             },
             "require": {
@@ -32,6 +32,7 @@
                 "mockery/mockery": "1.1.0",
                 "phpdocumentor/phpdocumentor": "2.9.0",
                 "phpdocumentor/reflection-docblock": "~2.0",
+                "phpstan/phpstan": "^0.12.32",
                 "phpunit/phpunit": "^5"
             },
             "type": "library",
@@ -47,20 +48,24 @@
                     "email": "code@neilmcgibbon.com"
                 }
             ],
-            "time": "2019-04-01T15:30:39+00:00"
+            "support": {
+                "issues": "https://github.com/dividohq/merchant-api-pub-sdk-php/issues",
+                "source": "https://github.com/dividohq/merchant-api-pub-sdk-php/tree/v2.5.0"
+            },
+            "time": "2021-08-27T09:55:52+00:00"
         },
         {
             "name": "divido/merchant-sdk-guzzle-5",
-            "version": "v1.1.0",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dividohq/merchant-api-pub-sdk-php-guzzle5.git",
-                "reference": "5453ef837d029dd7681ca6d7b6b37136d7f57faa"
+                "reference": "4bab87188271a4ad41791adc80960cda2d8301fa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dividohq/merchant-api-pub-sdk-php-guzzle5/zipball/5453ef837d029dd7681ca6d7b6b37136d7f57faa",
-                "reference": "5453ef837d029dd7681ca6d7b6b37136d7f57faa",
+                "url": "https://api.github.com/repos/dividohq/merchant-api-pub-sdk-php-guzzle5/zipball/4bab87188271a4ad41791adc80960cda2d8301fa",
+                "reference": "4bab87188271a4ad41791adc80960cda2d8301fa",
                 "shasum": ""
             },
             "require": {
@@ -72,6 +77,7 @@
             },
             "require-dev": {
                 "mockery/mockery": "1.1.0",
+                "phpstan/phpstan": "^0.12.33",
                 "phpunit/phpunit": "^5"
             },
             "type": "library",
@@ -91,20 +97,24 @@
                     "email": "mike.lovely@divido.com"
                 }
             ],
-            "time": "2019-02-19T15:57:41+00:00"
+            "support": {
+                "issues": "https://github.com/dividohq/merchant-api-pub-sdk-php-guzzle5/issues",
+                "source": "https://github.com/dividohq/merchant-api-pub-sdk-php-guzzle5/tree/v1.2.0"
+            },
+            "time": "2021-09-29T14:33:35+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "5.3.3",
+            "version": "5.3.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "93bbdb30d59be6cd9839495306c65f2907370eb9"
+                "reference": "b87eda7a7162f95574032da17e9323c9899cb6b2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/93bbdb30d59be6cd9839495306c65f2907370eb9",
-                "reference": "93bbdb30d59be6cd9839495306c65f2907370eb9",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/b87eda7a7162f95574032da17e9323c9899cb6b2",
+                "reference": "b87eda7a7162f95574032da17e9323c9899cb6b2",
                 "shasum": ""
             },
             "require": {
@@ -144,20 +154,24 @@
                 "rest",
                 "web service"
             ],
-            "time": "2018-07-31T13:33:10+00:00"
+            "support": {
+                "issues": "https://github.com/guzzle/guzzle/issues",
+                "source": "https://github.com/guzzle/guzzle/tree/5.3"
+            },
+            "time": "2019-10-30T09:32:00+00:00"
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "1.6.1",
+            "version": "1.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "239400de7a173fe9901b9ac7c06497751f00727a"
+                "reference": "dc960a912984efb74d0a90222870c72c87f10c91"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/239400de7a173fe9901b9ac7c06497751f00727a",
-                "reference": "239400de7a173fe9901b9ac7c06497751f00727a",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/dc960a912984efb74d0a90222870c72c87f10c91",
+                "reference": "dc960a912984efb74d0a90222870c72c87f10c91",
                 "shasum": ""
             },
             "require": {
@@ -170,15 +184,15 @@
             },
             "require-dev": {
                 "ext-zlib": "*",
-                "phpunit/phpunit": "~4.8.36 || ^5.7.27 || ^6.5.8"
+                "phpunit/phpunit": "~4.8.36 || ^5.7.27 || ^6.5.14 || ^7.5.20 || ^8.5.8 || ^9.3.10"
             },
             "suggest": {
-                "zendframework/zend-httphandlerrunner": "Emit PSR-7 responses"
+                "laminas/laminas-httphandlerrunner": "Emit PSR-7 responses"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.6-dev"
+                    "dev-master": "1.7-dev"
                 }
             },
             "autoload": {
@@ -215,7 +229,11 @@
                 "uri",
                 "url"
             ],
-            "time": "2019-07-01T23:21:34+00:00"
+            "support": {
+                "issues": "https://github.com/guzzle/psr7/issues",
+                "source": "https://github.com/guzzle/psr7/tree/1.8.2"
+            },
+            "time": "2021-04-26T09:17:50+00:00"
         },
         {
             "name": "guzzlehttp/ringphp",
@@ -266,6 +284,11 @@
                 }
             ],
             "description": "Provides a simple API and specification that abstracts away the details of HTTP into a single PHP function.",
+            "support": {
+                "issues": "https://github.com/guzzle/RingPHP/issues",
+                "source": "https://github.com/guzzle/RingPHP/tree/1.1.1"
+            },
+            "abandoned": true,
             "time": "2018-07-31T13:22:33+00:00"
         },
         {
@@ -316,6 +339,11 @@
                 "Guzzle",
                 "stream"
             ],
+            "support": {
+                "issues": "https://github.com/guzzle/streams/issues",
+                "source": "https://github.com/guzzle/streams/tree/master"
+            },
+            "abandoned": true,
             "time": "2014-10-12T19:18:40+00:00"
         },
         {
@@ -366,20 +394,23 @@
                 "request",
                 "response"
             ],
+            "support": {
+                "source": "https://github.com/php-fig/http-message/tree/master"
+            },
             "time": "2016-08-06T14:39:51+00:00"
         },
         {
             "name": "psr/log",
-            "version": "1.1.0",
+            "version": "1.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/log.git",
-                "reference": "6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd"
+                "reference": "d49695b909c3b7628b6289db5479a1c204601f11"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd",
-                "reference": "6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/d49695b909c3b7628b6289db5479a1c204601f11",
+                "reference": "d49695b909c3b7628b6289db5479a1c204601f11",
                 "shasum": ""
             },
             "require": {
@@ -388,7 +419,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0.x-dev"
+                    "dev-master": "1.1.x-dev"
                 }
             },
             "autoload": {
@@ -403,7 +434,7 @@
             "authors": [
                 {
                     "name": "PHP-FIG",
-                    "homepage": "http://www.php-fig.org/"
+                    "homepage": "https://www.php-fig.org/"
                 }
             ],
             "description": "Common interface for logging libraries",
@@ -413,7 +444,10 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2018-11-20T15:27:04+00:00"
+            "support": {
+                "source": "https://github.com/php-fig/log/tree/1.1.4"
+            },
+            "time": "2021-05-03T11:20:27+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -453,27 +487,31 @@
                 }
             ],
             "description": "A polyfill for getallheaders.",
+            "support": {
+                "issues": "https://github.com/ralouphie/getallheaders/issues",
+                "source": "https://github.com/ralouphie/getallheaders/tree/develop"
+            },
             "time": "2019-03-08T08:55:37+00:00"
         },
         {
             "name": "react/promise",
-            "version": "v2.7.1",
+            "version": "v2.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise.git",
-                "reference": "31ffa96f8d2ed0341a57848cbb84d88b89dd664d"
+                "reference": "f3cff96a19736714524ca0dd1d4130de73dbbbc4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/31ffa96f8d2ed0341a57848cbb84d88b89dd664d",
-                "reference": "31ffa96f8d2ed0341a57848cbb84d88b89dd664d",
+                "url": "https://api.github.com/repos/reactphp/promise/zipball/f3cff96a19736714524ca0dd1d4130de73dbbbc4",
+                "reference": "f3cff96a19736714524ca0dd1d4130de73dbbbc4",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4.8"
+                "phpunit/phpunit": "^7.0 || ^6.5 || ^5.7 || ^4.8.36"
             },
             "type": "library",
             "autoload": {
@@ -499,7 +537,11 @@
                 "promise",
                 "promises"
             ],
-            "time": "2019-01-07T21:25:54+00:00"
+            "support": {
+                "issues": "https://github.com/reactphp/promise/issues",
+                "source": "https://github.com/reactphp/promise/tree/v2.8.0"
+            },
+            "time": "2020-05-12T15:16:56+00:00"
         }
     ],
     "packages-dev": [],
@@ -511,5 +553,6 @@
     "platform": {
         "php": ">=5"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "2.1.0"
 }
