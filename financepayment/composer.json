@@ -5,6 +5,6 @@
     "require": {
         "php": ">=5",
         "divido/merchant-sdk":"^2.5.0",
-        "divido/merchant-sdk-guzzle-5": "^1.2"
+        "divido/merchant-sdk-guzzle-5": "^1.2.0"
     }
 }
