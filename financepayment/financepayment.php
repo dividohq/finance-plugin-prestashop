@@ -354,7 +354,7 @@ class FinancePayment extends PaymentModule
         );
 
         /*----------------------Display form only after key is inserted----------------------------*/
-        if (Configuration::get('FINANCE_API_KEY')) {
+        if (Configuration::get('FINANCE_ENVIRONMENT_URL') && Configuration::get('FINANCE_API_KEY')) {
             $api = new FinanceApi();
             $api_key = Configuration::get('FINANCE_API_KEY');
             Configuration::updateValue('FINANCE_ENVIRONMENT', $api->getFinanceEnv($api_key));
@@ -617,8 +617,17 @@ class FinancePayment extends PaymentModule
      */
     protected function postProcess()
     {
+        $displayedError = array();
+        if (!Tools::getValue('FINANCE_ENVIRONMENT_URL')) {
+            $displayedError[] = $this->l('environment_url_description');
+        }
+
         if (!Tools::getValue('FINANCE_API_KEY')) {
-            return $this->displayError($this->l('api_key_empty_error'));
+            $displayedError[] = $this->l('api_key_empty_error');
+        }
+
+        if(!empty($displayedError)) {
+            return $this->displayError(implode('<br>', $displayedError));
         }
         $form_values = $this->getConfigFormValues();
 
