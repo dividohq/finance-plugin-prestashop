@@ -34,7 +34,6 @@ require_once dirname(__FILE__) . '/classes/divido.class.php';
 use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
-use Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException;
 
 class FinancePayment extends PaymentModule
 {
@@ -326,35 +325,32 @@ class FinancePayment extends PaymentModule
      */
     protected function getConfigForm()
     {
-        $base_form = array(
-            'error' => $this->l('bad_key_url_combination'),
-            'legend' => array(
-            'title' => $this->l('settings_label'),
-            'icon' => 'icon-cogs',
-            ),
-            'input' => array(
-                array(
-                    'type'  => 'text',
-                    'name'  => 'FINANCE_ENVIRONMENT_URL',
-                    'label' => $this->l('environment_url_label'),
-                    'hint'  => $this->l('environment_url_description'),
-                    'required' => true,
-                ),
-                array(
-                    'type'  => 'text',
-                    'name'  => 'FINANCE_API_KEY',
-                    'label' => $this->l('api_key_label'),
-                    'hint'  => $this->l('api_key_description'),
-                    'required' => true,
-                )
-            ),
-            'submit' => array(
-                'title' => $this->l('save_label'),
-            ),
-        );
-
         $form = array(
-            'form' => $base_form 
+            'form' => array(
+                'legend' => array(
+                'title' => $this->l('settings_label'),
+                'icon' => 'icon-cogs',
+                ),
+                'input' => array(
+                    array(
+                        'type'  => 'text',
+                        'name'  => 'FINANCE_ENVIRONMENT_URL',
+                        'label' => $this->l('environment_url_label'),
+                        'hint'  => $this->l('environment_url_description'),
+                        'required' => true,
+                    ),
+                    array(
+                        'type'  => 'text',
+                        'name'  => 'FINANCE_API_KEY',
+                        'label' => $this->l('api_key_label'),
+                        'hint'  => $this->l('api_key_description'),
+                        'required' => true,
+                    )
+                ),
+                'submit' => array(
+                    'title' => $this->l('save_label'),
+                ),
+            ),
         );
 
         /*----------------------Display form only after key is inserted----------------------------*/
@@ -364,9 +360,12 @@ class FinancePayment extends PaymentModule
 
             try {
                 $finance_environment = $api->getFinanceEnv($api_key);
-                Configuration::updateValue('FINANCE_ENVIRONMENT', $finance_environment);
 
-                array_shift($form['form']);
+                if (is_null($finance_environment)) {
+                    throw new Exception();
+                };
+
+                Configuration::updateValue('FINANCE_ENVIRONMENT', $finance_environment);
 
                 $financePlans = $this->getPlans();
                 $orderStatus = OrderState::getOrderStates($this->context->language->id);
@@ -579,8 +578,14 @@ class FinancePayment extends PaymentModule
                         ),
                     );
                 }
-            } catch (MerchantApiBadResponseException $e) {
-   
+            } catch (Exception $e) {
+                $error_form = array(
+                    'form' => array(
+                        'error' => $this->l('bad_key_url_combination') . '<br>' . $e->getMessage(),
+                    ),
+                );
+
+                return array_merge_recursive($error_form, $form);
             }
         }; 
         

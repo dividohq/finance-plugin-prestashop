@@ -77,8 +77,7 @@ class FinanceApi
         $finance_env = $response->getBody()->getContents();
         $decoded =json_decode($finance_env);
 
-
-        return $decoded->data->environment;
+        return @$decoded->data->environment;
     }
 
     public function getAllPlans()
