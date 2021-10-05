@@ -34,6 +34,7 @@ require_once dirname(__FILE__) . '/classes/divido.class.php';
 use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
+use Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException;
 
 class FinancePayment extends PaymentModule
 {
@@ -325,251 +326,264 @@ class FinancePayment extends PaymentModule
      */
     protected function getConfigForm()
     {
-        $form = array(
-            'form' => array(
-                'legend' => array(
-                'title' => $this->l('settings_label'),
-                'icon' => 'icon-cogs',
-                ),
-                'input' => array(
-                    array(
-                        'type'  => 'text',
-                        'name'  => 'FINANCE_ENVIRONMENT_URL',
-                        'label' => $this->l('environment_url_label'),
-                        'hint'  => $this->l('environment_url_description'),
-                        'required' => true,
-                    ),
-                    array(
-                        'type'  => 'text',
-                        'name'  => 'FINANCE_API_KEY',
-                        'label' => $this->l('api_key_label'),
-                        'hint'  => $this->l('api_key_description'),
-                        'required' => true,
-                    )
-                ),
-                'submit' => array(
-                    'title' => $this->l('save_label'),
-                ),
+        $base_form = array(
+            'error' => $this->l('bad_key_url_combination'),
+            'legend' => array(
+            'title' => $this->l('settings_label'),
+            'icon' => 'icon-cogs',
             ),
+            'input' => array(
+                array(
+                    'type'  => 'text',
+                    'name'  => 'FINANCE_ENVIRONMENT_URL',
+                    'label' => $this->l('environment_url_label'),
+                    'hint'  => $this->l('environment_url_description'),
+                    'required' => true,
+                ),
+                array(
+                    'type'  => 'text',
+                    'name'  => 'FINANCE_API_KEY',
+                    'label' => $this->l('api_key_label'),
+                    'hint'  => $this->l('api_key_description'),
+                    'required' => true,
+                )
+            ),
+            'submit' => array(
+                'title' => $this->l('save_label'),
+            ),
+        );
+
+        $form = array(
+            'form' => $base_form 
         );
 
         /*----------------------Display form only after key is inserted----------------------------*/
         if (Configuration::get('FINANCE_ENVIRONMENT_URL') && Configuration::get('FINANCE_API_KEY')) {
             $api = new FinanceApi();
             $api_key = Configuration::get('FINANCE_API_KEY');
-            Configuration::updateValue('FINANCE_ENVIRONMENT', $api->getFinanceEnv($api_key));
-            $financePlans = $this->getPlans();
-            $orderStatus = OrderState::getOrderStates($this->context->language->id);
-            $product_options = array(
-                array(
-                    'type' => 'All',
-                    'name' => $this->l('finance_all_products_option'),
-                ),
-                array(
-                    'type' => 'product_selected',
-                    'name' => $this->l('finance_specific_products_option'),
-                ),
-                array(
-                    'type' => 'min_price',
-                    'name' => $this->l('finance_threshold_products_option'),
-                )
-            );
-            $form['form']['input'][] = array(
-                'type'  => 'text',
-                'name'  => 'FINANCE_HMAC',
-                'label' => $this->l('shared_secret_label'),
-                'hint'  => $this->l('shared_secret_description'),
-            );
-            $form['form']['input'][] = array(
-                'type'  => 'text',
-                'name'  => 'FINANCE_PAYMENT_TITLE',
-                'label' => $this->l('checkout_title_label'),
-                'hint'  => $this->l('checkout_title_description'),
-            );
-            if (!$this->ps_below_7) {
+
+            try {
+                $finance_environment = $api->getFinanceEnv($api_key);
+                Configuration::updateValue('FINANCE_ENVIRONMENT', $finance_environment);
+
+                array_shift($form['form']);
+
+                $financePlans = $this->getPlans();
+                $orderStatus = OrderState::getOrderStates($this->context->language->id);
+                $product_options = array(
+                    array(
+                        'type' => 'All',
+                        'name' => $this->l('finance_all_products_option'),
+                    ),
+                    array(
+                        'type' => 'product_selected',
+                        'name' => $this->l('finance_specific_products_option'),
+                    ),
+                    array(
+                        'type' => 'min_price',
+                        'name' => $this->l('finance_threshold_products_option'),
+                    )
+                );
                 $form['form']['input'][] = array(
                     'type'  => 'text',
-                    'name'  => 'FINANCE_PAYMENT_DESCRIPTION',
-                    'label' => $this->l('checkout_description_label'),
-                    'hint'  => $this->l('checkout_description_description'),
+                    'name'  => 'FINANCE_HMAC',
+                    'label' => $this->l('shared_secret_label'),
+                    'hint'  => $this->l('shared_secret_description'),
                 );
-            }
-            $form['form']['input'][] = array(
-                'type'    => 'select',
-                'name'    => 'FINANCE_ACTIVATION_STATUS',
-                'label'   => $this->l('activate_on_status_label'),
-                'hint'    => $this->l('activate_on_status_description'),
-                'options' => array(
-                    'query' => $orderStatus,
-                    'id'    => 'id_order_state',
-                    'name'  => 'name',
-                ),
-            );
-            $form['form']['input'][] = array(
-                'type'    => 'select',
-                'name'    => 'FINANCE_CANCELLATION_STATUS',
-                'label'   => $this->l('cancel_on_status_label'),
-                'hint'    => $this->l('cancel_on_status_description'),
-                'options' => array(
-                    'query' => $orderStatus,
-                    'id'    => 'id_order_state',
-                    'name'  => 'name',
-                ),
-            );
-            $form['form']['input'][] = array(
-                'type'    => 'select',
-                'name'    => 'FINANCE_REFUND_STATUS',
-                'label'   => $this->l('refund_on_status_label'),
-                'hint'    => $this->l('refund_on_status_description'),
-                'options' => array(
-                    'query' => $orderStatus,
-                    'id'    => 'id_order_state',
-                    'name'  => 'name',
-                ),
-            );
-            $form['form']['input'][] = array(
-                'type'    => 'switch',
-                'name'    => 'FINANCE_ALL_PLAN_SELECTION',
-                'label'   => $this->l('show_all_plans_option'),
-                'is_bool' => true,
-                'values'  => array(
-                    array(
-                        'id'    => 'active_on',
-                        'value' => true,
-                        'label' => $this->l('Yes')
-                    ),
-                    array(
-                        'id'    => 'active_off',
-                        'value' => false,
-                        'label' => $this->l('No')
-                    )
-                ),
-            );
-            $form['form']['input'][] = array(
-                'type'    => 'swap',
-                'name'    => 'FINANCE_PLAN_SELECTION',
-                'label'   => $this->l('select_specific_plans_option'),
-                'options' => array(
-                    'query' => $financePlans,
-                    'name'  => 'text',
-                    'id'    => 'id',
-                ),
-            );
-            $form['form']['input'][] = array(
-                'type'    => 'switch',
-                'name'    => 'FINANCE_PRODUCT_WIDGET',
-                'label'   => $this->l('show_widget_label'),
-                'hint'    => $this->l('show_widget_description'),
-                'is_bool' => true,
-                'values'  => array(
-                    array(
-                        'id'    => 'active_on',
-                        'value' => true,
-                        'label' => $this->l('Yes')
-                    ),
-                    array(
-                        'id'    => 'active_off',
-                        'value' => false,
-                        'label' => $this->l('No')
-                    )
-                ),
-            );
-            $form['form']['input'][] = array(
-                'type'    => 'switch',
-                'name'    => 'FINANCE_PRODUCT_CALCULATOR',
-                'label'   => $this->l('product_calculator_title'),
-                'is_bool' => true,
-                'values'  => array(
-                    array(
-                        'id'    => 'active_on',
-                        'value' => true,
-                        'label' => $this->l('Yes')
-                    ),
-                    array(
-                        'id'    => 'active_off',
-                        'value' => false,
-                        'label' => $this->l('No')
-                    )
-                ),
-            );
-            $form['form']['input'][] = array(
-                'type'    => 'switch',
-                'name'    => 'FINANCE_LANGUAGE_OVERRIDE',
-                'hint'    => $this->l('use_store_language_description'),
-                'label'   => $this->l('use_store_language_label'),
-                'is_bool' => true,
-                'values'  => array(
-                    array(
-                        'id'    => 'active_on',
-                        'value' => true,
-                        'label' => $this->l('Yes')
-                    ),
-                    array(
-                        'id'    => 'active_off',
-                        'value' => false,
-                        'label' => $this->l('No')
-                    )
-                ),
-            );
-            $form['form']['input'][] = array(
-                'type'  => 'text',
-                'name'  => 'FINANCE_PRODUCT_WIDGET_BUTTON_TEXT',
-                'label' => $this->l('widget_button_text_label'),
-                'hint'  => $this->l('widget_button_text_description'),
-            );
-            $form['form']['input'][] = array(
-                'type'  => 'text',
-                'name'  => 'FINANCE_PRODUCT_WIDGET_FOOTNOTE',
-                'label' => $this->l('widget_footnote_label'),
-                'hint'  => $this->l('widget_footnote_description')
-            );
-            $form['form']['input'][] = array(
-                'type'  => 'text',
-                'name'  => 'FINANCE_CART_MINIMUM',
-                'label' => $this->l('cart_threshold_label'),
-                'hint'  => $this->l('cart_threshold_description')
-            );
-
-            $form['form']['input'][] = array(
-                'type'  => 'text',
-                'name'  => 'FINANCE_CART_MAXIMUM',
-                'label' => $this->l('cart_maximum_label'),
-                'hint'  => $this->l('cart_maximum_description')
-            );
-            $form['form']['input'][] = array(
-                'type'    => 'select',
-                'name'    => 'FINANCE_PRODUCTS_OPTIONS',
-                'label'   => $this->l('product_selection_label'),
-                'hint'    => $this->l('product_selection_description'),
-                'options' => array(
-                    'query' => $product_options,
-                    'id'    => 'type',
-                    'name'  => 'name',
-                ),
-            );
-            $form['form']['input'][] = array(
-                'type'  => 'text',
-                'name'  => 'FINANCE_PRODUCTS_MINIMUM',
-                'label' => $this->l('product_price_threshold_label'),
-                'hint'  => $this->l('product_price_threshold_description')
-            );
-            $form['form']['input'][] = array(
-                'type' => 'html',
-                'name' => $this->l('map_statuses_description').":",
-            );
-            foreach ($this->ApiOrderStatus as $ApiStatus) {
+                $form['form']['input'][] = array(
+                    'type'  => 'text',
+                    'name'  => 'FINANCE_PAYMENT_TITLE',
+                    'label' => $this->l('checkout_title_label'),
+                    'hint'  => $this->l('checkout_title_description'),
+                );
+                if (!$this->ps_below_7) {
+                    $form['form']['input'][] = array(
+                        'type'  => 'text',
+                        'name'  => 'FINANCE_PAYMENT_DESCRIPTION',
+                        'label' => $this->l('checkout_description_label'),
+                        'hint'  => $this->l('checkout_description_description'),
+                    );
+                }
                 $form['form']['input'][] = array(
                     'type'    => 'select',
-                    'name'    => 'FINANCE_STATUS_'.$ApiStatus['code'],
-                    'label'   => $ApiStatus['code'],
+                    'name'    => 'FINANCE_ACTIVATION_STATUS',
+                    'label'   => $this->l('activate_on_status_label'),
+                    'hint'    => $this->l('activate_on_status_description'),
                     'options' => array(
                         'query' => $orderStatus,
                         'id'    => 'id_order_state',
                         'name'  => 'name',
                     ),
                 );
+                $form['form']['input'][] = array(
+                    'type'    => 'select',
+                    'name'    => 'FINANCE_CANCELLATION_STATUS',
+                    'label'   => $this->l('cancel_on_status_label'),
+                    'hint'    => $this->l('cancel_on_status_description'),
+                    'options' => array(
+                        'query' => $orderStatus,
+                        'id'    => 'id_order_state',
+                        'name'  => 'name',
+                    ),
+                );
+                $form['form']['input'][] = array(
+                    'type'    => 'select',
+                    'name'    => 'FINANCE_REFUND_STATUS',
+                    'label'   => $this->l('refund_on_status_label'),
+                    'hint'    => $this->l('refund_on_status_description'),
+                    'options' => array(
+                        'query' => $orderStatus,
+                        'id'    => 'id_order_state',
+                        'name'  => 'name',
+                    ),
+                );
+                $form['form']['input'][] = array(
+                    'type'    => 'switch',
+                    'name'    => 'FINANCE_ALL_PLAN_SELECTION',
+                    'label'   => $this->l('show_all_plans_option'),
+                    'is_bool' => true,
+                    'values'  => array(
+                        array(
+                            'id'    => 'active_on',
+                            'value' => true,
+                            'label' => $this->l('Yes')
+                        ),
+                        array(
+                            'id'    => 'active_off',
+                            'value' => false,
+                            'label' => $this->l('No')
+                        )
+                    ),
+                );
+                $form['form']['input'][] = array(
+                    'type'    => 'swap',
+                    'name'    => 'FINANCE_PLAN_SELECTION',
+                    'label'   => $this->l('select_specific_plans_option'),
+                    'options' => array(
+                        'query' => $financePlans,
+                        'name'  => 'text',
+                        'id'    => 'id',
+                    ),
+                );
+                $form['form']['input'][] = array(
+                    'type'    => 'switch',
+                    'name'    => 'FINANCE_PRODUCT_WIDGET',
+                    'label'   => $this->l('show_widget_label'),
+                    'hint'    => $this->l('show_widget_description'),
+                    'is_bool' => true,
+                    'values'  => array(
+                        array(
+                            'id'    => 'active_on',
+                            'value' => true,
+                            'label' => $this->l('Yes')
+                        ),
+                        array(
+                            'id'    => 'active_off',
+                            'value' => false,
+                            'label' => $this->l('No')
+                        )
+                    ),
+                );
+                $form['form']['input'][] = array(
+                    'type'    => 'switch',
+                    'name'    => 'FINANCE_PRODUCT_CALCULATOR',
+                    'label'   => $this->l('product_calculator_title'),
+                    'is_bool' => true,
+                    'values'  => array(
+                        array(
+                            'id'    => 'active_on',
+                            'value' => true,
+                            'label' => $this->l('Yes')
+                        ),
+                        array(
+                            'id'    => 'active_off',
+                            'value' => false,
+                            'label' => $this->l('No')
+                        )
+                    ),
+                );
+                $form['form']['input'][] = array(
+                    'type'    => 'switch',
+                    'name'    => 'FINANCE_LANGUAGE_OVERRIDE',
+                    'hint'    => $this->l('use_store_language_description'),
+                    'label'   => $this->l('use_store_language_label'),
+                    'is_bool' => true,
+                    'values'  => array(
+                        array(
+                            'id'    => 'active_on',
+                            'value' => true,
+                            'label' => $this->l('Yes')
+                        ),
+                        array(
+                            'id'    => 'active_off',
+                            'value' => false,
+                            'label' => $this->l('No')
+                        )
+                    ),
+                );
+                $form['form']['input'][] = array(
+                    'type'  => 'text',
+                    'name'  => 'FINANCE_PRODUCT_WIDGET_BUTTON_TEXT',
+                    'label' => $this->l('widget_button_text_label'),
+                    'hint'  => $this->l('widget_button_text_description'),
+                );
+                $form['form']['input'][] = array(
+                    'type'  => 'text',
+                    'name'  => 'FINANCE_PRODUCT_WIDGET_FOOTNOTE',
+                    'label' => $this->l('widget_footnote_label'),
+                    'hint'  => $this->l('widget_footnote_description')
+                );
+                $form['form']['input'][] = array(
+                    'type'  => 'text',
+                    'name'  => 'FINANCE_CART_MINIMUM',
+                    'label' => $this->l('cart_threshold_label'),
+                    'hint'  => $this->l('cart_threshold_description')
+                );
+    
+                $form['form']['input'][] = array(
+                    'type'  => 'text',
+                    'name'  => 'FINANCE_CART_MAXIMUM',
+                    'label' => $this->l('cart_maximum_label'),
+                    'hint'  => $this->l('cart_maximum_description')
+                );
+                $form['form']['input'][] = array(
+                    'type'    => 'select',
+                    'name'    => 'FINANCE_PRODUCTS_OPTIONS',
+                    'label'   => $this->l('product_selection_label'),
+                    'hint'    => $this->l('product_selection_description'),
+                    'options' => array(
+                        'query' => $product_options,
+                        'id'    => 'type',
+                        'name'  => 'name',
+                    ),
+                );
+                $form['form']['input'][] = array(
+                    'type'  => 'text',
+                    'name'  => 'FINANCE_PRODUCTS_MINIMUM',
+                    'label' => $this->l('product_price_threshold_label'),
+                    'hint'  => $this->l('product_price_threshold_description')
+                );
+                $form['form']['input'][] = array(
+                    'type' => 'html',
+                    'name' => $this->l('map_statuses_description').":",
+                );
+                foreach ($this->ApiOrderStatus as $ApiStatus) {
+                    $form['form']['input'][] = array(
+                        'type'    => 'select',
+                        'name'    => 'FINANCE_STATUS_'.$ApiStatus['code'],
+                        'label'   => $ApiStatus['code'],
+                        'options' => array(
+                            'query' => $orderStatus,
+                            'id'    => 'id_order_state',
+                            'name'  => 'name',
+                        ),
+                    );
+                }
+            } catch (MerchantApiBadResponseException $e) {
+   
             }
-        }
+        }; 
+        
         return $form;
     }
 

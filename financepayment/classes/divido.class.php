@@ -27,6 +27,7 @@
 use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\Client;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
+use Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException;
 use GuzzleHttp\Client as Guzzle;
 
 class FinanceApi
@@ -124,7 +125,7 @@ class FinanceApi
                 }
             }
             return $plans_plain;
-        } catch (\Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException $e) {
+        } catch (MerchantApiBadResponseException $e) {
             // Handle exception how you like...
             // $e->getCode() | eg 400401
             // $e->getMessage() | eg resource not found
