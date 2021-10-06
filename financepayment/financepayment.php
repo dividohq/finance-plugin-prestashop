@@ -330,6 +330,10 @@ class FinancePayment extends PaymentModule
                 'legend' => array(
                 'title' => $this->l('settings_label'),
                 'icon' => 'icon-cogs',
+                
+                'error' => '',
+                'description' => '',
+
                 ),
                 'input' => array(
                     array(
@@ -363,9 +367,7 @@ class FinancePayment extends PaymentModule
 
                 Configuration::updateValue('FINANCE_ENVIRONMENT_URL', $multitenant_environment_url);
 
-                $form['form'][] = array(
-                    'description'  => 'URL: ' . Configuration::get('FINANCE_ENVIRONMENT_URL'),
-                );
+                $form['form']['description'] = $this->l('environment_url_label') . ': ' . $multitenant_environment_url;
             }
 
             try {
@@ -589,13 +591,15 @@ class FinancePayment extends PaymentModule
                     );
                 }
             } catch (Exception $e) {
-                $error_form = array(
-                    'form' => array(
-                        'error' => $this->l('bad_key_url_combination') . '<br>' . $e->getMessage(),
-                    ),
-                );
+                $form['form']['error'] = $this->l('bad_key_url_combination') . '<br>' . $e->getMessage();
 
-                return array_merge_recursive($error_form, $form);
+                // $error_form = array(
+                //     'form' => array(
+                //         'error' => $this->l('bad_key_url_combination') . '<br>' . $e->getMessage(),
+                //     ),
+                // );
+
+                // return array_merge_recursive($error_form, $form);
             }
         }; 
         
@@ -647,9 +651,9 @@ class FinancePayment extends PaymentModule
     protected function postProcess()
     {
         $displayedError = array();
-        if (!Tools::getValue('FINANCE_ENVIRONMENT_URL')) {
-            $displayedError[] = $this->l('environment_url_description');
-        }
+        // if (!Tools::getValue('FINANCE_ENVIRONMENT_URL')) {
+        //     $displayedError[] = $this->l('environment_url_description');
+        // }
 
         if (!Tools::getValue('FINANCE_API_KEY')) {
             $displayedError[] = $this->l('api_key_empty_error');
