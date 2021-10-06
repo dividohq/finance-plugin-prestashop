@@ -337,7 +337,6 @@ class FinancePayment extends PaymentModule
                         'name'  => 'FINANCE_ENVIRONMENT_URL',
                         'label' => $this->l('environment_url_label'),
                         'hint'  => $this->l('environment_url_description'),
-                        'required' => true,
                     ),
                     array(
                         'type'  => 'text',
