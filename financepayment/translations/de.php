@@ -16,6 +16,7 @@ $_MODULE['<{financepayment}prestashop>financepayment_55b514b537dff8bab844630b2a3
 $_MODULE['<{financepayment}prestashop>financepayment_d5dca379ade9be2637ab1e09dd300435'] = 'Pläne begrenzen';
 $_MODULE['<{financepayment}prestashop>financepayment_c18a091d9d0379ada62141baccba01fa'] = 'Wählen Sie die Pläne, die Sie Ihren Kunden zur Verfügung stellen möchten';
 $_MODULE['<{financepayment}prestashop>financepayment_27cf3c510542ac742814857f45abf924'] = 'Der Mindestbetrag, der für den Gesamtbetrag des Einkaufswagens erforderlich ist, damit die Finanzierung an der Kasse möglich ist';
+$_MODULE['<{financepayment}prestashop>financepayment_e40d5af75723b9acf16aae5f2db66fcc'] = 'Die Bestellung konnte nicht angelegt werden';
 $_MODULE['<{financepayment}prestashop>financepayment_1e7d6684c57db504040bea99826622fe'] = 'Der Name der Zahlungsoption an der Kasse';
 $_MODULE['<{financepayment}prestashop>financepayment_00d68226061e477ca1966317da675107'] = 'Die Beschreibung der Zahlungsoption an der Kasse';
 $_MODULE['<{financepayment}prestashop>financepayment_d5cd0f49bac62a9cbd22bd9d5ff176cb'] = 'Produktauswahl';
@@ -53,8 +54,14 @@ $_MODULE['<{financepayment}prestashop>financepayment_80b150ad0c829f30fc424670e36
 $_MODULE['<{financepayment}prestashop>financepayment_1aa86bba71e6ad6b491a0b0ff27faa55'] = 'Der maximale Betrag, den ein Einkaufswagen insgesamt kann, damit die Finanzierung an der Kasse eine Option darstellt';
 $_MODULE['<{financepayment}prestashop>financepayment_6c91586db92b999302face422dc0ae25'] = 'Verfügbar auf Finanzen';
 $_MODULE['<{financepayment}prestashop>financepayment_e1e94923500d26fd6f7070c2bf24bd61'] = 'Ausgewählte Pläne';
+$_MODULE['<{financepayment}prestashop>financepayment_c877aa8e9f18cf16cb4add7f6f950ffa'] = 'Bitte versuche es erneut';
 $_MODULE['<{financepayment}prestashop>financepayment_d1b27f6cadd2a8f096ddcd5b7695927a'] = 'Geschäftssprache verwenden?';
 $_MODULE['<{financepayment}prestashop>financepayment_86593094a845811c626d151a057394fd'] = 'Überschreiben Sie die Sprache des Finanzrechners mit der Sprache des Gebietsschemas';
+$_MODULE['<{financepayment}prestashop>financepayment_e73cc93e976ab46446bc48407bd4cf8b'] = 'Die Bestellung konnte nicht gefunden werden';
+$_MODULE['<{financepayment}prestashop>financepayment_4937a114e5c2734a8459f6d5a5c9472b'] = 'Bestellung wartet auf Antragsabschluss';
+$_MODULE['<{financepayment}prestashop>financepayment_8524dc0dad440ac3cc239860774bca95'] = 'Umgebungs-URL';
+$_MODULE['<{financepayment}prestashop>financepayment_514da4a46b63cc795b2af17e9e54f2cd'] = 'Bitte geben Sie die von Ihrem Finanzdienstleister bereitgestellte Umgebungs-URL ein';
+$_MODULE['<{financepayment}prestashop>financepayment_72e8066cf63a282ccb97f08481969192'] = 'financepayment-bad_key_url_combination';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Ihr Warenkorb scheint leer zu sein';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Error';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Bestätigen';

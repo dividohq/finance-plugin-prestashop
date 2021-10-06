@@ -16,6 +16,7 @@ $_MODULE['<{financepayment}prestashop>financepayment_55b514b537dff8bab844630b2a3
 $_MODULE['<{financepayment}prestashop>financepayment_d5dca379ade9be2637ab1e09dd300435'] = 'Planes de límite';
 $_MODULE['<{financepayment}prestashop>financepayment_c18a091d9d0379ada62141baccba01fa'] = 'Elija los planes que desea poner a disposición de sus clientes.';
 $_MODULE['<{financepayment}prestashop>financepayment_27cf3c510542ac742814857f45abf924'] = 'El monto mínimo necesario para que el carrito totalice para que las finanzas sean una opción al momento de pagar';
+$_MODULE['<{financepayment}prestashop>financepayment_e40d5af75723b9acf16aae5f2db66fcc'] = 'No se pudo crear el pedido.';
 $_MODULE['<{financepayment}prestashop>financepayment_1e7d6684c57db504040bea99826622fe'] = 'El nombre de la opción de pago al finalizar la compra';
 $_MODULE['<{financepayment}prestashop>financepayment_00d68226061e477ca1966317da675107'] = 'La descripción de la opción de pago al finalizar la compra';
 $_MODULE['<{financepayment}prestashop>financepayment_d5cd0f49bac62a9cbd22bd9d5ff176cb'] = 'Selección de producto';
@@ -53,8 +54,14 @@ $_MODULE['<{financepayment}prestashop>financepayment_80b150ad0c829f30fc424670e36
 $_MODULE['<{financepayment}prestashop>financepayment_1aa86bba71e6ad6b491a0b0ff27faa55'] = 'La cantidad máxima que un carrito puede totalizar para que las finanzas sean una opción al momento de pagar';
 $_MODULE['<{financepayment}prestashop>financepayment_6c91586db92b999302face422dc0ae25'] = 'Disponible en finanzas';
 $_MODULE['<{financepayment}prestashop>financepayment_e1e94923500d26fd6f7070c2bf24bd61'] = 'Planes seleccionados';
+$_MODULE['<{financepayment}prestashop>financepayment_c877aa8e9f18cf16cb4add7f6f950ffa'] = 'Inténtalo de nuevo';
 $_MODULE['<{financepayment}prestashop>financepayment_d1b27f6cadd2a8f096ddcd5b7695927a'] = '¿Usar el idioma de la tienda?';
 $_MODULE['<{financepayment}prestashop>financepayment_86593094a845811c626d151a057394fd'] = 'Anule el idioma de la calculadora financiera con el idioma de la tienda';
+$_MODULE['<{financepayment}prestashop>financepayment_e73cc93e976ab46446bc48407bd4cf8b'] = 'No se pudo encontrar el pedido';
+$_MODULE['<{financepayment}prestashop>financepayment_4937a114e5c2734a8459f6d5a5c9472b'] = 'Pedido pendiente de finalización de la solicitud';
+$_MODULE['<{financepayment}prestashop>financepayment_8524dc0dad440ac3cc239860774bca95'] = 'URL del entorno';
+$_MODULE['<{financepayment}prestashop>financepayment_514da4a46b63cc795b2af17e9e54f2cd'] = 'Inserte la URL del entorno proporcionada por su proveedor financiero.';
+$_MODULE['<{financepayment}prestashop>financepayment_72e8066cf63a282ccb97f08481969192'] = 'financepayment-bad_key_url_combination';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Tu carrito parece estar vacío';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Error';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Confirmar';
