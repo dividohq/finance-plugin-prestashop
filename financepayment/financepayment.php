@@ -357,6 +357,17 @@ class FinancePayment extends PaymentModule
             $api = new FinanceApi();
             $api_key = Configuration::get('FINANCE_API_KEY');
 
+            if (!Configuration::get('FINANCE_ENVIRONMENT_URL')) {
+                $env = Environment::getEnvironmentFromAPIKey($api_key);
+                $multitenant_environment_url = Environment::CONFIGURATION[$env]['base_uri'];
+
+                Configuration::updateValue('FINANCE_ENVIRONMENT_URL', $multitenant_environment_url);
+
+                $form['form'][] = array(
+                    'description'  => 'URL: ' . Configuration::get('FINANCE_ENVIRONMENT_URL'),
+                );
+            }
+
             try {
                 $finance_environment = $api->getFinanceEnv($api_key);
 
