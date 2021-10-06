@@ -1100,7 +1100,7 @@ class FinancePayment extends PaymentModule
             ->withDeliveryMethod($shipping_method)
             ->withTrackingNumber($tracking_numbers);
         // Create a new activation for the application.
-        $env = FinanceApi::getEnvironment($api_key);
+        $env = Environment::getEnvironmentFromAPIKey($api_key);
         $client = new \GuzzleHttp\Client();
         $httpClientWrapper = new HttpClientWrapper(
             new GuzzleAdapter($client),
@@ -1143,7 +1143,7 @@ class FinancePayment extends PaymentModule
         $applicationCancel = ( new \Divido\MerchantSDK\Models\ApplicationCancellation() )
             ->withOrderItems($items);
         // Create a new activation for the application.
-        $env                      = FinanceApi::getEnvironment($api_key);
+        $env                      = Environment::getEnvironmentFromAPIKey($api_key);
         $client                   = new \GuzzleHttp\Client();
         $httpClientWrapper        = new HttpClientWrapper(
             new GuzzleAdapter($client),
@@ -1182,7 +1182,7 @@ class FinancePayment extends PaymentModule
         $applicationRefund = ( new \Divido\MerchantSDK\Models\ApplicationRefund() )
             ->withOrderItems($items);
         // Create a new activation for the application.
-        $env                      = FinanceApi::getEnvironment($api_key);
+        $env                      = Environment::getEnvironmentFromAPIKey($api_key);
         $client                   = new \GuzzleHttp\Client();
         $httpClientWrapper        = new HttpClientWrapper(
             new GuzzleAdapter($client),

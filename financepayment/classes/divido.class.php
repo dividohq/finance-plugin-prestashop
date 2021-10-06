@@ -26,6 +26,7 @@
 
 use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\Client;
+use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 use Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException;
 use GuzzleHttp\Client as Guzzle;
@@ -64,7 +65,7 @@ class FinanceApi
         }
 
         $client = new Guzzle();
-        $env = $this->getEnvironment($api_key);
+        $env = Environment::getEnvironmentFromAPIKey($api_key);
         $httpClientWrapper = new HttpClientWrapper(
             new GuzzleAdapter($client),
             $environment_url,
@@ -92,7 +93,7 @@ class FinanceApi
         }
 
         $client = new Guzzle();
-        $env = $this->getEnvironment($api_key);
+        $env = Environment::getEnvironmentFromAPIKey($api_key);
 
         $httpClientWrapper = new HttpClientWrapper(
             new GuzzleAdapter($client),
@@ -234,7 +235,7 @@ class FinanceApi
         }
 
         $client = new Guzzle();
-        $env = $this->getEnvironment($api_key);
+        $env = Environment::getEnvironmentFromAPIKey($api_key);
         $httpClientWrapper = new HttpClientWrapper(
             new GuzzleAdapter($client),
             $environment_url,
