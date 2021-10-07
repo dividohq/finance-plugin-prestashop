@@ -334,7 +334,7 @@ class FinancePayment extends PaymentModule
                                 
                 'error' => '',
                 'description' => '',
-                
+
                 'input' => array(
                     array(
                         'type'  => 'text',
@@ -593,14 +593,6 @@ class FinancePayment extends PaymentModule
                 }
             } catch (Exception $e) {
                 $form['form']['error'] = $this->l('bad_key_url_combination') . '<br>' . $e->getMessage();
-
-                // $error_form = array(
-                //     'form' => array(
-                //         'error' => $this->l('bad_key_url_combination') . '<br>' . $e->getMessage(),
-                //     ),
-                // );
-
-                // return array_merge_recursive($error_form, $form);
             }
         }; 
         
@@ -652,9 +644,6 @@ class FinancePayment extends PaymentModule
     protected function postProcess()
     {
         $displayedError = array();
-        // if (!Tools::getValue('FINANCE_ENVIRONMENT_URL')) {
-        //     $displayedError[] = $this->l('environment_url_description');
-        // }
 
         if (!Tools::getValue('FINANCE_API_KEY')) {
             $displayedError[] = $this->l('api_key_empty_error');
