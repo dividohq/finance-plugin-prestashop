@@ -62,6 +62,7 @@ $_MODULE['<{financepayment}prestashop>financepayment_4937a114e5c2734a8459f6d5a5c
 $_MODULE['<{financepayment}prestashop>financepayment_8524dc0dad440ac3cc239860774bca95'] = 'Umgebungs-URL';
 $_MODULE['<{financepayment}prestashop>financepayment_514da4a46b63cc795b2af17e9e54f2cd'] = 'Bitte geben Sie die von Ihrem Finanzdienstleister bereitgestellte Umgebungs-URL ein';
 $_MODULE['<{financepayment}prestashop>financepayment_72e8066cf63a282ccb97f08481969192'] = 'financepayment-bad_key_url_combination';
+$_MODULE['<{financepayment}prestashop>financepayment_99d26adcf34fbba8c3926e77563ce8fb'] = 'financepayment-finance_no_plans';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Ihr Warenkorb scheint leer zu sein';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Error';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Bestätigen';

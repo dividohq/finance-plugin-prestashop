@@ -62,6 +62,7 @@ $_MODULE['<{financepayment}prestashop>financepayment_4937a114e5c2734a8459f6d5a5c
 $_MODULE['<{financepayment}prestashop>financepayment_8524dc0dad440ac3cc239860774bca95'] = 'Miljø -URL';
 $_MODULE['<{financepayment}prestashop>financepayment_514da4a46b63cc795b2af17e9e54f2cd'] = 'Indsæt venligst miljø -URL\'en fra din finansielle udbyder';
 $_MODULE['<{financepayment}prestashop>financepayment_72e8066cf63a282ccb97f08481969192'] = 'financepayment-bad_key_url_combination';
+$_MODULE['<{financepayment}prestashop>financepayment_99d26adcf34fbba8c3926e77563ce8fb'] = 'financepayment-finance_no_plans';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Din kurv ser ud til at være tom';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Fejl';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Bekræfte';
