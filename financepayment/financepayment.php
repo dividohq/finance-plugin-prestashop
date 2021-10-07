@@ -379,7 +379,7 @@ class FinancePayment extends PaymentModule
             try {
                 $finance_environment = $api->getFinanceEnv($api_key);
 
-                if (is_null($finance_environment)) {
+                if ($finance_environment === NULL) {
                     throw new Exception();
                 };
 
@@ -602,7 +602,7 @@ class FinancePayment extends PaymentModule
                     );
                 }
             } catch (NoFinancePlansException $e) {
-                $form['form']['warning'] = $this->l('no_finance_plans_exception');
+                $form['form']['warning'] = $this->l('finance_no_plans');
             } catch (Exception $e) {
                 $form['form']['error'] = $this->l('bad_key_url_combination') . '<br>' . $e->getMessage();
             }
