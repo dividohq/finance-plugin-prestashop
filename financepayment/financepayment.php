@@ -328,13 +328,13 @@ class FinancePayment extends PaymentModule
         $form = array(
             'form' => array(
                 'legend' => array(
-                'title' => $this->l('settings_label'),
-                'icon' => 'icon-cogs',
-                
+                    'title' => $this->l('settings_label'),
+                    'icon' => 'icon-cogs',
+                ),
+                                
                 'error' => '',
                 'description' => '',
-
-                ),
+                
                 'input' => array(
                     array(
                         'type'  => 'text',
