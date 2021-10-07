@@ -35,6 +35,10 @@ use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 
+class NoFinancePlansException extends Exception
+{
+}
+
 class FinancePayment extends PaymentModule
 {
     public $ps_below_7;
@@ -333,8 +337,9 @@ class FinancePayment extends PaymentModule
                 ),
                                 
                 'error' => '',
+                'warning' => '',
                 'description' => '',
-
+                
                 'input' => array(
                     array(
                         'type'  => 'text',
@@ -369,7 +374,7 @@ class FinancePayment extends PaymentModule
                 Configuration::updateValue('FINANCE_ENVIRONMENT_URL', $multitenant_environment_url);
 
                 $form['form']['description'] = $this->l('environment_url_label') . ': ' . $multitenant_environment_url;
-            }
+            };
 
             try {
                 $finance_environment = $api->getFinanceEnv($api_key);
@@ -381,6 +386,11 @@ class FinancePayment extends PaymentModule
                 Configuration::updateValue('FINANCE_ENVIRONMENT', $finance_environment);
 
                 $financePlans = $this->getPlans();
+
+                if ($financePlans === NULL) {
+                    throw new NoFinancePlansException();
+                };
+
                 $orderStatus = OrderState::getOrderStates($this->context->language->id);
                 $product_options = array(
                     array(
@@ -591,6 +601,8 @@ class FinancePayment extends PaymentModule
                         ),
                     );
                 }
+            } catch (NoFinancePlansException $e) {
+                $form['form']['warning'] = $this->l('no_finance_plans_exception');
             } catch (Exception $e) {
                 $form['form']['error'] = $this->l('bad_key_url_combination') . '<br>' . $e->getMessage();
             }
