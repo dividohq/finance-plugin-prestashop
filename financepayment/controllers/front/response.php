@@ -28,7 +28,6 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = true;
 
-
     public function postProcess()
     {
         $input = Tools::file_get_contents('php://input');
@@ -51,7 +50,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $cart_id   = $data->metadata->merchant_reference;
 
         $result = Db::getInstance()->getRow(
-            'SELECT * FROM `'._DB_PREFIX_.'divido_requests` WHERE `cart_id` = "'.(int)$cart_id.'"'
+            'SELECT * FROM `'._DB_PREFIX_.'divido_requests` WHERE `cart_id` = "'.(int) $cart_id.'"'
         );
 
         if (!$result) {
@@ -107,14 +106,14 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             return false;
         }
         $history = new OrderHistory();
-        $history->id_order = (int)$order->id;
-        $history->id_employee = (int)$id_employee;
-        $history->changeIdOrderState((int)$id_order_state, $order, true);
+        $history->id_order = (int) $order->id;
+        $history->id_employee = (int) $id_employee;
+        $history->changeIdOrderState((int) $id_order_state, $order, true);
         $res = Db::getInstance()->getRow(
             '
             SELECT `invoice_number`, `invoice_date`, `delivery_number`, `delivery_date`
             FROM `'._DB_PREFIX_.'orders`
-            WHERE `id_order` = '.(int)$order->id
+            WHERE `id_order` = '.(int) $order->id
         );
         $order->invoice_date = $res['invoice_date'];
         $order->invoice_number = $res['invoice_number'];
@@ -133,7 +132,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $customer = new Customer($cart->id_customer);
         $carrier = new Carrier($order->getIdOrderCarrier());
         $currency = new Currency($cart->id_currency);
-        $order_status = new OrderState((int)$id_order_state, (int)$order->id_lang);
+        $order_status = new OrderState((int) $id_order_state, (int) $order->id_lang);
         $cart_rules = $cart->getCartRules();
 
         // Construct order detail table for the email
@@ -143,32 +142,32 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $cart_rule_used = array();
         foreach ($product_list as $product) {
             $price = Product::getPriceStatic(
-                (int)$product['id_product'],
+                (int) $product['id_product'],
                 false,
-                ($product['id_product_attribute'] ? (int)$product['id_product_attribute'] : null),
+                ($product['id_product_attribute'] ? (int) $product['id_product_attribute'] : null),
                 6,
                 null,
                 false,
                 true,
                 $product['cart_quantity'],
                 false,
-                (int)$order->id_customer,
-                (int)$order->id_cart,
-                (int)$order->{Configuration::get('PS_TAX_ADDRESS_TYPE')}
+                (int) $order->id_customer,
+                (int) $order->id_cart,
+                (int) $order->{Configuration::get('PS_TAX_ADDRESS_TYPE')}
             );
             $price_wt = Product::getPriceStatic(
-                (int)$product['id_product'],
+                (int) $product['id_product'],
                 true,
-                ($product['id_product_attribute'] ? (int)$product['id_product_attribute'] : null),
+                ($product['id_product_attribute'] ? (int) $product['id_product_attribute'] : null),
                 2,
                 null,
                 false,
                 true,
                 $product['cart_quantity'],
                 false,
-                (int)$order->id_customer,
-                (int)$order->id_cart,
-                (int)$order->{Configuration::get('PS_TAX_ADDRESS_TYPE')}
+                (int) $order->id_customer,
+                (int) $order->id_cart,
+                (int) $order->{Configuration::get('PS_TAX_ADDRESS_TYPE')}
             );
 
             $product_price = Product::getTaxCalculationMethod() == PS_TAX_EXC ? Tools::ps_round(
@@ -202,7 +201,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $product_var_tpl['unit_price'] = $product_var_tpl['unit_price_full'] = '';
             }
 
-            $customized_datas = Product::getAllCustomizedDatas((int)$order->id_cart);
+            $customized_datas = Product::getAllCustomizedDatas((int) $order->id_cart);
             if (isset($customized_datas[$product['id_product']][$product['id_product_attribute']])) {
                 $product_var_tpl['customization'] = array();
                 $p_customized_datas = $customized_datas[$product['id_product']];
@@ -222,7 +221,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                         ).'<br />';
                     }
 
-                    $customization_quantity = (int)$product['customization_quantity'];
+                    $customization_quantity = (int) $product['customization_quantity'];
 
                     $product_var_tpl['customization'][] = array(
                         'customization_text' => $customization_text,
@@ -257,7 +256,6 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $product_var_tpl_list
             );
         }
-
 
         $cart_rules_list = array();
         $total_reduction_value_ti = 0;
@@ -296,7 +294,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             // THEN
             //  The voucher is cloned with a new value corresponding to the remainder
             $order_list = Db::getInstance()->executeS(
-                'SELECT * FROM `'._DB_PREFIX_.'orders` WHERE `id_cart` = "'.(int)$order->id_cart.'"'
+                'SELECT * FROM `'._DB_PREFIX_.'orders` WHERE `id_cart` = "'.(int) $order->id_cart.'"'
             );
             if (count($order_list) == 1
                 && $values['tax_incl'] > ($order->total_products_wt - $total_reduction_value_ti)
@@ -305,7 +303,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             ) {
                 // Create a new voucher from the original
                 // We need to instantiate the CartRule without lang parameter to allow saving it
-                $voucher = new CartRule((int)$cart_rule['obj']->id);
+                $voucher = new CartRule((int) $cart_rule['obj']->id);
                 unset($voucher->id);
 
                 // Set a new voucher code
@@ -322,7 +320,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 ) {
                     $voucher->code = preg_replace(
                         '/'.$matches[0].'$/',
-                        '-'.((int)($matches[1]) + 1),
+                        '-'.((int) ($matches[1]) + 1),
                         $voucher->code
                     );
                 }
@@ -376,10 +374,10 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                         '{order_name}' => $order->getUniqReference()
                     );
                     Mail::Send(
-                        (int)$order->id_lang,
+                        (int) $order->id_lang,
                         'voucher',
                         sprintf(
-                            Mail::l('New voucher for your order %s', (int)$order->id_lang),
+                            Mail::l('New voucher for your order %s', (int) $order->id_lang),
                             $order->reference
                         ),
                         $params,
@@ -391,7 +389,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                         null,
                         _PS_MAIL_DIR_,
                         false,
-                        (int)$order->id_shop
+                        (int) $order->id_shop
                     );
                 }
 
@@ -420,7 +418,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $cart_rule_used[] = $cart_rule['obj']->id;
 
                 // Create a new instance of Cart Rule without id_lang, in order to update its quantity
-                $cart_rule_to_update = new CartRule((int)$cart_rule['obj']->id);
+                $cart_rule_to_update = new CartRule((int) $cart_rule['obj']->id);
                 $cart_rule_to_update->quantity = max(0, $cart_rule_to_update->quantity - 1);
                 $cart_rule_to_update->update();
             }
@@ -448,16 +446,15 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             );
         }
 
-
         // Send an e-mail to customer (one order = one email)
         if ($id_order_state != Configuration::get('PS_OS_ERROR')
             && $id_order_state != Configuration::get('PS_OS_CANCELED')
             && $customer->id
         ) {
-            $invoice = new Address((int)$order->id_address_invoice);
-            $delivery = new Address((int)$order->id_address_delivery);
-            $delivery_state = $delivery->id_state ? new State((int)$delivery->id_state) : false;
-            $invoice_state = $invoice->id_state ? new State((int)$invoice->id_state) : false;
+            $invoice = new Address((int) $order->id_address_invoice);
+            $delivery = new Address((int) $order->id_address_delivery);
+            $delivery_state = $delivery->id_state ? new State((int) $delivery->id_state) : false;
+            $invoice_state = $invoice->id_state ? new State((int) $invoice->id_state) : false;
             $tax_method = Product::getTaxCalculationMethod();
             $data = array(
                 '{firstname}' => $customer->firstname,
@@ -539,7 +536,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             }
 
             // Join PDF invoice
-            if ((int)Configuration::get('PS_INVOICE')
+            if ((int) Configuration::get('PS_INVOICE')
                 && $order_status->invoice
                 && $order->invoice_number
             ) {
@@ -550,7 +547,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $file_attachement['content'] = $pdf->render(false);
                 $file_attachement['name'] = Configuration::get(
                     'PS_INVOICE_PREFIX',
-                    (int)$order->id_lang,
+                    (int) $order->id_lang,
                     null,
                     $order->id_shop
                 ).sprintf('%06d', $order->invoice_number).'.pdf';
@@ -565,16 +562,16 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                     1,
                     null,
                     'Cart',
-                    (int)$id_cart,
+                    (int) $id_cart,
                     true
                 );
             }
 
             if (Validate::isEmail($customer->email)) {
                 Mail::Send(
-                    (int)$order->id_lang,
+                    (int) $order->id_lang,
                     'order_conf',
-                    Mail::l('Order confirmation', (int)$order->id_lang),
+                    Mail::l('Order confirmation', (int) $order->id_lang),
                     $data,
                     $customer->email,
                     $customer->firstname.' '.$customer->lastname,
@@ -584,7 +581,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                     null,
                     _PS_MAIL_DIR_,
                     false,
-                    (int)$order->id_shop
+                    (int) $order->id_shop
                 );
             }
         }
@@ -608,6 +605,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         foreach ($pathToFindEmail as $path) {
             if (Tools::file_exists_cache($path)) {
                 $this->context->smarty->assign('list', $var);
+
                 return $this->context->smarty->fetch($path);
             }
         }
@@ -637,6 +635,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
     {
         $hmac      = hash_hmac('sha256', $payload, $secret, true);
         $signature = base64_encode($hmac);
+
         return $signature;
     }
 }

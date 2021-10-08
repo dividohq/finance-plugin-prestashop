@@ -24,10 +24,10 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\Client;
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
+use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use GuzzleHttp\Client as Guzzle;
 
 class FinancePaymentValidationModuleFrontController extends ModuleFrontController
@@ -91,6 +91,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         foreach (Module::getPaymentModules() as $module) {
             if ($module['name'] == $this->module->name) {
                 $authorized = true;
+
                 break;
             }
         }
@@ -117,7 +118,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $address = new Address($cart->id_address_invoice);
         $country = Country::getIsoById($address->id_country);
 
-        //
         if (gettype($this->context->language)==="integer") {
             $language = Language::getIsoById($this->context->language);
         } else {
@@ -146,13 +146,13 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
                 'name' => $product['name'],
                 'quantity' => $product['quantity'],
-                'price' => (int)($product['price_wt']*100),
+                'price' => (int) ($product['price_wt']*100),
             );
         }
 
-        $sub_total = round((float)$cart->getOrderTotal(true, Cart::BOTH) , 2);
-        $shiphandle = round((float)$cart->getOrderTotal(true, Cart::ONLY_SHIPPING), 2);
-        $discount = round((float)$cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS), 2);
+        $sub_total = round((float) $cart->getOrderTotal(true, Cart::BOTH), 2);
+        $shiphandle = round((float) $cart->getOrderTotal(true, Cart::ONLY_SHIPPING), 2);
+        $discount = round((float) $cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS), 2);
 
         $products[] = array(
             'name'     => 'Shipping & Handling',
@@ -219,7 +219,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         ->withOrderItems($products)
         ->withDepositAmount($deposit)
         ->withFinalisationRequired(false)
-        ->withMerchantReference((string)$cart_id)
+        ->withMerchantReference((string) $cart_id)
         ->withUrls(
             array (
                 'merchant_redirect_url' => $redirect_url,
@@ -253,6 +253,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     array(),
                     array ('Content-Type' => 'application/json')
                 );
+
         try {
                 $application_response_body = $response->getBody()->getContents();
                 $decode                    = json_decode($application_response_body);
@@ -269,7 +270,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                         $this->module->displayName,
                         null,
                         array('transaction_id' => $decode->data->id),
-                        (int)$cart->id_currency,
+                        (int) $cart->id_currency,
                         false,
                         $customer->secure_key
                     );
@@ -279,22 +280,23 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 'message' => Tools::displayError($e->getMessage()),
             );
         }
+
          return $data;
     }
 
     public function saveHash($cart_id, $salt, $total)
     {
         $data = array(
-            'cart_id' => (int)$cart_id,
+            'cart_id' => (int) $cart_id,
             'hash' => pSQL($salt),
             'total' => pSQL($total),
         );
         $result = Db::getInstance()->getRow(
-            'SELECT * FROM `'._DB_PREFIX_.'divido_requests` WHERE `cart_id` = "'.(int)$cart_id.'"'
+            'SELECT * FROM `'._DB_PREFIX_.'divido_requests` WHERE `cart_id` = "'.(int) $cart_id.'"'
         );
 
         if ($result) {
-            Db::getInstance()->update('divido_requests', $data, '`cart_id` = "'.(int)$cart_id.'"');
+            Db::getInstance()->update('divido_requests', $data, '`cart_id` = "'.(int) $cart_id.'"');
         } else {
             Db::getInstance()->insert('divido_requests', $data);
         }
@@ -318,7 +320,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 1,
                 null,
                 'Cart',
-                (int)$id_cart,
+                (int) $id_cart,
                 true
             );
         }
@@ -326,30 +328,31 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         if (!isset($this->context)) {
             $this->context = Context::getContext();
         }
-        $this->context->cart = new Cart((int)$id_cart);
-        $this->context->customer = new Customer((int)$this->context->cart->id_customer);
+        $this->context->cart = new Cart((int) $id_cart);
+        $this->context->customer = new Customer((int) $this->context->cart->id_customer);
         // The tax cart is loaded before the customer so re-cache the tax calculation method
         $this->context->cart->setTaxCalculationMethod();
 
-        $this->context->language = new Language((int)$this->context->cart->id_lang);
-        $this->context->shop = ($shop ? $shop : new Shop((int)$this->context->cart->id_shop));
+        $this->context->language = new Language((int) $this->context->cart->id_lang);
+        $this->context->shop = ($shop ? $shop : new Shop((int) $this->context->cart->id_shop));
         ShopUrl::resetMainDomainCache();
-        $id_currency = $currency_special ? (int)$currency_special : (int)$this->context->cart->id_currency;
-        $this->context->currency = new Currency((int)$id_currency, null, (int)$this->context->shop->id);
+        $id_currency = $currency_special ? (int) $currency_special : (int) $this->context->cart->id_currency;
+        $this->context->currency = new Currency((int) $id_currency, null, (int) $this->context->shop->id);
         if (Configuration::get('PS_TAX_ADDRESS_TYPE') == 'id_address_delivery') {
             $context_country = $this->context->country;
         }
 
-        $order_status = new OrderState((int)$id_order_state, (int)$this->context->language->id);
+        $order_status = new OrderState((int) $id_order_state, (int) $this->context->language->id);
         if (!Validate::isLoadedObject($order_status)) {
             PrestaShopLogger::addLog(
                 'PaymentModule::validateOrder - Order Status cannot be loaded',
                 3,
                 null,
                 'Cart',
-                (int)$id_cart,
+                (int) $id_cart,
                 true
             );
+
             throw new PrestaShopException('Can\'t load Order status');
         }
 
@@ -359,7 +362,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 3,
                 null,
                 'Cart',
-                (int)$id_cart,
+                (int) $id_cart,
                 true
             );
             die(Tools::displayError());
@@ -373,7 +376,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     3,
                     null,
                     'Cart',
-                    (int)$id_cart,
+                    (int) $id_cart,
                     true
                 );
                 die(Tools::displayError('Secure key does not match'));
@@ -390,6 +393,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 ) {
                     foreach (array_keys($package) as $key) {
                         $cart_delivery_option[$id_address] = $key;
+
                         break;
                     }
                 }
@@ -404,8 +408,8 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             $this->module->currentOrderReference = $reference;
 
             $order_creation_failed = false;
-            $cart_total_paid = (float)Tools::ps_round(
-                (float)$this->context->cart->getOrderTotal(true, Cart::BOTH),
+            $cart_total_paid = (float) Tools::ps_round(
+                (float) $this->context->cart->getOrderTotal(true, Cart::BOTH),
                 2
             );
 
@@ -415,9 +419,9 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     foreach ($data['package_list'] as $id_package) {
                         // Rewrite the id_warehouse
                         $package_list[$id_address][$id_package]['id_warehouse'] =
-                        (int)$this->context->cart->getPackageIdWarehouse(
+                        (int) $this->context->cart->getPackageIdWarehouse(
                             $package_list[$id_address][$id_package],
-                            (int)$id_carrier
+                            (int) $id_carrier
                         );
                         $package_list[$id_address][$id_package]['id_carrier'] = $id_carrier;
                     }
@@ -427,9 +431,9 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             CartRule::cleanCache();
             $cart_rules = $this->context->cart->getCartRules();
             foreach ($cart_rules as $cart_rule) {
-                if (($rule = new CartRule((int)$cart_rule['obj']->id)) && Validate::isLoadedObject($rule)) {
+                if (($rule = new CartRule((int) $cart_rule['obj']->id)) && Validate::isLoadedObject($rule)) {
                     if ($error = $rule->checkValidity($this->context, true, true)) {
-                        $this->context->cart->removeCartRule((int)$rule->id);
+                        $this->context->cart->removeCartRule((int) $rule->id);
                         if (isset($this->context->cookie)
                             && isset($this->context->cookie->id_customer)
                             && $this->context->cookie->id_customer
@@ -449,14 +453,14 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                             );
                         } else {
                             $rule_name = isset(
-                                $rule->name[(int)$this->context->cart->id_lang]
-                            ) ? $rule->name[(int)$this->context->cart->id_lang] : $rule->code;
+                                $rule->name[(int) $this->context->cart->id_lang]
+                            ) ? $rule->name[(int) $this->context->cart->id_lang] : $rule->code;
                             $error = sprintf(
                                 Tools::displayError(
                                     'CartRule ID %1s (%2s) used in this cart is not valid
                                      and has been withdrawn from cart'
                                 ),
-                                (int)$rule->id,
+                                (int) $rule->id,
                                 $rule_name
                             );
                             PrestaShopLogger::addLog(
@@ -464,7 +468,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                                 3,
                                 '0000002',
                                 'Cart',
-                                (int)$this->context->cart->id
+                                (int) $this->context->cart->id
                             );
                         }
                     }
@@ -479,10 +483,10 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     $order->product_list = $package['product_list'];
 
                     if (Configuration::get('PS_TAX_ADDRESS_TYPE') == 'id_address_delivery') {
-                        $address = new Address((int)$id_address);
+                        $address = new Address((int) $id_address);
                         $this->context->country = new Country(
-                            (int)$address->id_country,
-                            (int)$this->context->cart->id_lang
+                            (int) $address->id_country,
+                            (int) $this->context->cart->id_lang
                         );
                         if (!$this->context->country->active) {
                             throw new PrestaShopException('The delivery address country is not active.');
@@ -492,25 +496,25 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     $carrier = null;
                     if (!$this->context->cart->isVirtualCart() && isset($package['id_carrier'])) {
                         $carrier = new Carrier(
-                            (int)$package['id_carrier'],
-                            (int)$this->context->cart->id_lang
+                            (int) $package['id_carrier'],
+                            (int) $this->context->cart->id_lang
                         );
-                        $order->id_carrier = (int)$carrier->id;
-                        $id_carrier = (int)$carrier->id;
+                        $order->id_carrier = (int) $carrier->id;
+                        $id_carrier = (int) $carrier->id;
                     } else {
                         $order->id_carrier = 0;
                         $id_carrier = 0;
                     }
 
-                    $order->id_customer = (int)$this->context->cart->id_customer;
-                    $order->id_address_invoice = (int)$this->context->cart->id_address_invoice;
-                    $order->id_address_delivery = (int)$id_address;
+                    $order->id_customer = (int) $this->context->cart->id_customer;
+                    $order->id_address_invoice = (int) $this->context->cart->id_address_invoice;
+                    $order->id_address_delivery = (int) $id_address;
                     $order->id_currency = $this->context->currency->id;
-                    $order->id_lang = (int)$this->context->cart->id_lang;
-                    $order->id_cart = (int)$this->context->cart->id;
+                    $order->id_lang = (int) $this->context->cart->id_lang;
+                    $order->id_cart = (int) $this->context->cart->id;
                     $order->reference = $reference;
-                    $order->id_shop = (int)$this->context->shop->id;
-                    $order->id_shop_group = (int)$this->context->shop->id_shop_group;
+                    $order->id_shop = (int) $this->context->shop->id;
+                    $order->id_shop_group = (int) $this->context->shop->id_shop_group;
 
                     $order->secure_key = (
                         $secure_key ? pSQL($secure_key) : pSQL($this->context->customer->secure_key)
@@ -520,29 +524,29 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                         $order->module = $this->module->name;
                     }
                     $order->recyclable = $this->context->cart->recyclable;
-                    $order->gift = (int)$this->context->cart->gift;
+                    $order->gift = (int) $this->context->cart->gift;
                     $order->gift_message = $this->context->cart->gift_message;
                     $order->mobile_theme = $this->context->cart->mobile_theme;
                     $order->conversion_rate = $this->context->currency->conversion_rate;
                     $amount_paid = !$dont_touch_amount ? Tools::ps_round(
-                        (float)$amount_paid,
+                        (float) $amount_paid,
                         2
                     ) : $amount_paid;
                     $order->total_paid_real = 0;
 
-                    $order->total_products = (float)$this->context->cart->getOrderTotal(
+                    $order->total_products = (float) $this->context->cart->getOrderTotal(
                         false,
                         Cart::ONLY_PRODUCTS,
                         $order->product_list,
                         $id_carrier
                     );
-                    $order->total_products_wt = (float)$this->context->cart->getOrderTotal(
+                    $order->total_products_wt = (float) $this->context->cart->getOrderTotal(
                         true,
                         Cart::ONLY_PRODUCTS,
                         $order->product_list,
                         $id_carrier
                     );
-                    $order->total_discounts_tax_excl = (float)abs(
+                    $order->total_discounts_tax_excl = (float) abs(
                         $this->context->cart->getOrderTotal(
                             false,
                             Cart::ONLY_DISCOUNTS,
@@ -550,7 +554,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                             $id_carrier
                         )
                     );
-                    $order->total_discounts_tax_incl = (float)abs(
+                    $order->total_discounts_tax_incl = (float) abs(
                         $this->context->cart->getOrderTotal(
                             true,
                             Cart::ONLY_DISCOUNTS,
@@ -560,14 +564,14 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     );
                     $order->total_discounts = $order->total_discounts_tax_incl;
 
-                    $order->total_shipping_tax_excl = (float)$this->context->cart->getPackageShippingCost(
-                        (int)$id_carrier,
+                    $order->total_shipping_tax_excl = (float) $this->context->cart->getPackageShippingCost(
+                        (int) $id_carrier,
                         false,
                         null,
                         $order->product_list
                     );
-                    $order->total_shipping_tax_incl = (float)$this->context->cart->getPackageShippingCost(
-                        (int)$id_carrier,
+                    $order->total_shipping_tax_incl = (float) $this->context->cart->getPackageShippingCost(
+                        (int) $id_carrier,
                         true,
                         null,
                         $order->product_list
@@ -577,12 +581,12 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     if (!is_null($carrier) && Validate::isLoadedObject($carrier)) {
                         $order->carrier_tax_rate = $carrier->getTaxesRate(
                             new Address(
-                                (int)$this->context->cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')}
+                                (int) $this->context->cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')}
                             )
                         );
                     }
 
-                    $order->total_wrapping_tax_excl = (float)abs(
+                    $order->total_wrapping_tax_excl = (float) abs(
                         $this->context->cart->getOrderTotal(
                             false,
                             Cart::ONLY_WRAPPING,
@@ -590,7 +594,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                             $id_carrier
                         )
                     );
-                    $order->total_wrapping_tax_incl = (float)abs(
+                    $order->total_wrapping_tax_incl = (float) abs(
                         $this->context->cart->getOrderTotal(
                             true,
                             Cart::ONLY_WRAPPING,
@@ -600,8 +604,8 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     );
                     $order->total_wrapping = $order->total_wrapping_tax_incl;
 
-                    $order->total_paid_tax_excl = (float)Tools::ps_round(
-                        (float)$this->context->cart->getOrderTotal(
+                    $order->total_paid_tax_excl = (float) Tools::ps_round(
+                        (float) $this->context->cart->getOrderTotal(
                             false,
                             Cart::BOTH,
                             $order->product_list,
@@ -609,8 +613,8 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                         ),
                         _PS_PRICE_COMPUTE_PRECISION_
                     );
-                    $order->total_paid_tax_incl = (float)Tools::ps_round(
-                        (float)$this->context->cart->getOrderTotal(
+                    $order->total_paid_tax_incl = (float) Tools::ps_round(
+                        (float) $this->context->cart->getOrderTotal(
                             true,
                             Cart::BOTH,
                             $order->product_list,
@@ -631,7 +635,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                             1,
                             null,
                             'Cart',
-                            (int)$id_cart,
+                            (int) $id_cart,
                             true
                         );
                     }
@@ -645,9 +649,10 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                             3,
                             null,
                             'Cart',
-                            (int)$id_cart,
+                            (int) $id_cart,
                             true
                         );
+
                         throw new PrestaShopException('Can\'t save Order');
                     }
 
@@ -673,7 +678,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                             1,
                             null,
                             'Cart',
-                            (int)$id_cart,
+                            (int) $id_cart,
                             true
                         );
                     }
@@ -697,7 +702,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                             1,
                             null,
                             'Cart',
-                            (int)$id_cart,
+                            (int) $id_cart,
                             true
                         );
                     }
@@ -705,11 +710,11 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     // Adding an entry in order_carrier table
                     if (!is_null($carrier)) {
                         $order_carrier = new OrderCarrier();
-                        $order_carrier->id_order = (int)$order->id;
-                        $order_carrier->id_carrier = (int)$id_carrier;
-                        $order_carrier->weight = (float)$order->getTotalWeight();
-                        $order_carrier->shipping_cost_tax_excl = (float)$order->total_shipping_tax_excl;
-                        $order_carrier->shipping_cost_tax_incl = (float)$order->total_shipping_tax_incl;
+                        $order_carrier->id_order = (int) $order->id;
+                        $order_carrier->id_carrier = (int) $id_carrier;
+                        $order_carrier->weight = (float) $order->getTotalWeight();
+                        $order_carrier->shipping_cost_tax_excl = (float) $order->total_shipping_tax_excl;
+                        $order_carrier->shipping_cost_tax_incl = (float) $order->total_shipping_tax_incl;
                         $order_carrier->add();
                     }
                 }
@@ -727,9 +732,10 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     3,
                     null,
                     'Cart',
-                    (int)$id_cart,
+                    (int) $id_cart,
                     true
                 );
+
                 throw new PrestaShopException('The order address country is not active.');
             }
 
@@ -739,7 +745,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     1,
                     null,
                     'Cart',
-                    (int)$id_cart,
+                    (int) $id_cart,
                     true
                 );
             }
@@ -763,9 +769,10 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                         3,
                         null,
                         'Cart',
-                        (int)$id_cart,
+                        (int) $id_cart,
                         true
                     );
+
                     throw new PrestaShopException('Can\'t save Order Payment');
                 }
             }
@@ -795,14 +802,14 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                                     1,
                                     null,
                                     'Cart',
-                                    (int)$id_cart,
+                                    (int) $id_cart,
                                     true
                                 );
                             }
                             $msg->message = $message;
-                            $msg->id_cart = (int)$id_cart;
-                            $msg->id_customer = (int)($order->id_customer);
-                            $msg->id_order = (int)$order->id;
+                            $msg->id_cart = (int) $id_cart;
+                            $msg->id_customer = (int) ($order->id_customer);
+                            $msg->id_order = (int) $order->id;
                             $msg->private = 1;
                             $msg->add();
                         }
@@ -812,21 +819,20 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     //$orderDetail = new OrderDetail(null, null, $this->context);
                     //$orderDetail->createList($order, $this->context->cart, $id_order_state);
 
-
                     // Specify order id for message
-                    $old_message = Message::getMessageByCartId((int)$this->context->cart->id);
+                    $old_message = Message::getMessageByCartId((int) $this->context->cart->id);
                     if ($old_message && !$old_message['private']) {
-                        $update_message = new Message((int)$old_message['id_message']);
-                        $update_message->id_order = (int)$order->id;
+                        $update_message = new Message((int) $old_message['id_message']);
+                        $update_message->id_order = (int) $order->id;
                         $update_message->update();
 
                         // Add this message in the customer thread
                         $customer_thread = new CustomerThread();
                         $customer_thread->id_contact = 0;
-                        $customer_thread->id_customer = (int)$order->id_customer;
-                        $customer_thread->id_shop = (int)$this->context->shop->id;
-                        $customer_thread->id_order = (int)$order->id;
-                        $customer_thread->id_lang = (int)$this->context->language->id;
+                        $customer_thread->id_customer = (int) $order->id_customer;
+                        $customer_thread->id_shop = (int) $this->context->shop->id;
+                        $customer_thread->id_order = (int) $order->id;
+                        $customer_thread->id_lang = (int) $this->context->language->id;
                         $customer_thread->email = $this->context->customer->email;
                         $customer_thread->status = 'open';
                         $customer_thread->token = Tools::passwdGen(12);
@@ -849,7 +855,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                             1,
                             null,
                             'Cart',
-                            (int)$id_cart,
+                            (int) $id_cart,
                             true
                         );
                     }
@@ -869,8 +875,8 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     foreach ($this->context->cart->getProducts() as $product) {
                         if ($order_status->logable) {
                             ProductSale::addProductSale(
-                                (int)$product['id_product'],
-                                (int)$product['cart_quantity']
+                                (int) $product['id_product'],
+                                (int) $product['cart_quantity']
                             );
                         }
                     }
@@ -881,15 +887,15 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                             1,
                             null,
                             'Cart',
-                            (int)$id_cart,
+                            (int) $id_cart,
                             true
                         );
                     }
 
                     // Set the order status
                     $new_history = new OrderHistory();
-                    $new_history->id_order = (int)$order->id;
-                    $new_history->changeIdOrderState((int)$id_order_state, $order, true);
+                    $new_history->id_order = (int) $order->id;
+                    $new_history->changeIdOrderState((int) $id_order_state, $order, true);
                     $new_history->addWithemail(true, $extra_vars);
 
                     // Switch to back order if needed
@@ -897,7 +903,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                         && ($order_detail->getStockState() || $order_detail->product_quantity_in_stock <= 0)
                     ) {
                         $history = new OrderHistory();
-                        $history->id_order = (int)$order->id;
+                        $history->id_order = (int) $order->id;
                         $history->changeIdOrderState(
                             Configuration::get(
                                 $order->valid ? 'PS_OS_OUTOFSTOCK_PAID' : 'PS_OS_OUTOFSTOCK_UNPAID'
@@ -911,7 +917,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     unset($order_detail);
 
                     // Order is reloaded because the status just changed
-                    $order = new Order((int)$order->id);
+                    $order = new Order((int) $order->id);
 
                     // updates stock in shops
                     if (Configuration::get('PS_ADVANCED_STOCK_MANAGEMENT')) {
@@ -929,23 +935,23 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     if (!$this->module->ps_below_7) {
                         // sync all stock
                         (new PrestaShop\PrestaShop\Adapter\StockManager())->updatePhysicalProductQuantity(
-                            (int)$order->id_shop,
-                            (int)Configuration::get('PS_OS_ERROR'),
-                            (int)Configuration::get('PS_OS_CANCELED'),
+                            (int) $order->id_shop,
+                            (int) Configuration::get('PS_OS_ERROR'),
+                            (int) Configuration::get('PS_OS_CANCELED'),
                             null,
-                            (int)$order->id
+                            (int) $order->id
                         );
                     }
                 } else {
                     $error = Tools::displayError('Order creation failed');
-                    PrestaShopLogger::addLog($error, 4, '0000002', 'Cart', (int)($order->id_cart));
+                    PrestaShopLogger::addLog($error, 4, '0000002', 'Cart', (int) ($order->id_cart));
                     die($error);
                 }
             } // End foreach $order_detail_list
 
             // Use the last order as currentOrder
             if (isset($order) && $order->id) {
-                $this->module->currentOrder = (int)$order->id;
+                $this->module->currentOrder = (int) $order->id;
             }
 
             if (self::DEBUG_MODE) {
@@ -954,16 +960,17 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     1,
                     null,
                     'Cart',
-                    (int)$id_cart,
+                    (int) $id_cart,
                     true
                 );
             }
+
             return true;
         } else {
             $error = Tools::displayError(
                 'Cart cannot be loaded or an order has already been placed using this cart'
             );
-            PrestaShopLogger::addLog($error, 4, '0000001', 'Cart', (int)($this->context->cart->id));
+            PrestaShopLogger::addLog($error, 4, '0000001', 'Cart', (int) ($this->context->cart->id));
             die($error);
         }
     }
