@@ -24,11 +24,11 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\Client;
 use Divido\MerchantSDK\Environment;
-use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 use Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException;
+use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
+use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use GuzzleHttp\Client as Guzzle;
 
 class FinanceApi
@@ -53,7 +53,6 @@ class FinanceApi
 
         return $plans;
     }
-
 
     public function getFinanceEnv($api_key)
     {
@@ -124,6 +123,7 @@ class FinanceApi
                     $plans_plain[$plan->id] = $plan_copy;
                 }
             }
+
             return $plans_plain;
         } catch (MerchantApiBadResponseException $e) {
             // Handle exception how you like...
@@ -143,6 +143,7 @@ class FinanceApi
                 $plans = array_merge($plans, $product_plans);
             }
         }
+
         return $plans;
     }
 
@@ -163,7 +164,6 @@ class FinanceApi
 
         $product_selection = Configuration::get('FINANCE_PRODUCTS_OPTIONS');
         $price_threshold   = Configuration::get('FINANCE_PRODUCTS_MINIMUM');
-
 
         $plans = $this->getPlans(true);
 
@@ -210,21 +210,20 @@ class FinanceApi
 
     public static function getProductSettings($id_product)
     {
-        $query = "select * from `"._DB_PREFIX_."finance_product` where id_product = '".(int)$id_product."'";
+        $query = "select * from `"._DB_PREFIX_."finance_product` where id_product = '".(int) $id_product."'";
 
         return Db::getInstance()->getRow($query);
     }
-
 
     public function getEnvironment($key)
     {
         $array       = explode('_', $key);
         $environment = Tools::strtoupper($array[0]);
+
         return ('LIVE' == $environment)
             ? constant("Divido\MerchantSDK\Environment::PRODUCTION")
             : constant("Divido\MerchantSDK\Environment::$environment");
     }
-
 
     public function setLender()
     {
