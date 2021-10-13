@@ -140,7 +140,7 @@ class FinanceApi
         if (isset($decoded->data->environment) ) {
             return $decoded->data->environment;
         } else {
-            throw new BadApiKeyException();
+            return null;
         }
     }
 

@@ -397,7 +397,7 @@ class FinancePayment extends PaymentModule
 
                 $finance_environment = $api->getFinanceEnv($api_key);
 
-                if (!$finance_environment) {
+                if ($finance_environment === NULL) {
                     throw new BadApiKeyException();
                 }
 
