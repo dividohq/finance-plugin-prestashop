@@ -123,7 +123,6 @@ class FinanceApi
     public function getFinanceEnv($api_key)
     {
         $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
-        $api_key = Configuration::get('FINANCE_API_KEY');
 
         if (!$environment_url || !$api_key) {
             return array();
