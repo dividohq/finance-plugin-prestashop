@@ -31,11 +31,11 @@ if (!defined('_PS_VERSION_')) {
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/classes/divido.class.php';
 
-use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\Environment;
-use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
-use Divido\MerchantSDK\Exceptions\InvalidEnvironmentException;
 use Divido\MerchantSDK\Exceptions\InvalidApiKeyFormatException;
+use Divido\MerchantSDK\Exceptions\InvalidEnvironmentException;
+use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
+use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 
 class NoFinancePlansException extends Exception
 {
@@ -48,6 +48,7 @@ class BadApiKeyException extends Exception
 class FinancePayment extends PaymentModule
 {
     public $ps_below_7;
+
     public $ApiOrderStatus = array(
         array(
             'code' => 'ACCEPTED',
@@ -146,27 +147,33 @@ class FinancePayment extends PaymentModule
                 case 'DEFERRED':
                 case 'REFERRED':
                     $status = Configuration::get('PS_OS_PREPARATION');
+
                     break;
 
                 case 'SIGNED':
                 case 'READY':
                 case 'COMPLETED':
                     $status = Configuration::get('PS_OS_PAYMENT');
+
                     break;
 
                 case 'CANCELED':
                 case 'DECLINED':
                     $status = Configuration::get('PS_OS_CANCELED');
+
                     break;
 
                 case 'FULFILLED':
                     $status = Configuration::get('PS_OS_DELIVERED');
+
                     break;
                 default:
                     $status = Configuration::get('PS_OS_PREPARATION');
+
                     break;
                 case 'REFUNDED':
                     $status = Configuration::get('PS_OS_REFUNDED');
+
                     break;
             }
             Configuration::updateValue('FINANCE_STATUS_'.$ApiStatus['code'], $status);
@@ -199,6 +206,7 @@ class FinancePayment extends PaymentModule
         /*------------------Handle hooks according to version-------------------*/
         if ($this->ps_below_7 && !$this->registerHook('payment')) {
             Configuration::updateValue('FINANCE_PAYMENT_DESCRIPTION', $this->displayName);
+
             return false;
         } elseif (!$this->ps_below_7 && !$this->registerHook('paymentOptions')) {
             return false;
@@ -231,9 +239,10 @@ class FinancePayment extends PaymentModule
         $order_state->paid = $status['paid'];
         if ($order_state->add()) {
             if (file_exists(dirname(__FILE__).'/logo.gif')) {
-                copy(dirname(__FILE__).'/logo.gif', dirname(__FILE__).'/../../img/os/'.(int)$order_state->id.'.gif');
+                copy(dirname(__FILE__).'/logo.gif', dirname(__FILE__).'/../../img/os/'.(int) $order_state->id.'.gif');
             }
         }
+
         return $order_state->id;
     }
 
@@ -278,8 +287,8 @@ class FinancePayment extends PaymentModule
         if (Validate::isLoadedObject($order_state)) {
             $order_state->delete();
             Configuration::deleteByName('FINANCE_AWAITING_STATUS');
-            if (file_exists(dirname(__FILE__).'/../../img/os/'.(int)$order_state->id.'.gif')) {
-                unlink(dirname(__FILE__).'/../../img/os/'.(int)$order_state->id.'.gif');
+            if (file_exists(dirname(__FILE__).'/../../img/os/'.(int) $order_state->id.'.gif')) {
+                unlink(dirname(__FILE__).'/../../img/os/'.(int) $order_state->id.'.gif');
             }
         }
         include_once dirname(__FILE__).'/sql/uninstall.php';
@@ -296,9 +305,10 @@ class FinancePayment extends PaymentModule
          * If values have been submitted in the form, process.
          */
         $error = '';
-        if (((bool)Tools::isSubmit('submitFinanceModule')) == true) {
+        if (((bool) Tools::isSubmit('submitFinanceModule')) == true) {
             $error = $this->postProcess();
         }
+
         return $error.$this->renderForm();
     }
 
@@ -341,11 +351,11 @@ class FinancePayment extends PaymentModule
                     'title' => $this->l('settings_label'),
                     'icon' => 'icon-cogs',
                 ),
-                                
+
                 'error' => '',
                 'warning' => '',
                 'description' => '',
-                
+
                 'input' => array(
                     array(
                         'type'  => 'text',
@@ -569,7 +579,7 @@ class FinancePayment extends PaymentModule
                     'label' => $this->l('cart_threshold_label'),
                     'hint'  => $this->l('cart_threshold_description')
                 );
-    
+
                 $form['form']['input'][] = array(
                     'type'  => 'text',
                     'name'  => 'FINANCE_CART_MAXIMUM',
@@ -624,7 +634,7 @@ class FinancePayment extends PaymentModule
                 $form['form']['warning'] = $this->l('finance_no_plans');
             }
         }; 
-        
+
         return $form;
     }
 
@@ -664,6 +674,7 @@ class FinancePayment extends PaymentModule
             $form_values['FINANCE_STATUS_'.$ApiStatus['code']] =
             Configuration::get('FINANCE_STATUS_'.$ApiStatus['code']);
         }
+
         return $form_values;
     }
 
@@ -724,6 +735,7 @@ class FinancePayment extends PaymentModule
                 }
             }
         }
+
         return false;
     }
 
@@ -749,6 +761,7 @@ class FinancePayment extends PaymentModule
         $api_key   = Configuration::get('FINANCE_API_KEY');
         $key_parts = explode('.', $api_key);
         $js_key    = Tools::strtolower(array_shift($key_parts));
+
         return $js_key;
     }
 
@@ -883,12 +896,10 @@ class FinancePayment extends PaymentModule
                 'shop_name' => Configuration::get('PS_SHOP_NAME'),
             )
         );
+
         return $this->display(__FILE__, 'confirmation.tpl');
     }
 
-    /**
-     *
-     */
     public function hookActionAdminControllerSetMedia()
     {
         $this->context->controller->addJS($this->_path.'views/js/financeAdmin.js');
@@ -905,6 +916,7 @@ class FinancePayment extends PaymentModule
         ) {
             return;
         }
+
         return $this->getWidgetData($params, 'widget.tpl');
     }
 
@@ -949,7 +961,7 @@ class FinancePayment extends PaymentModule
      */
     public function hookActionProductUpdate($params)
     {
-        $id_product = (int)$params['id_product'];
+        $id_product = (int) $params['id_product'];
         $display = Tools::getValue('FINANCE_display');
         $plans = '';
         if (Tools::getValue('FINANCE_plans')) {
@@ -958,16 +970,15 @@ class FinancePayment extends PaymentModule
         $data = array(
             'display' => pSQL($display),
             'plans' => pSQL($plans),
-            'id_product' => (int)$id_product
+            'id_product' => (int) $id_product
         );
-        Db::getInstance()->delete('finance_product', '`id_product` = "'.(int)$id_product.'"');
+        Db::getInstance()->delete('finance_product', '`id_product` = "'.(int) $id_product.'"');
         Db::getInstance()->insert('finance_product', $data);
     }
 
     public function hookDisplayFooterProduct($params)
     {
 
-        return;
    //     return $this->getWidgetData($params, 'calculator.tpl');
     }
 
@@ -983,7 +994,7 @@ class FinancePayment extends PaymentModule
         $orderStatus = $params['newOrderStatus'];
         $id_order = $params['id_order'];
 
-        $order = new Order((int)$id_order);
+        $order = new Order((int) $id_order);
         $total_price = $order->total_paid;
 
         if ($order->module != $this->name) {
@@ -996,31 +1007,33 @@ class FinancePayment extends PaymentModule
             AND transaction_id != "" ORDER BY `date_add` ASC'
         );
 
-
         if ($orderStatus->id == Configuration::get('FINANCE_ACTIVATION_STATUS') && $orderPaymanet) {
             try {
                 $this->setFulfilled($orderPaymanet['transaction_id'], $total_price, $id_order);
+
                 return true;
             } catch (Exception $e) {
                 return $e->message;
             }
-            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int)$id_order, true);
+            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int) $id_order, true);
         } elseif ($orderStatus->id == Configuration::get('FINANCE_CANCELLATION_STATUS') && $orderPaymanet) {
             try {
                 $this->setCancelled($orderPaymanet['transaction_id'], $total_price, $id_order);
+
                 return true;
             } catch (Exception $e) {
                 return $e->message;
             }
-            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int)$id_order, true);
+            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int) $id_order, true);
         } elseif ($orderStatus->id == Configuration::get('FINANCE_REFUND_STATUS') && $orderPaymanet) {
             try {
                 $this->setRefunded($orderPaymanet['transaction_id'], $total_price, $id_order);
+
                 return true;
             } catch (Exception $e) {
                 return $e->message;
             }
-            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int)$id_order, true);
+            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int) $id_order, true);
         }
     }
 
@@ -1033,7 +1046,6 @@ class FinancePayment extends PaymentModule
     {
 
         $product = $params['product'];
-
 
         if ($this->ps_below_7 && is_object($product)) {
             $product_price = $product->price;
@@ -1082,7 +1094,6 @@ class FinancePayment extends PaymentModule
                 $data_language = $language;
             }
         }
-
 
         $this->context->smarty->assign(
             array(
@@ -1150,6 +1161,7 @@ class FinancePayment extends PaymentModule
             $application_activation
         );
         $activation_response_body = $response->getBody()->getContents();
+
         return $activation_response_body;
     }
 
@@ -1190,6 +1202,7 @@ class FinancePayment extends PaymentModule
         $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
         $response = $sdk->applicationCancellations()->createApplicationCancellation($application, $applicationCancel);
         $cancellation_response_body = $response->getBody()->getContents();
+
         return $cancellation_response_body;
     }
 
@@ -1230,6 +1243,7 @@ class FinancePayment extends PaymentModule
         $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
         $response = $sdk->applicationRefunds()->createApplicationRefund($application, $applicationRefund);
         $cancellation_response_body = $response->getBody()->getContents();
+
         return $cancellation_response_body;
     }
 
@@ -1244,6 +1258,7 @@ class FinancePayment extends PaymentModule
     {
         $api = new FinanceApi();
         $plans = $api->getCartPlans($cart);
+
         return (count($plans) > 0) ? $plans : null;
     }
 
@@ -1258,6 +1273,7 @@ class FinancePayment extends PaymentModule
     {
         $FinanceApi = new FinanceApi();
         $plans  = $FinanceApi->getPlans();
+
         return (count($plans) > 0) ? $plans : null;
     }
 }
