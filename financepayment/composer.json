@@ -4,7 +4,7 @@
     },
     "require": {
         "php": ">=5",
-        "divido/merchant-sdk":"v2.1.1",
-        "divido/merchant-sdk-guzzle-5": "v1.1.0"
+        "divido/merchant-sdk":"^2.5.0",
+        "divido/merchant-sdk-guzzle-5": "^1.2.0"
     }
 }
