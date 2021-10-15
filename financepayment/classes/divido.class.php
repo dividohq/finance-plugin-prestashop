@@ -204,11 +204,8 @@ class FinanceApi
     {
         if ($default_plans) {
             return $this->getGlobalSelectedPlans();
-        } else {
-            return $this->getAllPlans();
-        }
-
-        return $plans;
+        } 
+        return $this->getAllPlans();
     }
 
     public function getProductPlans($product_price, $id_product)
