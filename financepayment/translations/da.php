@@ -54,6 +54,7 @@ $_MODULE['<{financepayment}prestashop>financepayment_80b150ad0c829f30fc424670e36
 $_MODULE['<{financepayment}prestashop>financepayment_1aa86bba71e6ad6b491a0b0ff27faa55'] = 'Det maksimale beløb, som en kurv kan udgøre, for at finansiering kan være en mulighed ved kassen';
 $_MODULE['<{financepayment}prestashop>financepayment_6c91586db92b999302face422dc0ae25'] = 'Fås på Finance';
 $_MODULE['<{financepayment}prestashop>financepayment_e1e94923500d26fd6f7070c2bf24bd61'] = 'Udvalgte planer';
+$_MODULE['<{financepayment}prestashop>financepayment_4c056ea9b3deb1ae003d8d70e6f557af'] = 'Forkert eller ugyldig API-nøgle';
 $_MODULE['<{financepayment}prestashop>financepayment_c877aa8e9f18cf16cb4add7f6f950ffa'] = 'Prøv igen';
 $_MODULE['<{financepayment}prestashop>financepayment_d1b27f6cadd2a8f096ddcd5b7695927a'] = 'Brug butikssprog?';
 $_MODULE['<{financepayment}prestashop>financepayment_86593094a845811c626d151a057394fd'] = 'Overstyr sproget på finansregnemaskinen med sprog i butikens sprog';
@@ -61,8 +62,11 @@ $_MODULE['<{financepayment}prestashop>financepayment_e73cc93e976ab46446bc48407bd
 $_MODULE['<{financepayment}prestashop>financepayment_4937a114e5c2734a8459f6d5a5c9472b'] = 'Ordre, der afventer ansøgningens afslutning';
 $_MODULE['<{financepayment}prestashop>financepayment_8524dc0dad440ac3cc239860774bca95'] = 'Miljø -URL';
 $_MODULE['<{financepayment}prestashop>financepayment_514da4a46b63cc795b2af17e9e54f2cd'] = 'Indsæt venligst miljø -URL\'en fra din finansielle udbyder';
-$_MODULE['<{financepayment}prestashop>financepayment_72e8066cf63a282ccb97f08481969192'] = 'financepayment-bad_key_url_combination';
-$_MODULE['<{financepayment}prestashop>financepayment_99d26adcf34fbba8c3926e77563ce8fb'] = 'financepayment-finance_no_plans';
+$_MODULE['<{financepayment}prestashop>financepayment_17e595baefccb2c3c87881afc1ef3ef1'] = 'Forkert eller ugyldig miljø -URL';
+$_MODULE['<{financepayment}prestashop>financepayment_a302a18c80829f5f54c37f836ffa4944'] = 'Forkert eller ugyldig miljø -URL_msg';
+$_MODULE['<{financepayment}prestashop>financepayment_1f15f53944b9e15a9e66b595b3adeae0'] = 'Noget kan være galt med miljøet. Det vendte tilbage:';
+$_MODULE['<{financepayment}prestashop>financepayment_72e8066cf63a282ccb97f08481969192'] = 'Ugyldig kombination af miljø -URL og API -nøgle. Kontroller værdierne.';
+$_MODULE['<{financepayment}prestashop>financepayment_99d26adcf34fbba8c3926e77563ce8fb'] = 'Skal have mindst en finansieringsplan.';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Din kurv ser ud til at være tom';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Fejl';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Bekræfte';
