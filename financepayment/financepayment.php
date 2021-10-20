@@ -66,7 +66,7 @@ class FinancePayment extends PaymentModule
             'code' => 'ACTION-LENDER',
         ),
         array(
-            'code' => 'CANCELED',
+            'code' => 'CANCELLED',
         ),
         array(
             'code' => 'COMPLETED',
@@ -157,7 +157,7 @@ class FinancePayment extends PaymentModule
 
                     break;
 
-                case 'CANCELED':
+                case 'CANCELLED':
                 case 'DECLINED':
                     $status = Configuration::get('PS_OS_CANCELED');
 
