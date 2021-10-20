@@ -65,8 +65,8 @@ $_MODULE['<{financepayment}prestashop>financepayment_514da4a46b63cc795b2af17e9e5
 $_MODULE['<{financepayment}prestashop>financepayment_17e595baefccb2c3c87881afc1ef3ef1'] = 'Falsche oder ungültige Umgebungs-URL';
 $_MODULE['<{financepayment}prestashop>financepayment_a302a18c80829f5f54c37f836ffa4944'] = 'Falsche oder ungültige Umgebungs-URL_msg';
 $_MODULE['<{financepayment}prestashop>financepayment_1f15f53944b9e15a9e66b595b3adeae0'] = 'Möglicherweise stimmt etwas mit der Umgebung nicht. Es kam zurück:';
-$_MODULE['<{financepayment}prestashop>financepayment_72e8066cf63a282ccb97f08481969192'] = 'financepayment-bad_key_url_combination';
-$_MODULE['<{financepayment}prestashop>financepayment_99d26adcf34fbba8c3926e77563ce8fb'] = 'financepayment-finance_no_plans';
+$_MODULE['<{financepayment}prestashop>financepayment_72e8066cf63a282ccb97f08481969192'] = 'Ungültige Kombination aus Umgebungs-URL und API-Schlüssel. Bitte überprüfen Sie die Werte.';
+$_MODULE['<{financepayment}prestashop>financepayment_99d26adcf34fbba8c3926e77563ce8fb'] = 'Muss mindestens einen Finanzplan haben.';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Ihr Warenkorb scheint leer zu sein';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Error';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Bestätigen';
