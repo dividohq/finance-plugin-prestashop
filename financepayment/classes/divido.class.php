@@ -49,6 +49,7 @@ class EnvironmentUrlException extends \Exception
  **/
 class Merchant_SDK
 {
+    private static Client $instance = null;
     /**
      * Creates and returns a merchant sdk instance
      *
@@ -59,20 +60,24 @@ class Merchant_SDK
      */
     public static function getSDK($url, $api_key)
     {
+        if(self::$instance === null){
+            $env = Environment::getEnvironmentFromAPIKey($api_key);
+            $client = new Guzzle();
+            $httpClientWrapper = new HttpClientWrapper(
+                new GuzzleAdapter($client),
+                $url,
+                $api_key
+            );
 
-        $env = Environment::getEnvironmentFromAPIKey($api_key);
-        $client = new Guzzle();
-        $httpClientWrapper = new HttpClientWrapper(
-            new GuzzleAdapter($client),
-            $url,
-            $api_key
-        );
+            self::$instance = new Client($httpClientWrapper, $env);
+        }
 
-        return new Client($httpClientWrapper, $env);
+        return self::$instance;
     }
 }
 class FinanceApi
 {
+
     public function checkEnviromentHealth()
     {
         $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
