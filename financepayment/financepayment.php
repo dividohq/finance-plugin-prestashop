@@ -30,12 +30,17 @@ if (!defined('_PS_VERSION_')) {
 
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/classes/divido.class.php';
+require_once dirname(__FILE__) . '/classes/DividoHelper.php';
 
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\Exceptions\InvalidApiKeyFormatException;
 use Divido\MerchantSDK\Exceptions\InvalidEnvironmentException;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
+use Divido\Helper\DividoHelper;
+use Divido\Proxy\FinanceApi;
+use Divido\Proxy\EnvironmentUnhealthyException;
+use Divido\Proxy\EnvironmentUrlException;
 
 class NoFinancePlansException extends Exception
 {
@@ -1095,23 +1100,21 @@ class FinancePayment extends PaymentModule
             }
         }
 
-        $this->context->smarty->assign(
-            array(
+        $this->context->smarty->assign(array(
             'plans' => implode(',', array_keys($plans)),
             'raw_total' => $product_price,
             'finance_environment'  => Configuration::get('FINANCE_ENVIRONMENT'),
-            'api_key' => Tools::substr(
-                Configuration::get('FINANCE_API_KEY'),
-                0,
-                strpos(Configuration::get('FINANCE_API_KEY'), ".")
-            ),
+            'api_key' => explode(".", Configuration::get('FINANCE_API_KEY'), 2)[0],
             'lender' => $lender,
             'data_button_text' => $data_button_text,
             'data_mode' => $data_mode,
             'data_footnote' => $data_footnote,
-            'data_language' => $data_language
+            'data_language' => $data_language,
+            'calculator_url' => DividoHelper::generateCalcUrl(
+                configuration::get('FINANCE_ENVIRONMENT'),
+                Environment::getEnvironmentFromAPIKey(Configuration::get('FINANCE_API_KEY'))
             )
-        );
+        ));
 
         return $this->display(__FILE__, $template);
     }

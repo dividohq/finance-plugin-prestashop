@@ -24,6 +24,10 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+use Divido\Proxy\FinanceApi;
+use Divido\Helper\DividoHelper;
+use Divido\MerchantSDK\Environment;
+
 class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
 {
     public $ssl = true;
@@ -90,7 +94,11 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
                     0,
                     strpos(Configuration::get('FINANCE_API_KEY'), ".")
                 ),
-                'lender' => $lender
+                'lender' => $lender,
+                'calculator_url' => DividoHelper::generateCalcUrl(
+                    configuration::get('FINANCE_ENVIRONMENT'),
+                    Environment::getEnvironmentFromAPIKey(Configuration::get('FINANCE_API_KEY'))
+                )
             )
         );
         Media::addJsDef(

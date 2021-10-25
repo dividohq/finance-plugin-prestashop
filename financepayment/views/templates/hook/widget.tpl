@@ -45,7 +45,7 @@
     {if $data_language}data-language="{$data_language}"{/if}
 ></div>
 {literal}
-    <script type="text/javascript"  src="https://cdn.divido.com/widget/v3/{/literal}{$finance_environment|escape:'htmlall':'UTF-8'}{literal}.calculator.js" ></script>
+    <script type="text/javascript"  src="{/literal}{$calculator_url}{literal}" ></script>
 {/literal}
 
 

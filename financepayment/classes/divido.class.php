@@ -24,17 +24,22 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+namespace Divido\Proxy;
+
+use Configuration;
+use Tools;
+use Db;
 use Divido\MerchantSDK\Client;
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use GuzzleHttp\Client as Guzzle;
-class EnvironmentUnhealthyException extends Exception
+class EnvironmentUnhealthyException extends \Exception
 {
 }
 
-class EnvironmentUrlException extends Exception
+class EnvironmentUrlException extends \Exception
 {
 }
 
@@ -161,7 +166,7 @@ class FinanceApi
 
             $plans_plain = array();
             foreach ($plans as $plan) {
-                $plan_copy = new stdClass();
+                $plan_copy = new \stdClass();
                 $plan_copy->id = $plan->id;
                 $plan_copy->text = $plan->description;
                 $plan_copy->country = $plan->country;
@@ -263,16 +268,6 @@ class FinanceApi
         $query = "select * from `"._DB_PREFIX_."finance_product` where id_product = '".(int) $id_product."'";
 
         return Db::getInstance()->getRow($query);
-    }
-
-    public function getEnvironment($key)
-    {
-        $array       = explode('_', $key);
-        $environment = Tools::strtoupper($array[0]);
-
-        return ('LIVE' == $environment)
-            ? constant("Divido\MerchantSDK\Environment::PRODUCTION")
-            : constant("Divido\MerchantSDK\Environment::$environment");
     }
 
     public function setLender()
