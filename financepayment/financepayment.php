@@ -386,17 +386,22 @@ class FinancePayment extends PaymentModule
             $api = new FinanceApi();
             $api_key = Configuration::get('FINANCE_API_KEY');
 
-            /*-------If no Environment URL, apply appropriate internal multitenant URL-----------*/
-            if (!Configuration::get('FINANCE_ENVIRONMENT_URL')) {
-                $env = Environment::getEnvironmentFromAPIKey($api_key);
-                $multitenant_environment_url = Environment::CONFIGURATION[$env]['base_uri'];
-
-                Configuration::updateValue('FINANCE_ENVIRONMENT_URL', $multitenant_environment_url);
-
-                $form['form']['description'] = $this->l('environment_url_label') . ': ' . $multitenant_environment_url;
-            };
-
             try {
+
+                /*-------If no Environment URL, apply appropriate internal multitenant URL-----------*/
+                if (!Configuration::get('FINANCE_ENVIRONMENT_URL')) {
+                    $env = Environment::getEnvironmentFromAPIKey($api_key);
+                    
+                    if(!isset(Environment::CONFIGURATION[$env])){
+                        throw new InvalidEnvironmentException($this->l('environment_url_required_error_msg'));
+                    }
+                    $multitenant_environment_url = Environment::CONFIGURATION[$env]['base_uri'];
+
+                    Configuration::updateValue('FINANCE_ENVIRONMENT_URL', $multitenant_environment_url);
+
+                    $form['form']['description'] = $this->l('environment_url_label') . ': ' . $multitenant_environment_url;
+                };
+
                 $api->checkEnviromentHealth();
 
                 $finance_environment = $api->getFinanceEnv($api_key);
@@ -626,13 +631,14 @@ class FinancePayment extends PaymentModule
             } catch (EnvironmentUrlException $e) {
                 $form['form']['error'] = $this->l('environment_url_error') . '? ';
             } catch (EnvironmentUnhealthyException $e) {
-                $form['form']['error'] = $this->l('environment_url_error') . '? ' . '<br>'
+                $form['form']['error'] = $this->l('environment_url_error') . '? ' . '<br/>'
                                             . $this->l('environment_unhealthy_error_msg') . ' ' 
                                             . $e->getMessage();
             } catch (InvalidEnvironmentException | BadApiKeyException $e) {
-                $form['form']['error'] = $this->l('invalid_api_key_error');
+                $form['form']['error'] = $this->l('invalid_api_key_error') . '<br/>'
+                                            . $e->getMessage();
             } catch (InvalidApiKeyFormatException $e) {
-                $form['form']['error'] = $this->l('invalid_api_key_error') . '<br>'
+                $form['form']['error'] = $this->l('invalid_api_key_error') . '<br/>'
                                             . $e->getMessage();
             } catch (NoFinancePlansException $e) {
                 $form['form']['warning'] = $this->l('finance_no_plans');
