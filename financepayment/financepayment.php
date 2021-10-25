@@ -35,12 +35,11 @@ require_once dirname(__FILE__) . '/classes/DividoHelper.php';
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\Exceptions\InvalidApiKeyFormatException;
 use Divido\MerchantSDK\Exceptions\InvalidEnvironmentException;
-use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
-use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\Helper\DividoHelper;
 use Divido\Proxy\FinanceApi;
 use Divido\Proxy\EnvironmentUnhealthyException;
 use Divido\Proxy\EnvironmentUrlException;
+use Divido\Proxy\Merchant_SDK;
 
 class NoFinancePlansException extends Exception
 {
@@ -1151,15 +1150,8 @@ class FinancePayment extends PaymentModule
             ->withDeliveryMethod($shipping_method)
             ->withTrackingNumber($tracking_numbers);
         // Create a new activation for the application.
-        $env = Environment::getEnvironmentFromAPIKey($api_key);
-        $client = new \GuzzleHttp\Client();
-        $httpClientWrapper = new HttpClientWrapper(
-            new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
-            $api_key
-        );
-        $sdk                      = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
-        $response                 = $sdk->applicationActivations()->createApplicationActivation(
+        $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
+        $response = $sdk->applicationActivations()->createApplicationActivation(
             $application,
             $application_activation
         );
@@ -1195,14 +1187,7 @@ class FinancePayment extends PaymentModule
         $applicationCancel = ( new \Divido\MerchantSDK\Models\ApplicationCancellation() )
             ->withOrderItems($items);
         // Create a new activation for the application.
-        $env                      = Environment::getEnvironmentFromAPIKey($api_key);
-        $client                   = new \GuzzleHttp\Client();
-        $httpClientWrapper        = new HttpClientWrapper(
-            new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
-            $api_key
-        );
-        $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
+        $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
         $response = $sdk->applicationCancellations()->createApplicationCancellation($application, $applicationCancel);
         $cancellation_response_body = $response->getBody()->getContents();
 
@@ -1235,15 +1220,8 @@ class FinancePayment extends PaymentModule
         $applicationRefund = ( new \Divido\MerchantSDK\Models\ApplicationRefund() )
             ->withOrderItems($items);
         // Create a new activation for the application.
-        $env                      = Environment::getEnvironmentFromAPIKey($api_key);
-        $client                   = new \GuzzleHttp\Client();
-        $httpClientWrapper        = new HttpClientWrapper(
-            new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
-            $api_key
-        );
 
-        $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
+        $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
         $response = $sdk->applicationRefunds()->createApplicationRefund($application, $applicationRefund);
         $cancellation_response_body = $response->getBody()->getContents();
 

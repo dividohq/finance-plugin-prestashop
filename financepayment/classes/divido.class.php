@@ -27,7 +27,6 @@
 namespace Divido\Proxy;
 
 use Configuration;
-use Tools;
 use Db;
 use Divido\MerchantSDK\Client;
 use Divido\MerchantSDK\Environment;
