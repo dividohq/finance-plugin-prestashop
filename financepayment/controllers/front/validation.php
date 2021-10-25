@@ -138,29 +138,38 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
         $products  = array();
         foreach ($cart->getProducts() as $product) {
+            $reference = (empty($product['reference'])) ? $product['id_product'] : $product['reference'];
             $products[] = array(
 
-                'name' => $product['name'],
+                'name'     => $product['name'],
                 'quantity' => $product['quantity'],
-                'price' => (int) ($product['price_wt']*100),
+                'price'    => (int) ($product['price_wt']*100),
+                'sku'      => $reference
             );
         }
 
         $sub_total = round((float) $cart->getOrderTotal(true, Cart::BOTH), 2);
+
         $shiphandle = round((float) $cart->getOrderTotal(true, Cart::ONLY_SHIPPING), 2);
+        if($shiphandle > 0){
+            $products[] = array(
+                'name'     => 'Shipping & Handling',
+                'quantity' => 1,
+                'price'    => $shiphandle*100,
+                'sku'      => 'SHPNG'
+            );
+        }
+
         $discount = round((float) $cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS), 2);
+        if($discount > 0){
+            $products[] = array(
+                'name'     => 'Discount',
+                'quantity' => 1,
+                'price'    => -$discount*100,
+                'sku'      => 'DISCNT'
+            );
+        }
 
-        $products[] = array(
-            'name'     => 'Shipping & Handling',
-            'quantity' => 1,
-            'price'    => $shiphandle*100,
-        );
-
-        $products[] = array(
-            'name'     => 'Discount',
-            'quantity' => 1,
-            'price'    => -$discount*100,
-        );
         $response_url = $this->context->link->getModuleLink($this->module->name, 'response');
         $redirect_url = $this->context->link->getModuleLink(
             $this->module->name,
