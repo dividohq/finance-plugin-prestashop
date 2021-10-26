@@ -233,7 +233,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 'ecom_platform' => 'prestashop',
                 'ecom_platform_version' => _PS_VERSION_,
                 'ecom_base_url'   => htmlspecialchars_decode($checkout_url),
-                'plugin_version'  => DividoHelper::getVersion(),
+                'plugin_version'  => DividoHelper::getPluginVersion(),
                 'merchant_reference' => $cart_id
             )
         );
