@@ -2,7 +2,7 @@
 <module>
     <name>financepayment</name>
     <displayName><![CDATA[Payer par les finances]]></displayName>
-    <version><![CDATA[2.3.0]]></version>
+    <version><![CDATA[2.4.2]]></version>
     <description><![CDATA[Cette extension vous permet d&#039;accepter des paiements de financement dans votre magasin.]]></description>
     <author><![CDATA[Divido Financial Services Ltd]]></author>
     <tab><![CDATA[payments_gateways]]></tab>

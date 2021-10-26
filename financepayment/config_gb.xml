@@ -2,7 +2,7 @@
 <module>
     <name>financepayment</name>
     <displayName><![CDATA[Powered By Divido]]></displayName>
-    <version><![CDATA[2.3.0]]></version>
+    <version><![CDATA[2.4.2]]></version>
     <description><![CDATA[]]></description>
     <author><![CDATA[Divido Financial Services Ltd]]></author>
     <tab><![CDATA[payments_gateways]]></tab>
