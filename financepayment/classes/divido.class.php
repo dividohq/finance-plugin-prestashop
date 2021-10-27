@@ -77,7 +77,6 @@ class Merchant_SDK
 }
 class FinanceApi
 {
-
     public function checkEnviromentHealth()
     {
         $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
