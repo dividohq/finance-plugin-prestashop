@@ -146,6 +146,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $sub_total = round((float) $cart->getOrderTotal(true, Cart::BOTH), 2);
 
         $shiphandle = round((float) $cart->getOrderTotal(true, Cart::ONLY_SHIPPING), 2);
+        // If shopping and handling fee is above 0, add that as a separate product
         if($shiphandle > 0){
             $products[] = array(
                 'name'     => 'Shipping & Handling',
