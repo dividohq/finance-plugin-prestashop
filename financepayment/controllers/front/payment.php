@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
 * 2007-2018 PrestaShop
 *
@@ -24,9 +26,9 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-use Divido\Proxy\FinanceApi;
 use Divido\Helper\DividoHelper;
 use Divido\MerchantSDK\Environment;
+use Divido\Proxy\FinanceApi;
 
 class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
 {

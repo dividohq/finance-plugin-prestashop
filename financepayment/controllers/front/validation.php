@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
 * 2007-2018 PrestaShop
 *
@@ -239,15 +241,15 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 'merchant_reference' => $cart_id
             )
         );
-//Note: If creating an application on a merchant with a shared secret, you will have to pass in a valid hmac
+        //Note: If creating an application on a merchant with a shared secret, you will have to pass in a valid hmac
 
-                $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
+        $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
 
-                $response = $sdk->applications()->createApplication(
-                    $application,
-                    array(),
-                    array ('Content-Type' => 'application/json')
-                );
+        $response = $sdk->applications()->createApplication(
+            $application,
+            array(),
+            array ('Content-Type' => 'application/json')
+        );
 
         try {
                 $application_response_body = $response->getBody()->getContents();
@@ -573,7 +575,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     );
                     $order->total_shipping = $order->total_shipping_tax_incl;
 
-                    if (!is_null($carrier) && Validate::isLoadedObject($carrier)) {
+                    if (null !== $carrier && Validate::isLoadedObject($carrier)) {
                         $order->carrier_tax_rate = $carrier->getTaxesRate(
                             new Address(
                                 (int) $this->context->cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')}
@@ -703,7 +705,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     }
 
                     // Adding an entry in order_carrier table
-                    if (!is_null($carrier)) {
+                    if (null !== $carrier) {
                         $order_carrier = new OrderCarrier();
                         $order_carrier->id_order = (int) $order->id;
                         $order_carrier->id_carrier = (int) $id_carrier;

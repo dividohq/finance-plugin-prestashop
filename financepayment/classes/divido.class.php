@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
 * 2007-2018 PrestaShop
 *
@@ -50,6 +52,7 @@ class EnvironmentUrlException extends \Exception
 class Merchant_SDK
 {
     private static Client $instance;
+
     /**
      * Creates and returns a merchant sdk instance
      *
@@ -212,7 +215,8 @@ class FinanceApi
     {
         if ($default_plans) {
             return $this->getGlobalSelectedPlans();
-        } 
+        }
+ 
         return $this->getAllPlans();
     }
 
