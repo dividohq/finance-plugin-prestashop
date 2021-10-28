@@ -157,6 +157,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         }
 
         $discount = round((float) $cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS), 2);
+        // If there is a discount, add that as a separate product
         if($discount > 0){
             $products[] = array(
                 'name'     => 'Discount',
