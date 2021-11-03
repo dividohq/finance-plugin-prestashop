@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
 * 2007-2018 PrestaShop
 *
@@ -24,20 +26,12 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-use Divido\MerchantSDK\Client;
-use Divido\MerchantSDK\Environment;
-use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
-use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
-use GuzzleHttp\Client as Guzzle;
+use Divido\Helper\DividoHelper;
+use Divido\Proxy\Merchant_SDK;
 
 class FinancePaymentValidationModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = false;
-
-    /**
-     * @var
-     */
-    private $plugin_version;
 
     /**
      * This class should be use by your Instant Payment
@@ -45,7 +39,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
      */
     public function postProcess()
     {
-        $this->plugin_version = "2.2.2";
 
         if (!(Tools::getIsset('total') && Tools::getIsset('deposit') && Tools::getIsset('finance'))) {
             Tools::redirect($this->context->link->getPageLink('index'));
@@ -142,29 +135,40 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
         $products  = array();
         foreach ($cart->getProducts() as $product) {
+            $reference = (empty($product['reference'])) ? $product['id_product'] : $product['reference'];
             $products[] = array(
 
-                'name' => $product['name'],
+                'name'     => $product['name'],
                 'quantity' => $product['quantity'],
-                'price' => (int) ($product['price_wt']*100),
+                'price'    => (int) ($product['price_wt']*100),
+                'sku'      => $reference
             );
         }
 
         $sub_total = round((float) $cart->getOrderTotal(true, Cart::BOTH), 2);
+
         $shiphandle = round((float) $cart->getOrderTotal(true, Cart::ONLY_SHIPPING), 2);
+        // If shopping and handling fee is above 0, add that as a separate product
+        if($shiphandle > 0){
+            $products[] = array(
+                'name'     => 'Shipping & Handling',
+                'quantity' => 1,
+                'price'    => $shiphandle*100,
+                'sku'      => 'SHPNG'
+            );
+        }
+
         $discount = round((float) $cart->getOrderTotal(true, Cart::ONLY_DISCOUNTS), 2);
+        // If there is a discount, add that as a separate product
+        if($discount > 0){
+            $products[] = array(
+                'name'     => 'Discount',
+                'quantity' => 1,
+                'price'    => -$discount*100,
+                'sku'      => 'DISCNT'
+            );
+        }
 
-        $products[] = array(
-            'name'     => 'Shipping & Handling',
-            'quantity' => 1,
-            'price'    => $shiphandle*100,
-        );
-
-        $products[] = array(
-            'name'     => 'Discount',
-            'quantity' => 1,
-            'price'    => -$discount*100,
-        );
         $response_url = $this->context->link->getModuleLink($this->module->name, 'response');
         $redirect_url = $this->context->link->getModuleLink(
             $this->module->name,
@@ -233,26 +237,19 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 'ecom_platform' => 'prestashop',
                 'ecom_platform_version' => _PS_VERSION_,
                 'ecom_base_url'   => htmlspecialchars_decode($checkout_url),
-                'plugin_version'  => $this->plugin_version,
+                'plugin_version'  => DividoHelper::getPluginVersion(),
                 'merchant_reference' => $cart_id
             )
         );
-//Note: If creating an application on a merchant with a shared secret, you will have to pass in a valid hmac
-                $env = FinanceApi::getEnvironment($api_key);
-                $client = new Guzzle();
-                $httpClientWrapper = new HttpClientWrapper(
-                    new GuzzleAdapter($client),
-                    Environment::CONFIGURATION[$env]['base_uri'],
-                    $api_key
-                );
+        //Note: If creating an application on a merchant with a shared secret, you will have to pass in a valid hmac
 
-                $sdk = new Client($httpClientWrapper, $env);
+        $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
 
-                $response = $sdk->applications()->createApplication(
-                    $application,
-                    array(),
-                    array ('Content-Type' => 'application/json')
-                );
+        $response = $sdk->applications()->createApplication(
+            $application,
+            array(),
+            array ('Content-Type' => 'application/json')
+        );
 
         try {
                 $application_response_body = $response->getBody()->getContents();
@@ -578,7 +575,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     );
                     $order->total_shipping = $order->total_shipping_tax_incl;
 
-                    if (!is_null($carrier) && Validate::isLoadedObject($carrier)) {
+                    if (null !== $carrier && Validate::isLoadedObject($carrier)) {
                         $order->carrier_tax_rate = $carrier->getTaxesRate(
                             new Address(
                                 (int) $this->context->cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')}
@@ -708,7 +705,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     }
 
                     // Adding an entry in order_carrier table
-                    if (!is_null($carrier)) {
+                    if (null !== $carrier) {
                         $order_carrier = new OrderCarrier();
                         $order_carrier->id_order = (int) $order->id;
                         $order_carrier->id_carrier = (int) $id_carrier;

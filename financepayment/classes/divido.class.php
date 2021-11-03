@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
 * 2007-2018 PrestaShop
 *
@@ -24,17 +26,21 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+namespace Divido\Proxy;
+
+use Configuration;
+use Db;
 use Divido\MerchantSDK\Client;
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use GuzzleHttp\Client as Guzzle;
-class EnvironmentUnhealthyException extends Exception
+class EnvironmentUnhealthyException extends \Exception
 {
 }
 
-class EnvironmentUrlException extends Exception
+class EnvironmentUrlException extends \Exception
 {
 }
 
@@ -45,6 +51,8 @@ class EnvironmentUrlException extends Exception
  **/
 class Merchant_SDK
 {
+    private static Client $instance;
+
     /**
      * Creates and returns a merchant sdk instance
      *
@@ -55,16 +63,19 @@ class Merchant_SDK
      */
     public static function getSDK($url, $api_key)
     {
+        if(empty(self::$instance)){
+            $env = Environment::getEnvironmentFromAPIKey($api_key);
+            $client = new Guzzle();
+            $httpClientWrapper = new HttpClientWrapper(
+                new GuzzleAdapter($client),
+                $url,
+                $api_key
+            );
 
-        $env = Environment::getEnvironmentFromAPIKey($api_key);
-        $client = new Guzzle();
-        $httpClientWrapper = new HttpClientWrapper(
-            new GuzzleAdapter($client),
-            $url,
-            $api_key
-        );
+            self::$instance = new Client($httpClientWrapper, $env);
+        }
 
-        return new Client($httpClientWrapper, $env);
+        return self::$instance;
     }
 }
 class FinanceApi
@@ -125,7 +136,7 @@ class FinanceApi
         $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
 
         if (!$environment_url || !$api_key) {
-            return array();
+            return null;
         }
 
         $sdk = Merchant_SDK::getSDK($environment_url, $api_key);
@@ -161,7 +172,7 @@ class FinanceApi
 
             $plans_plain = array();
             foreach ($plans as $plan) {
-                $plan_copy = new stdClass();
+                $plan_copy = new \stdClass();
                 $plan_copy->id = $plan->id;
                 $plan_copy->text = $plan->description;
                 $plan_copy->country = $plan->country;
@@ -204,7 +215,8 @@ class FinanceApi
     {
         if ($default_plans) {
             return $this->getGlobalSelectedPlans();
-        } 
+        }
+ 
         return $this->getAllPlans();
     }
 
@@ -263,16 +275,6 @@ class FinanceApi
         $query = "select * from `"._DB_PREFIX_."finance_product` where id_product = '".(int) $id_product."'";
 
         return Db::getInstance()->getRow($query);
-    }
-
-    public function getEnvironment($key)
-    {
-        $array       = explode('_', $key);
-        $environment = Tools::strtoupper($array[0]);
-
-        return ('LIVE' == $environment)
-            ? constant("Divido\MerchantSDK\Environment::PRODUCTION")
-            : constant("Divido\MerchantSDK\Environment::$environment");
     }
 
     public function setLender()

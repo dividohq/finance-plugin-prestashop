@@ -67,6 +67,7 @@ $_MODULE['<{financepayment}prestashop>financepayment_a302a18c80829f5f54c37f836ff
 $_MODULE['<{financepayment}prestashop>financepayment_1f15f53944b9e15a9e66b595b3adeae0'] = 'Something may be wrong with the environment. It returned:';
 $_MODULE['<{financepayment}prestashop>financepayment_72e8066cf63a282ccb97f08481969192'] = 'Invalid combination of Environment URL and API key. Please check the values.';
 $_MODULE['<{financepayment}prestashop>financepayment_99d26adcf34fbba8c3926e77563ce8fb'] = 'Must have at least one finance plan.';
+$_MODULE['<{financepayment}prestashop>financepayment_04b7971579897c9561ddc3fcb7114358'] = 'An Environment URL may be required to use this API Key';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Your cart appears to be empty';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Error';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Confirm';

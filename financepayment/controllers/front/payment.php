@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
 * 2007-2018 PrestaShop
 *
@@ -23,6 +25,10 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
+
+use Divido\Helper\DividoHelper;
+use Divido\MerchantSDK\Environment;
+use Divido\Proxy\FinanceApi;
 
 class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
 {
@@ -90,7 +96,11 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
                     0,
                     strpos(Configuration::get('FINANCE_API_KEY'), ".")
                 ),
-                'lender' => $lender
+                'lender' => $lender,
+                'calculator_url' => DividoHelper::generateCalcUrl(
+                    configuration::get('FINANCE_ENVIRONMENT'),
+                    Environment::getEnvironmentFromAPIKey(Configuration::get('FINANCE_API_KEY'))
+                )
             )
         );
         Media::addJsDef(

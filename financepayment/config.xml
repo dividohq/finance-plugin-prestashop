@@ -2,7 +2,7 @@
 <module>
     <name>financepayment</name>
     <displayName><![CDATA[Powered by Divido]]></displayName>
-    <version><![CDATA[2.3.0]]></version>
+    <version><![CDATA[2.4.2]]></version>
     <description><![CDATA[The Finance extension allows you to accept finance payments in your Prestashop store.]]></description>
     <author><![CDATA[Divido Financial Services Ltd]]></author>
     <tab><![CDATA[payments_gateways]]></tab>

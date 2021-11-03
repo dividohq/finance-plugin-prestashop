@@ -30,12 +30,16 @@ if (!defined('_PS_VERSION_')) {
 
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/classes/divido.class.php';
+require_once dirname(__FILE__) . '/classes/DividoHelper.php';
 
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\Exceptions\InvalidApiKeyFormatException;
 use Divido\MerchantSDK\Exceptions\InvalidEnvironmentException;
-use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
-use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
+use Divido\Helper\DividoHelper;
+use Divido\Proxy\FinanceApi;
+use Divido\Proxy\EnvironmentUnhealthyException;
+use Divido\Proxy\EnvironmentUrlException;
+use Divido\Proxy\Merchant_SDK;
 
 class NoFinancePlansException extends Exception
 {
@@ -91,7 +95,7 @@ class FinancePayment extends PaymentModule
     {
         $this->name = 'financepayment';
         $this->tab = 'payments_gateways';
-        $this->version = '2.4.1';
+        $this->version = DividoHelper::getPluginVersion();
         $this->author = 'Divido Financial Services Ltd';
         $this->need_instance = 0;
         $this->module_key = "71b50f7f5d75c244cd0a5635f664cd56";
@@ -382,17 +386,22 @@ class FinancePayment extends PaymentModule
             $api = new FinanceApi();
             $api_key = Configuration::get('FINANCE_API_KEY');
 
-            /*-------If no Environment URL, apply appropriate internal multitenant URL-----------*/
-            if (!Configuration::get('FINANCE_ENVIRONMENT_URL')) {
-                $env = Environment::getEnvironmentFromAPIKey($api_key);
-                $multitenant_environment_url = Environment::CONFIGURATION[$env]['base_uri'];
-
-                Configuration::updateValue('FINANCE_ENVIRONMENT_URL', $multitenant_environment_url);
-
-                $form['form']['description'] = $this->l('environment_url_label') . ': ' . $multitenant_environment_url;
-            };
-
             try {
+
+                /*-------If no Environment URL, apply appropriate internal multitenant URL-----------*/
+                if (!Configuration::get('FINANCE_ENVIRONMENT_URL')) {
+                    $env = Environment::getEnvironmentFromAPIKey($api_key);
+                    
+                    if(!isset(Environment::CONFIGURATION[$env])){
+                        throw new InvalidEnvironmentException($this->l('environment_url_required_error_msg'));
+                    }
+                    $multitenant_environment_url = Environment::CONFIGURATION[$env]['base_uri'];
+
+                    Configuration::updateValue('FINANCE_ENVIRONMENT_URL', $multitenant_environment_url);
+
+                    $form['form']['description'] = $this->l('environment_url_label') . ': ' . $multitenant_environment_url;
+                };
+
                 $api->checkEnviromentHealth();
 
                 $finance_environment = $api->getFinanceEnv($api_key);
@@ -622,13 +631,14 @@ class FinancePayment extends PaymentModule
             } catch (EnvironmentUrlException $e) {
                 $form['form']['error'] = $this->l('environment_url_error') . '? ';
             } catch (EnvironmentUnhealthyException $e) {
-                $form['form']['error'] = $this->l('environment_url_error') . '? ' . '<br>'
+                $form['form']['error'] = $this->l('environment_url_error') . '? ' . '<br/>'
                                             . $this->l('environment_unhealthy_error_msg') . ' ' 
                                             . $e->getMessage();
             } catch (InvalidEnvironmentException | BadApiKeyException $e) {
-                $form['form']['error'] = $this->l('invalid_api_key_error');
+                $form['form']['error'] = $this->l('invalid_api_key_error') . '<br/>'
+                                            . $e->getMessage();
             } catch (InvalidApiKeyFormatException $e) {
-                $form['form']['error'] = $this->l('invalid_api_key_error') . '<br>'
+                $form['form']['error'] = $this->l('invalid_api_key_error') . '<br/>'
                                             . $e->getMessage();
             } catch (NoFinancePlansException $e) {
                 $form['form']['warning'] = $this->l('finance_no_plans');
@@ -1095,23 +1105,21 @@ class FinancePayment extends PaymentModule
             }
         }
 
-        $this->context->smarty->assign(
-            array(
+        $this->context->smarty->assign(array(
             'plans' => implode(',', array_keys($plans)),
             'raw_total' => $product_price,
             'finance_environment'  => Configuration::get('FINANCE_ENVIRONMENT'),
-            'api_key' => Tools::substr(
-                Configuration::get('FINANCE_API_KEY'),
-                0,
-                strpos(Configuration::get('FINANCE_API_KEY'), ".")
-            ),
+            'api_key' => explode(".", Configuration::get('FINANCE_API_KEY'), 2)[0],
             'lender' => $lender,
             'data_button_text' => $data_button_text,
             'data_mode' => $data_mode,
             'data_footnote' => $data_footnote,
-            'data_language' => $data_language
+            'data_language' => $data_language,
+            'calculator_url' => DividoHelper::generateCalcUrl(
+                configuration::get('FINANCE_ENVIRONMENT'),
+                Environment::getEnvironmentFromAPIKey(Configuration::get('FINANCE_API_KEY'))
             )
-        );
+        ));
 
         return $this->display(__FILE__, $template);
     }
@@ -1148,15 +1156,8 @@ class FinancePayment extends PaymentModule
             ->withDeliveryMethod($shipping_method)
             ->withTrackingNumber($tracking_numbers);
         // Create a new activation for the application.
-        $env = Environment::getEnvironmentFromAPIKey($api_key);
-        $client = new \GuzzleHttp\Client();
-        $httpClientWrapper = new HttpClientWrapper(
-            new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
-            $api_key
-        );
-        $sdk                      = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
-        $response                 = $sdk->applicationActivations()->createApplicationActivation(
+        $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
+        $response = $sdk->applicationActivations()->createApplicationActivation(
             $application,
             $application_activation
         );
@@ -1192,14 +1193,7 @@ class FinancePayment extends PaymentModule
         $applicationCancel = ( new \Divido\MerchantSDK\Models\ApplicationCancellation() )
             ->withOrderItems($items);
         // Create a new activation for the application.
-        $env                      = Environment::getEnvironmentFromAPIKey($api_key);
-        $client                   = new \GuzzleHttp\Client();
-        $httpClientWrapper        = new HttpClientWrapper(
-            new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
-            $api_key
-        );
-        $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
+        $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
         $response = $sdk->applicationCancellations()->createApplicationCancellation($application, $applicationCancel);
         $cancellation_response_body = $response->getBody()->getContents();
 
@@ -1232,15 +1226,8 @@ class FinancePayment extends PaymentModule
         $applicationRefund = ( new \Divido\MerchantSDK\Models\ApplicationRefund() )
             ->withOrderItems($items);
         // Create a new activation for the application.
-        $env                      = Environment::getEnvironmentFromAPIKey($api_key);
-        $client                   = new \GuzzleHttp\Client();
-        $httpClientWrapper        = new HttpClientWrapper(
-            new GuzzleAdapter($client),
-            Environment::CONFIGURATION[$env]['base_uri'],
-            $api_key
-        );
 
-        $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
+        $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
         $response = $sdk->applicationRefunds()->createApplicationRefund($application, $applicationRefund);
         $cancellation_response_body = $response->getBody()->getContents();
 
