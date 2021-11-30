@@ -72,12 +72,6 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
             Tools::redirect('index.php?controller=order');
         }
 
-        // get lender name to set widget styling
-        $lender = $api->getLender();
-        if (empty($lender)) {
-            $lender =  $api->setLender();
-        }
-
         $this->context->smarty->assign(
             array(
                 'payment_error' => $payment_error,
@@ -96,7 +90,6 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
                     0,
                     strpos(Configuration::get('FINANCE_API_KEY'), ".")
                 ),
-                'lender' => $lender,
                 'calculator_url' => DividoHelper::generateCalcUrl(
                     configuration::get('FINANCE_ENVIRONMENT'),
                     Environment::getEnvironmentFromAPIKey(Configuration::get('FINANCE_API_KEY'))

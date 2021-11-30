@@ -216,7 +216,7 @@ class FinanceApi
         if ($default_plans) {
             return $this->getGlobalSelectedPlans();
         }
- 
+
         return $this->getAllPlans();
     }
 
@@ -275,37 +275,5 @@ class FinanceApi
         $query = "select * from `"._DB_PREFIX_."finance_product` where id_product = '".(int) $id_product."'";
 
         return Db::getInstance()->getRow($query);
-    }
-
-    public function setLender()
-    {
-        $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
-        $api_key = Configuration::get('FINANCE_API_KEY');
-        if (!$environment_url || !$api_key) {
-            return array();
-        }
-
-        $sdk = Merchant_SDK::getSDK($environment_url, $api_key);
-
-        // Set any request options.
-        $requestOptions = (new \Divido\MerchantSDK\Handlers\ApiRequestOptions());
-
-        // Retrieve all finance plans for the merchant.
-        $plans = $sdk->getAllPlans($requestOptions);
-
-        $data = json_decode(json_encode($plans->getResources()), true);
-
-        Configuration::updateValue('FINANCE_LENDER', $data[0]['lender']['name']);
-
-        return $data[0]['lender']['name'];
-    }
-
-    /**
-     * @return string
-     */
-    public function getLender()
-    {
-
-        return  Configuration::get('FINANCE_LENDER');
     }
 }

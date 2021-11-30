@@ -189,7 +189,6 @@ class FinancePayment extends PaymentModule
             || !$this->registerHook('payment')
             || !$this->registerHook('header')
             || !$this->registerHook('actionAdminControllerSetMedia')
-            || !$this->registerHook('displayFooterProduct')
             || !$this->registerHook('displayProductPriceBlock')
             || !$this->registerHook('displayAdminProductsExtra')
             || !$this->registerHook('actionProductUpdate')
@@ -391,7 +390,7 @@ class FinancePayment extends PaymentModule
                 /*-------If no Environment URL, apply appropriate internal multitenant URL-----------*/
                 if (!Configuration::get('FINANCE_ENVIRONMENT_URL')) {
                     $env = Environment::getEnvironmentFromAPIKey($api_key);
-                    
+
                     if(!isset(Environment::CONFIGURATION[$env])){
                         throw new InvalidEnvironmentException($this->l('environment_url_required_error_msg'));
                     }
@@ -632,7 +631,7 @@ class FinancePayment extends PaymentModule
                 $form['form']['error'] = $this->l('environment_url_error') . '? ';
             } catch (EnvironmentUnhealthyException $e) {
                 $form['form']['error'] = $this->l('environment_url_error') . '? ' . '<br/>'
-                                            . $this->l('environment_unhealthy_error_msg') . ' ' 
+                                            . $this->l('environment_unhealthy_error_msg') . ' '
                                             . $e->getMessage();
             } catch (InvalidEnvironmentException | BadApiKeyException $e) {
                 $form['form']['error'] = $this->l('invalid_api_key_error') . '<br/>'
@@ -643,7 +642,7 @@ class FinancePayment extends PaymentModule
             } catch (NoFinancePlansException $e) {
                 $form['form']['warning'] = $this->l('finance_no_plans');
             }
-        }; 
+        };
 
         return $form;
     }
@@ -986,12 +985,6 @@ class FinancePayment extends PaymentModule
         Db::getInstance()->insert('finance_product', $data);
     }
 
-    public function hookDisplayFooterProduct($params)
-    {
-
-   //     return $this->getWidgetData($params, 'calculator.tpl');
-    }
-
     /**
      * @param $params
      * @return bool|void
@@ -1074,14 +1067,8 @@ class FinancePayment extends PaymentModule
             return;
         }
 
-        // get lender name to set widget styling
-        $lender =  $finance->getLender();
-        if (empty($lender)) {
-            $lender = $finance->setLender();
-        }
-
         $data_mode = (
-            !empty(Configuration::get('FINANCE_PRODUCT_CALCULATOR')) 
+            !empty(Configuration::get('FINANCE_PRODUCT_CALCULATOR'))
             && 1 == Configuration::get('FINANCE_PRODUCT_CALCULATOR'))
                 ? 'calculator'
                 : 'lightbox';
@@ -1096,7 +1083,7 @@ class FinancePayment extends PaymentModule
 
         $data_language = false;
         if(
-            !empty(Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT')) 
+            !empty(Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT'))
             && 1 == Configuration::get('FINANCE_PRODUCT_CALCULATOR')
         ){
             $language = $this->context->language->iso_code;
@@ -1110,7 +1097,6 @@ class FinancePayment extends PaymentModule
             'raw_total' => $product_price,
             'finance_environment'  => Configuration::get('FINANCE_ENVIRONMENT'),
             'api_key' => explode(".", Configuration::get('FINANCE_API_KEY'), 2)[0],
-            'lender' => $lender,
             'data_button_text' => $data_button_text,
             'data_mode' => $data_mode,
             'data_footnote' => $data_footnote,
