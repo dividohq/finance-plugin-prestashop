@@ -25,7 +25,6 @@
 {literal}
     <script>
         __widgetConfig = {
-            lenderConfig:{ preset: '{/literal}{$lender}{literal}'},
             apiKey: '{/literal}{$api_key}{literal}',
             theme:{}
         }
@@ -47,5 +46,3 @@
 {literal}
     <script type="text/javascript"  src="{/literal}{$calculator_url}{literal}" ></script>
 {/literal}
-
-
