@@ -1088,8 +1088,6 @@ class FinancePayment extends PaymentModule
             if(in_array($language, self::SUPPORTED_LANGUAGES)){
                 $data_language = $language;
             }
-        } else {
-            die('Ooops, something went wrong!');
         }
 
         $this->context->smarty->assign(array(
