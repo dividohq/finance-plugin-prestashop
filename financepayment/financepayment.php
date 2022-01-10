@@ -550,6 +550,7 @@ class FinancePayment extends PaymentModule
                         )
                     ),
                 );
+
                 $form['form']['input'][] = array(
                     'type'    => 'switch',
                     'name'    => 'FINANCE_LANGUAGE_OVERRIDE',
@@ -1082,14 +1083,13 @@ class FinancePayment extends PaymentModule
             : Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT');
 
         $data_language = false;
-        if(
-            !empty(Configuration::get('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT'))
-            && 1 == Configuration::get('FINANCE_PRODUCT_CALCULATOR')
-        ){
+        if(Configuration::get('FINANCE_LANGUAGE_OVERRIDE')) {
             $language = $this->context->language->iso_code;
             if(in_array($language, self::SUPPORTED_LANGUAGES)){
                 $data_language = $language;
             }
+        } else {
+            die('Ooops, something went wrong!');
         }
 
         $this->context->smarty->assign(array(
