@@ -59,5 +59,8 @@ All notable changes to this project will be documented in this file.
 ## [2.3.0] - 2020-07-08
 - Feat: Adds Language Override Feature
 
-## [2.3.1] - 2020-11-30
+## [2.3.1] - 2021-11-30
 - Chore: Removed some obsolete code connected to calculator widget
+
+## [2.3.2] - 2022-01-10
+- Fix: The calculator is displayed in a correct language
