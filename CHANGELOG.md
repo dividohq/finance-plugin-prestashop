@@ -64,3 +64,6 @@ All notable changes to this project will be documented in this file.
 
 ## [2.3.2] - 2022-01-10
 - Fix: The calculator is displayed in a correct language
+
+## [2.3.3] - 2022-01-20
+- Chore: Updated the readme file
