@@ -19,6 +19,8 @@ Initial configuration out of the box simply needs your API key, this is provided
 For testing be sure to use your sandbox api key.
 2. Be sure to confirm that the default options selected for the payment statuses will work with your store workflow.
 ![Default configuration](https://s3-eu-west-1.amazonaws.com/content.divido.com/images/documentation/Prestashop/4_configuration.png)
+3. In the payment section we need to re-install all payment methods including the Prestashop default options.
+4. Lastly, we need to create a new delivery service and enable all countries.
 
 # Getting Started
 
@@ -86,7 +88,7 @@ If you have a security concern or bug relating to this module please email jonat
 
 We welcome all contributions - if you want to help out or get involved, please review our code of conduct and contribution guidelines.
 
- 
+
  # Maintainer
 
 https://github.com/DividoFinancialServices/
