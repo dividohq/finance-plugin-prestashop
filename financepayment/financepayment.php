@@ -856,10 +856,16 @@ class FinancePayment extends PaymentModule
             return;
         }
 
+        $api = new FinanceApi();
+        $env = $api->getFinanceEnv(Configuration::get('FINANCE_API_KEY'));
+
         $action = Configuration::get('FINANCE_PAYMENT_TITLE');
         $info = Configuration::get('FINANCE_PAYMENT_DESCRIPTION');
         $newOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption;
         $newOption->setCallToActionText($action);
+        if($env === 'nordea'){
+            $newOption->setLogo('https://cdn.divido.com/widge/themes/nordea/logo-presta.png');
+        }
         $newOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true));
         $newOption->setAdditionalInformation($info);
         $payment_options = array($newOption);
