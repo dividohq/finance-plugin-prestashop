@@ -864,7 +864,7 @@ class FinancePayment extends PaymentModule
         $newOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption;
         $newOption->setCallToActionText($action);
         if($env === 'nordea'){
-            $newOption->setLogo('https://cdn.divido.com/widge/themes/nordea/logo-presta.png');
+            $newOption->setLogo('https://s3.eu-west-1.amazonaws.com/content.divido.com/widget/themes/nordea/nordea-presta.png');
         }
         $newOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true));
         $newOption->setAdditionalInformation($info);
