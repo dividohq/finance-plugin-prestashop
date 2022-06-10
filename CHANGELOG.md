@@ -67,3 +67,6 @@ All notable changes to this project will be documented in this file.
 
 ## [2.3.3] - 2022-01-20
 - Chore: Updated the readme file
+
+## [2.3.4] - 2022-06-10
+- Chore: Adds nordea logo to checkout
