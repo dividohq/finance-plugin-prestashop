@@ -33,9 +33,7 @@ use Db;
 use Divido\MerchantSDK\Client;
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException;
-use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
-use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
-use GuzzleHttp\Client as Guzzle;
+use Divido\MerchantSDK\Wrappers\HttpWrapper;
 class EnvironmentUnhealthyException extends \Exception
 {
 }
@@ -65,9 +63,7 @@ class Merchant_SDK
     {
         if(empty(self::$instance)){
             $env = Environment::getEnvironmentFromAPIKey($api_key);
-            $client = new Guzzle();
-            $httpClientWrapper = new HttpClientWrapper(
-                new GuzzleAdapter($client),
+            $httpClientWrapper = new HttpWrapper(
                 $url,
                 $api_key
             );
