@@ -4,3 +4,4 @@
 .vscode/
 vendor/
 financepayment.zip
+financepayment/composer.lock
