@@ -863,9 +863,9 @@ class FinancePayment extends PaymentModule
         $info = Configuration::get('FINANCE_PAYMENT_DESCRIPTION');
         $newOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption;
         $newOption->setCallToActionText($action);
-        if($env === 'nordea'){
-            $newOption->setLogo('https://s3.eu-west-1.amazonaws.com/content.divido.com/widget/themes/nordea/nordea-presta.png');
-        }
+        
+        $this->setLogo($newOption, $plans);
+        
         $newOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true));
         $newOption->setAdditionalInformation($info);
         $payment_options = array($newOption);
@@ -1252,5 +1252,17 @@ class FinancePayment extends PaymentModule
         $plans  = $FinanceApi->getPlans();
 
         return $plans;
+    }
+
+    private function setLogo(
+        PrestaShop\PrestaShop\Core\Payment\PaymentOption $paymentOption, 
+        array $plans
+    ){
+        foreach($plans as $plan){
+            if(!empty($plan->lender->branding->logoUrl)){
+                $paymentOption->setLogo($plan->lender->branding->logoUrl);
+                break;
+            }
+        }
     }
 }
