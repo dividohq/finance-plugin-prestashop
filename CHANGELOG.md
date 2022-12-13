@@ -70,3 +70,6 @@ All notable changes to this project will be documented in this file.
 
 ## [2.3.4] - 2022-06-10
 - Chore: Adds nordea logo to checkout
+
+## [2.4.0] - 2022-12-12
+- Feat: Bumps the Merchant API SDK to the latest version
