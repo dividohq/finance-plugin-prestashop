@@ -58,3 +58,7 @@ All notable changes to this project will be documented in this file.
 
 ## [2.3.0] - 2020-07-08
 - Feat: Adds Language Override Feature
+
+## [ING-v.1.3.4] - 2023-01-12
+- Feat: Adds ING logo to checkout
+- Feat: Bumps Merchant API SDK version
