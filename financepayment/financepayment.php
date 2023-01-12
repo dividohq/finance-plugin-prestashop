@@ -31,7 +31,6 @@ if (!defined('_PS_VERSION_')) {
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/classes/divido.class.php';
 
-use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
 
 class FinancePayment extends PaymentModule

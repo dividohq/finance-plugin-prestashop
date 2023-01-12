@@ -88,11 +88,9 @@ class FinanceApi
             return array();
         }
 
-        $client = new Guzzle();
         $env = $this->getEnvironment($api_key);
 
-        $httpClientWrapper = new HttpClientWrapper(
-            new GuzzleAdapter($client),
+        $httpClientWrapper = new \Divido\MerchantSDK\Wrappers\HttpWrapper(
             self::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
@@ -238,10 +236,8 @@ class FinanceApi
             return array();
         }
 
-        $client = new Guzzle();
         $env = $this->getEnvironment($api_key);
-        $httpClientWrapper = new HttpClientWrapper(
-            new GuzzleAdapter($client),
+        $httpClientWrapper = new \Divido\MerchantSDK\Wrappers\HttpWrapper(
             self::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
