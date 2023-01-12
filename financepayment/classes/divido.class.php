@@ -24,11 +24,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\Client;
-use Divido\MerchantSDK\Environment;
-use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
-use GuzzleHttp\Client as Guzzle;
 
 class FinanceApi
 {
