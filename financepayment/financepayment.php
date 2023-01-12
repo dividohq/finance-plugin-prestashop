@@ -764,7 +764,7 @@ class FinancePayment extends PaymentModule
         $newOption->setCallToActionText($action);
         $newOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true));
         $newOption->setAdditionalInformation($info);
-        $newOption->setLogo('https://lender-branding-prod.s3.eu-west-1.amazonaws.com/ing.png');
+        $newOption->setLogo('https://lender-branding-test.s3.eu-west-1.amazonaws.com/ing-presta.png');
 
         $payment_options = array($newOption);
 
