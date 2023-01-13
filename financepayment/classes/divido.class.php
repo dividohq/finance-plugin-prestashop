@@ -24,7 +24,11 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\Client;
+use Divido\MerchantSDK\Environment;
+use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
+use GuzzleHttp\Client as Guzzle;
 
 class FinanceApi
 {
@@ -84,9 +88,11 @@ class FinanceApi
             return array();
         }
 
+        $client = new Guzzle();
         $env = $this->getEnvironment($api_key);
 
-        $httpClientWrapper = new \Divido\MerchantSDK\Wrappers\HttpWrapper(
+        $httpClientWrapper = new HttpClientWrapper(
+            new GuzzleAdapter($client),
             self::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
@@ -232,8 +238,10 @@ class FinanceApi
             return array();
         }
 
+        $client = new Guzzle();
         $env = $this->getEnvironment($api_key);
-        $httpClientWrapper = new \Divido\MerchantSDK\Wrappers\HttpWrapper(
+        $httpClientWrapper = new HttpClientWrapper(
+            new GuzzleAdapter($client),
             self::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
