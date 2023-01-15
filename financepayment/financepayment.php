@@ -76,7 +76,7 @@ class FinancePayment extends PaymentModule
     {
         $this->name = 'financepayment';
         $this->tab = 'payments_gateways';
-        $this->version = 'ING-v.1.3.4';
+        $this->version = 'ING-v.1.3.5';
         $this->author = 'Divido Financial Services Ltd';
         $this->need_instance = 0;
         $this->module_key = "71b50f7f5d75c244cd0a5635f664cd56";
@@ -1207,7 +1207,7 @@ class FinancePayment extends PaymentModule
         $applicationRefund = ( new \Divido\MerchantSDK\Models\ApplicationRefund() )
             ->withOrderItems($items);
         // Create a new activation for the application.
-        $env                      = FinanceApi::getEnvironment($api_key);
+        $env = FinanceApi::getEnvironment($api_key);
         
         $httpClientWrapper = new \Divido\MerchantSDK\Wrappers\HttpWrapper(
             FinanceApi::CONFIGURATION[$env]['base_uri'],
