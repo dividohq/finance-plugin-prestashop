@@ -31,8 +31,6 @@ if (!defined('_PS_VERSION_')) {
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/classes/divido.class.php';
 
-use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
-
 class FinancePayment extends PaymentModule
 {
     public $ps_below_7;
@@ -1101,14 +1099,12 @@ class FinancePayment extends PaymentModule
             ->withTrackingNumber($tracking_numbers);
         // Create a new activation for the application.
         $env = FinanceApi::getEnvironment($api_key);
-        $client = new \GuzzleHttp\Client();
-        $httpClientWrapper = new HttpClientWrapper(
-            new GuzzleAdapter($client),
+        $httpClientWrapper = new \Divido\MerchantSDK\Wrappers\HttpWrapper(
             FinanceApi::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
-        $sdk                      = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
-        $response                 = $sdk->applicationActivations()->createApplicationActivation(
+        $sdk = new \Divido\MerchantSDK\Client($httpClientWrapper, $env);
+        $response = $sdk->applicationActivations()->createApplicationActivation(
             $application,
             $application_activation
         );
@@ -1158,10 +1154,8 @@ class FinancePayment extends PaymentModule
         $applicationCancel = ( new \Divido\MerchantSDK\Models\ApplicationCancellation() )
             ->withOrderItems($items);
         // Create a new activation for the application.
-        $env                      = FinanceApi::getEnvironment($api_key);
-        $client                   = new \GuzzleHttp\Client();
-        $httpClientWrapper        = new HttpClientWrapper(
-            new GuzzleAdapter($client),
+        $env = FinanceApi::getEnvironment($api_key);
+        $httpClientWrapper = new \Divido\MerchantSDK\Wrappers\HttpWrapper(
             FinanceApi::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
@@ -1214,9 +1208,8 @@ class FinancePayment extends PaymentModule
             ->withOrderItems($items);
         // Create a new activation for the application.
         $env                      = FinanceApi::getEnvironment($api_key);
-        $client                   = new \GuzzleHttp\Client();
-        $httpClientWrapper        = new HttpClientWrapper(
-            new GuzzleAdapter($client),
+        
+        $httpClientWrapper = new \Divido\MerchantSDK\Wrappers\HttpWrapper(
             FinanceApi::CONFIGURATION[$env]['base_uri'],
             $api_key
         );
