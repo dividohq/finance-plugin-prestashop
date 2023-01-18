@@ -67,3 +67,6 @@ All notable changes to this project will be documented in this file.
 - Fix: Implements new Merchant API SDK everywhere
 - Fix: Leaves response client to discovery
 - Fix: Solid Guzzle version requirement for Prestashop compatibility
+
+## [ING-v.1.3.6] - 2023-01-18
+- Fix: Removes unnecessary use of Tools class
