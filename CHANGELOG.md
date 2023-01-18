@@ -62,3 +62,8 @@ All notable changes to this project will be documented in this file.
 ## [ING-v.1.3.4] - 2023-01-12
 - Feat: Adds ING logo to checkout
 - Feat: Bumps Merchant API SDK version
+
+## [ING-v.1.3.5] - 2023-01-15
+- Fix: Implements new Merchant API SDK everywhere
+- Fix: Leaves response client to discovery
+- Fix: Solid Guzzle version requirement for Prestashop compatibility

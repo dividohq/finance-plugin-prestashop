@@ -24,9 +24,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
-
+use Http\Discovery\HttpClientDiscovery;
 class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = true;
@@ -735,7 +733,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $env = FinanceApi::getEnvironment($api_key);
         $base_uri = FinanceApi::CONFIGURATION[$env]['base_uri'];
 
-        $client = new Client();
+        $client = new HttpClientDiscovery::find();
         $url = "{$base_uri}/applications/{$application_id}";
         $body = [
             "id" => $application_id,
@@ -753,7 +751,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 'allow_redirects' => false,
                 'timeout'         => 5
             ]);
-        } catch (RequestException $e) {
+        } catch (\Exception $e) {
             PrestaShopLogger::addLog(
                 $e->getResponse(),
                 1,

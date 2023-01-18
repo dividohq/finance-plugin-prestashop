@@ -84,7 +84,7 @@ class FinanceApi
             return array();
         }
 
-        $env = $this->getEnvironment($api_key);
+        $env = FinanceApi::getEnvironment($api_key);
 
         $httpClientWrapper = new \Divido\MerchantSDK\Wrappers\HttpWrapper(
             self::CONFIGURATION[$env]['base_uri'],
@@ -205,7 +205,7 @@ class FinanceApi
     }
 
 
-    public function getEnvironment($key)
+    public static function getEnvironment($key)
     {
         $array       = explode('_', $key);
         $environment = Tools::strtoupper($array[0]);
@@ -232,7 +232,7 @@ class FinanceApi
             return array();
         }
 
-        $env = $this->getEnvironment($api_key);
+        $env = FinanceApi::getEnvironment($api_key);
         $httpClientWrapper = new \Divido\MerchantSDK\Wrappers\HttpWrapper(
             self::CONFIGURATION[$env]['base_uri'],
             $api_key

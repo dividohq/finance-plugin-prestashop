@@ -24,11 +24,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-use Divido\MerchantSDKGuzzle5\GuzzleAdapter;
 use Divido\MerchantSDK\Client;
-use Divido\MerchantSDK\Environment;
-use Divido\MerchantSDK\HttpClient\HttpClientWrapper;
-use GuzzleHttp\Client as Guzzle;
 
 class FinancePaymentValidationModuleFrontController extends ModuleFrontController
 {
@@ -245,9 +241,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         );
 //Note: If creating an application on a merchant with a shared secret, you will have to pass in a valid hmac
                 $env = FinanceApi::getEnvironment($api_key);
-                $client = new Guzzle();
-                $httpClientWrapper = new HttpClientWrapper(
-                    new GuzzleAdapter($client),
+                $httpClientWrapper = new \Divido\MerchantSDK\Wrappers\HttpWrapper(
                     FinanceApi::CONFIGURATION[$env]['base_uri'],
                     $api_key
                 );
