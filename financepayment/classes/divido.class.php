@@ -220,7 +220,7 @@ class FinanceApi
         }
         return ('LIVE' == $environment)
             ? "production"
-            : Tools::strtolower($environment);
+            : strtolower($environment);
     }
 
 

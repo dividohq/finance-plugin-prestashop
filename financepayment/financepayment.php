@@ -672,7 +672,7 @@ class FinancePayment extends PaymentModule
     {
         $api_key   = Configuration::get('FINANCE_API_KEY');
         $key_parts = explode('.', $api_key);
-        $js_key    = Tools::strtolower(array_shift($key_parts));
+        $js_key    = strtolower(array_shift($key_parts));
         return $js_key;
     }
 
@@ -1044,7 +1044,7 @@ class FinancePayment extends PaymentModule
             'raw_total' => $product_price,
             'finance_environment'  => Configuration::get('FINANCE_ENVIRONMENT'),
             'calculator_url' => $calculator_url,
-            'api_key' => Tools::substr(
+            'api_key' => substr(
                 Configuration::get('FINANCE_API_KEY'),
                 0,
                 strpos(Configuration::get('FINANCE_API_KEY'), ".")
