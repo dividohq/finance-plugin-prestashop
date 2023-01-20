@@ -53,7 +53,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
          * If the module is not active anymore, no need to process anything.
          */
         if ($this->module->active == false) {
-            echo Tools::jsonEncode($response);
+            echo json_encode($response);
             die;
         }
 
@@ -64,19 +64,19 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 'status' => true,
                 'url' => $this->context->link->getPageLink('order'),
             );
-            echo Tools::jsonEncode($response);
+            echo json_encode($response);
             die;
         }
 
         if (!Validate::isLoadedObject($cart)) {
-            echo Tools::jsonEncode($response);
+            echo json_encode($response);
             die;
         }
 
         $id_cus = $cart->id_customer;
         $id_add = $cart->id_address_delivery;
         if ($id_cus == 0 || $id_add == 0 || $cart->id_address_invoice == 0) {
-            echo Tools::jsonEncode($response);
+            echo json_encode($response);
             die;
         }
 
@@ -95,7 +95,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         }
 
         $response = $this->getConfirmation();
-        echo Tools::jsonEncode($response);
+        echo json_encode($response);
         die;
     }
 
