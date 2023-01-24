@@ -183,6 +183,7 @@ class FinanceApi
                 $plan_copy->interest_rate = $plan->interest_rate_percentage;
                 $plan_copy->deferral_period = $plan->deferral_period_months;
                 $plan_copy->agreement_duration = $plan->agreement_duration_months;
+                $plan_copy->branding = $plan->lender->branding ?? (object)[];
                 if($plan->active){
                     $plans_plain[$plan->id] = $plan_copy;
                 }
