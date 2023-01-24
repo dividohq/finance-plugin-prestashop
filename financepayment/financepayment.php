@@ -91,6 +91,10 @@ class FinancePayment extends PaymentModule
 
     const SUPPORTED_LANGUAGES = ['gb', 'no', 'fi', 'da', 'fr', 'es', 'pe', 'en', 'de'];
 
+    const LOGO_RESIZE_HEIGHT = 30;
+    const LOGO_PADDING = 2;
+    const CHECKOUT_LOGO = 'checkout.png';
+
     public function __construct()
     {
         $this->name = 'financepayment';
@@ -416,6 +420,20 @@ class FinancePayment extends PaymentModule
                 if ($financePlans === NULL) {
                     throw new NoFinancePlansException();
                 };
+
+                foreach($financePlans as $plan){
+                    if(!empty($plan->branding->logo_url)){
+                        try{
+                            $this->resizeLogo($plan->branding->logo_url);
+                            break;
+                        } catch (\Exception $e) {
+                            echo($e->getMessage());
+                            PrestaShopLogger::addLog(
+                                sprintf('Failed to create image from %s: %s', $plan->branding->logo_url, $e->getMessage())
+                            );
+                        }
+                    }
+                }
 
                 $orderStatus = OrderState::getOrderStates($this->context->language->id);
                 $product_options = array(
@@ -864,7 +882,11 @@ class FinancePayment extends PaymentModule
         $newOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption;
         $newOption->setCallToActionText($action);
         
-        $this->setLogo($newOption, $plans);
+        if(file_exists(sprintf('%s/%s',__DIR__, FinancePayment::CHECKOUT_LOGO))){
+            $newOption->setLogo(
+                sprintf("%s/modules/financepayment/%s", _PS_BASE_URL_, FinancePayment::CHECKOUT_LOGO)
+            );
+        }
         
         $newOption->setAction($this->context->link->getModuleLink($this->name, 'payment', array(), true));
         $newOption->setAdditionalInformation($info);
@@ -1254,15 +1276,36 @@ class FinancePayment extends PaymentModule
         return $plans;
     }
 
-    private function setLogo(
-        PrestaShop\PrestaShop\Core\Payment\PaymentOption $paymentOption, 
-        array $plans
-    ){
-        foreach($plans as $plan){
-            if(!empty($plan->lender->branding->logoUrl)){
-                $paymentOption->setLogo($plan->lender->branding->logoUrl);
-                break;
-            }
+    private function resizeLogo(string $url){
+        $source = @imagecreatefromstring(file_get_contents($url));
+        if(!$source){
+            throw new \Exception("image type is unsupported, the data is not in a recognised format, or the image is corrupt and cannot be loaded.");
         }
+        list($originalWidth, $originalHeight) = getimagesize($url);
+        $newHeight = FinancePayment::LOGO_RESIZE_HEIGHT;
+        $factor = $newHeight/$originalHeight;
+        $newWidth = round($originalWidth*$factor);
+        $frameHeight = $newHeight + (FinancePayment::LOGO_PADDING*2);
+        $frameWidth = $newWidth + (FinancePayment::LOGO_PADDING*2);
+        $thumb = imagecreatetruecolor($frameWidth, $frameHeight);
+        imagealphablending($thumb, false);
+        imagesavealpha($thumb, true);
+        $transparent = imagecolorallocatealpha($thumb, 255, 255, 255, 127);
+        imagefilledrectangle($thumb, 0, 0, $frameWidth, $frameHeight, $transparent);
+        imagecopyresampled(
+            $thumb, 
+            $source, 
+            FinancePayment::LOGO_PADDING, 
+            FinancePayment::LOGO_PADDING, 
+            0, 
+            0, 
+            $newWidth, 
+            $newHeight, 
+            $originalWidth, 
+            $originalHeight
+        );
+        $filename = FinancePayment::CHECKOUT_LOGO;
+        imagepng($thumb, __DIR__.'/'.$filename, 0);
+        return $filename;
     }
 }
