@@ -103,7 +103,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
     {
         $this->context = Context::getContext();
         $api_key   = Configuration::get('FINANCE_API_KEY');
-        $deposit = round(Tools::getValue('deposit'));
+        $deposit = (int) Tools::getValue('deposit');
         $finance = Tools::getValue('finance');
         $cart = $this->context->cart;
 
