@@ -1305,7 +1305,10 @@ class FinancePayment extends PaymentModule
             $originalHeight
         );
         $filename = FinancePayment::CHECKOUT_LOGO;
-        imagepng($thumb, __DIR__.'/'.$filename, 0);
+        $created = imagepng($thumb, __DIR__.'/'.$filename, 0);
+        if(!$created){
+            throw new \exception("Could not create a png from the image");
+        }
         return $filename;
     }
 }
