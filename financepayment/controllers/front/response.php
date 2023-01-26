@@ -32,8 +32,8 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 
     public function postProcess()
     {
-        $input = Tools::file_get_contents('php://input');
-        $data  = Tools::jsonDecode($input);
+        $input = file_get_contents('php://input');
+        $data  = json_decode($input);
         $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : null;
         $secret = null;
 
@@ -309,7 +309,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 unset($voucher->id);
 
                 // Set a new voucher code
-                $voucher->code = empty($voucher->code) ? Tools::substr(
+                $voucher->code = empty($voucher->code) ? substr(
                     md5($order->id.'-'.$order->id_customer.'-'.$cart_rule['obj']->id),
                     0,
                     16
@@ -508,7 +508,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 '{carrier}' => (
                     $virtual_product || !isset($carrier->name)
                 ) ? $this->module->l('no_carrier') : $carrier->name,
-                '{payment}' => Tools::substr($order->payment, 0, 255),
+                '{payment}' => substr($order->payment, 0, 255),
                 '{products}' => $product_list_html,
                 '{products_txt}' => $product_list_txt,
                 '{discounts}' => $cart_rules_list_html,
