@@ -772,12 +772,6 @@ class FinancePayment extends PaymentModule
      */
     public function hookHeader()
     {
-        $js_key = $this->getJsKey();
-        Media::addJsDef(
-            array(
-            Configuration::get('FINANCE_ENVIRONMENT') . 'Key' => $js_key,
-            )
-        );
         $this->context->controller->addJS(_PS_MODULE_DIR_.$this->name.'/views/js/finance.js');
     }
 
