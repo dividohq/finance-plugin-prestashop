@@ -1,10 +1,13 @@
 {
     "config": {
-        "prepend-autoloader": false
+        "prepend-autoloader": false,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     },
     "require": {
         "php": ">=5",
         "divido/merchant-sdk":"^3.0.1",
-        "guzzlehttp/guzzle": "^6.5.8"
+        "php-http/message-factory": "^1.1"
     }
 }
