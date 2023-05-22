@@ -79,5 +79,5 @@ All notable changes to this project will be documented in this file.
 - Fix: Solves issues relating to use of Prestashop's Tools class
 - Fix: Handles calculator deposit amount correctly
 
-## [2.5.0] - 2023-01-25
+## [2.6.0] - 2023-05-22
 - Feat: Adds V4 Calculator compatibility
