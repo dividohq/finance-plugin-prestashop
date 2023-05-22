@@ -12,7 +12,7 @@ class DividoHelper
 
     const V4_CALCULATOR_URL = "//cdn.divido.com/widget/v4/divido.calculator.js";
 
-    const PLUGIN_VERSION = "2.5.0";
+    const PLUGIN_VERSION = "2.6.0";
 
     public static function generateCalcUrl($isV4Compatible, $tenant=null, $environment=null){
         if($isV4Compatible){
