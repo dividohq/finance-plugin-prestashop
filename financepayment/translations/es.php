@@ -68,6 +68,9 @@ $_MODULE['<{financepayment}prestashop>financepayment_1f15f53944b9e15a9e66b595b3a
 $_MODULE['<{financepayment}prestashop>financepayment_72e8066cf63a282ccb97f08481969192'] = 'Combinación no válida de URL de entorno y clave API. Compruebe los valores.';
 $_MODULE['<{financepayment}prestashop>financepayment_99d26adcf34fbba8c3926e77563ce8fb'] = 'Debe tener al menos un plan financiero.';
 $_MODULE['<{financepayment}prestashop>financepayment_04b7971579897c9561ddc3fcb7114358'] = 'Es posible que se requiera una URL de entorno para usar esta clave de API';
+$_MODULE['<{financepayment}prestashop>financepayment_ebacbe81303ee8fcaca62d04a1505e1a'] = 'si es aplicable';
+$_MODULE['<{financepayment}prestashop>financepayment_bce6f85cd1b8ba193edfb6e2f079c455'] = 'URL de la API de configuración de la calculadora';
+$_MODULE['<{financepayment}prestashop>financepayment_57d44795970b63a1d10bc6a43e96b792'] = 'Ingrese esta URL si se le ha proporcionado';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Tu carrito parece estar vacío';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Error';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Confirmar';

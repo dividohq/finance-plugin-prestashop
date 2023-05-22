@@ -72,6 +72,16 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
             Tools::redirect('index.php?controller=order');
         }
 
+        if(empty(Configuration::get('FINANCE_CALC_CONF_API_URL'))){
+            $calcConfApiUrlVars = [
+                false,
+                configuration::get('FINANCE_ENVIRONMENT'),
+                Environment::getEnvironmentFromAPIKey(Configuration::get('FINANCE_API_KEY'))
+            ];
+        } else {
+            $calcConfApiUrlVars = [true];
+        }
+
         $this->context->smarty->assign(
             array(
                 'payment_error' => $payment_error,
@@ -90,10 +100,8 @@ class FinancePaymentPaymentModuleFrontController extends ModuleFrontController
                     0,
                     strpos(Configuration::get('FINANCE_API_KEY'), ".")
                 ),
-                'calculator_url' => DividoHelper::generateCalcUrl(
-                    configuration::get('FINANCE_ENVIRONMENT'),
-                    Environment::getEnvironmentFromAPIKey(Configuration::get('FINANCE_API_KEY'))
-                )
+                'calculator_url' => DividoHelper::generateCalcUrl(...$calcConfApiUrlVars),
+                'calc_conf_api_url'  => Configuration::get('FINANCE_CALC_CONF_API_URL')
             )
         );
         Media::addJsDef(

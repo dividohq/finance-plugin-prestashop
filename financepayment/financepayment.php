@@ -136,6 +136,7 @@ class FinancePayment extends PaymentModule
         Configuration::updateValue('FINANCE_ACTIVATION_STATUS', Configuration::get('PS_OS_DELIVERED'));
         Configuration::updateValue('FINANCE_CANCELLATION_STATUS', Configuration::get('PS_OS_CANCELED'));
         Configuration::updateValue('FINANCE_REFUND_STATUS', '7');
+        Configuration::updateValue('FINANCE_CALC_CONF_API_URL', null);
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET', true);
         Configuration::updateValue('FINANCE_PRODUCT_CALCULATOR', null);
         Configuration::updateValue('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT', null);
@@ -270,6 +271,7 @@ class FinancePayment extends PaymentModule
         Configuration::deleteByName('FINANCE_REFUND_STATUS');
         Configuration::deleteByName('FINANCE_REFUNDED_STATUS');
         Configuration::deleteByName('FINANCE_PRODUCT_WIDGET');
+        Configuration::deleteByName('FINANCE_CALC_CONF_API_URL');
         Configuration::deleteByName('FINANCE_PRODUCT_CALCULATOR');
         Configuration::deleteByName('FINANCE_PRODUCT_WIDGET_BUTTON_TEXT');
         Configuration::deleteByName('FINANCE_PRODUCT_WIDGET_FOOTNOTE');
@@ -570,6 +572,13 @@ class FinancePayment extends PaymentModule
                 );
 
                 $form['form']['input'][] = array(
+                    'type'  => 'text',
+                    'name'  => 'FINANCE_CALC_CONF_API_URL',
+                    'label' => $this->l('calc_conf_api_url_label'),
+                    'hint'  => $this->l('calc_conf_api_url_description')
+                );
+
+                $form['form']['input'][] = array(
                     'type'    => 'switch',
                     'name'    => 'FINANCE_LANGUAGE_OVERRIDE',
                     'hint'    => $this->l('use_store_language_description'),
@@ -683,6 +692,7 @@ class FinancePayment extends PaymentModule
             'FINANCE_ALL_PLAN_SELECTION' => Configuration::get('FINANCE_ALL_PLAN_SELECTION'),
             'FINANCE_PLAN_SELECTION' => explode(',', Configuration::get('FINANCE_PLAN_SELECTION')),
             'FINANCE_PRODUCT_WIDGET' => Configuration::get('FINANCE_PRODUCT_WIDGET'),
+            'FINANCE_CALC_CONF_API_URL' => Configuration::get('FINANCE_CALC_CONF_API_URL'),
             'FINANCE_PRODUCT_CALCULATOR' => Configuration::get('FINANCE_PRODUCT_CALCULATOR'),
             'FINANCE_LANGUAGE_OVERRIDE' => Configuration::get('FINANCE_LANGUAGE_OVERRIDE'),
             'FINANCE_PRODUCT_WIDGET_SUFFIX' => Configuration::get('FINANCE_PRODUCT_WIDGET_SUFFIX'),
@@ -1112,19 +1122,28 @@ class FinancePayment extends PaymentModule
             }
         }
 
+        
+        if(empty(Configuration::get('FINANCE_CALC_CONF_API_URL'))){
+            $calcConfApiUrlVars = [
+                false,
+                configuration::get('FINANCE_ENVIRONMENT'),
+                Environment::getEnvironmentFromAPIKey(Configuration::get('FINANCE_API_KEY'))
+            ];
+        } else {
+            $calcConfApiUrlVars = [true];
+        }
+
         $this->context->smarty->assign(array(
             'plans' => implode(',', array_keys($plans)),
             'raw_total' => $product_price,
             'finance_environment'  => Configuration::get('FINANCE_ENVIRONMENT'),
             'api_key' => explode(".", Configuration::get('FINANCE_API_KEY'), 2)[0],
+            'calc_conf_api_url'  => Configuration::get('FINANCE_CALC_CONF_API_URL'),
             'data_button_text' => $data_button_text,
             'data_mode' => $data_mode,
             'data_footnote' => $data_footnote,
             'data_language' => $data_language,
-            'calculator_url' => DividoHelper::generateCalcUrl(
-                configuration::get('FINANCE_ENVIRONMENT'),
-                Environment::getEnvironmentFromAPIKey(Configuration::get('FINANCE_API_KEY'))
-            )
+            'calculator_url' => DividoHelper::generateCalcUrl(...$calcConfApiUrlVars)
         ));
 
         return $this->display(__FILE__, $template);

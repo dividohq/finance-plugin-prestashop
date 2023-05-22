@@ -8,18 +8,23 @@ use Divido\MerchantSDK\Environment;
 
 class DividoHelper
 {
-    const CALCULATOR_URL = "//cdn.divido.com/widget/v3/";
+    const V3_CALCULATOR_URL = "//cdn.divido.com/widget/v3/";
+
+    const V4_CALCULATOR_URL = "//cdn.divido.com/widget/v4/divido.calculator.js";
 
     const PLUGIN_VERSION = "2.5.0";
 
-    public static function generateCalcUrl($tenant, $environment){
+    public static function generateCalcUrl($isV4Compatible, $tenant=null, $environment=null){
+        if($isV4Compatible){
+            return self::V4_CALCULATOR_URL;
+        }
 
         $prefixes = [$tenant];
         if($environment !== Environment::PRODUCTION){
             $prefixes[] = $environment;
         }
 
-        return sprintf("%s%s.calculator.js", self::CALCULATOR_URL, implode(".", $prefixes));
+        return sprintf("%s%s.calculator.js", self::V3_CALCULATOR_URL, implode(".", $prefixes));
     }
 
     public static function getPluginVersion() {
