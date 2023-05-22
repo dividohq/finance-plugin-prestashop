@@ -78,3 +78,6 @@ All notable changes to this project will be documented in this file.
 - Feat: Attempts to retrieve the lender logo to display at checkout
 - Fix: Solves issues relating to use of Prestashop's Tools class
 - Fix: Handles calculator deposit amount correctly
+
+## [2.5.0] - 2023-01-25
+- Feat: Adds V4 Calculator compatibility
