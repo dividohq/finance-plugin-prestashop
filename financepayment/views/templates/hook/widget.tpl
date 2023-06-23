@@ -48,6 +48,17 @@
     {literal}
     <script>
     window.__calculatorConfig = {
+        {if $data_button_text}
+        overrides: {
+            theme: {
+                modes: {
+                    Lightbox: {
+                        linkText: '{$data_button_text}'
+                    }
+                }
+            }
+        },
+        {/if}
         apiKey: '{/literal}{$api_key}{literal}',
         calculatorApiPubUrl: '{/literal}{$calc_conf_api_url}{literal}'
     };
