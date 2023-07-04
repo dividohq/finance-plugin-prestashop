@@ -7,7 +7,6 @@
     },
     "require": {
         "php": ">=5",
-        "divido/merchant-sdk":"^3.0.1",
-        "psr/http-factory": "^1.0"
+        "divido/merchant-sdk":"^3.0.1"
     }
 }
