@@ -43,6 +43,28 @@
     data-plans="{$plans|escape:'htmlall':'UTF-8'}"
     {if $data_language}data-language="{$data_language}"{/if}
 ></div>
+{if $calc_conf_api_url != ""}
+    {literal}
+    <script>
+    window.__calculatorConfig = {
+        {/literal}{if $data_button_text}{literal}
+        overrides: {
+            theme: {
+                modes: {
+                    Lightbox: {
+                        linkText: '{/literal}{$data_button_text}{literal}'
+                    }
+                }
+            }
+        },
+        {/literal}{/if}{literal}
+        apiKey: '{/literal}{$api_key}{literal}',
+        calculatorApiPubUrl: '{/literal}{$calc_conf_api_url}{literal}'
+    };
+    </script>
+    {/literal}
+{/if}
+
 {literal}
     <script type="text/javascript"  src="{/literal}{$calculator_url}{literal}" ></script>
 {/literal}

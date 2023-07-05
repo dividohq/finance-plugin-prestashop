@@ -68,6 +68,9 @@ $_MODULE['<{financepayment}prestashop>financepayment_1f15f53944b9e15a9e66b595b3a
 $_MODULE['<{financepayment}prestashop>financepayment_72e8066cf63a282ccb97f08481969192'] = 'Ugyldig kombination af miljø -URL og API -nøgle. Kontroller værdierne.';
 $_MODULE['<{financepayment}prestashop>financepayment_99d26adcf34fbba8c3926e77563ce8fb'] = 'Skal have mindst en finansieringsplan.';
 $_MODULE['<{financepayment}prestashop>financepayment_04b7971579897c9561ddc3fcb7114358'] = 'En miljø-URL kan være påkrævet for at bruge denne API-nøgle';
+$_MODULE['<{financepayment}prestashop>financepayment_ebacbe81303ee8fcaca62d04a1505e1a'] = 'hvis relevant';
+$_MODULE['<{financepayment}prestashop>financepayment_bce6f85cd1b8ba193edfb6e2f079c455'] = 'Calculator Configuration API URL';
+$_MODULE['<{financepayment}prestashop>financepayment_57d44795970b63a1d10bc6a43e96b792'] = 'Indtast denne URL, hvis den er blevet leveret til dig';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Din kurv ser ud til at være tom';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Fejl';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Bekræfte';

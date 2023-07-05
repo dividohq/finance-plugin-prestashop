@@ -32,6 +32,16 @@
     </script>
 {/literal}
 <div data-calculator-widget data-amount="{$raw_total*100|escape:'htmlall':'UTF-8'}"  data-plans="{$plans|escape:'htmlall':'UTF-8'}"></div>
+{if $calc_conf_api_url != ""}
+    {literal}
+    <script>
+    window.__calculatorConfig = {
+        apiKey: '{/literal}{$api_key}{literal}',
+        calculatorApiPubUrl: '{/literal}{$calc_conf_api_url}{literal}'
+    };
+    </script>
+    {/literal}
+{/if}
 {literal}
     <script type="text/javascript"  src="{/literal}{$calculator_url}{literal}" ></script>
 {/literal}
