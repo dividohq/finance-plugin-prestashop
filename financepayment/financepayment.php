@@ -191,16 +191,7 @@ class FinancePayment extends PaymentModule
 
         include_once dirname(__FILE__).'/sql/install.php';
 
-        if (!parent::install()
-            || !$this->registerHook('payment')
-            || !$this->registerHook('header')
-            || !$this->registerHook('actionAdminControllerSetMedia')
-            || !$this->registerHook('displayProductPriceBlock')
-            || !$this->registerHook('displayAdminProductsExtra')
-            || !$this->registerHook('actionProductUpdate')
-            || !$this->registerHook('actionOrderStatusUpdate')
-            || !$this->registerHook('paymentReturn')
-        ) {
+        if (!parent::install() || !$this->registerHooks()) {
             return false;
         }
         $status = array();
@@ -224,6 +215,22 @@ class FinancePayment extends PaymentModule
         return true;
     }
 
+    private function registerHooks(){
+        $hooks = [
+            'payment',
+            'header',
+            'actionAdminControllerSetMedia',
+            'displayProductPriceBlock',
+            'displayAdminProductsExtra',
+            'actionProductUpdate',
+            'actionOrderStatusUpdate',
+            'paymentReturn',
+            'displayAdminOrderSide',
+            'actionGetAdminOrderButtons'
+        ];
+
+        return (bool) $this->registerHook($hooks);
+    }
     /**
      * @param $name
      * @param $color
