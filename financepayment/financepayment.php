@@ -1332,4 +1332,45 @@ class FinancePayment extends PaymentModule
         }
         return $filename;
     }
+
+    public function hookActionGetAdminOrderButtons($params)
+    {
+        $order = new Order($params['id_order']);
+
+        /** @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
+        $router = $this->get('router');
+
+        /** @var \PrestaShopBundle\Controller\Admin\Sell\Order\ActionsBarButtonsCollection $bar */
+        $bar = $params['actions_bar_buttons_collection'];
+
+        $viewCustomerUrl = $router->generate('admin_customers_view', ['customerId'=> (int)$order->id_customer]);
+        $bar->add(
+            new \PrestaShopBundle\Controller\Admin\Sell\Order\ActionsBarButton(
+                'btn-secondary', ['href' => $viewCustomerUrl], 'Notify Lender...'
+            )
+        );
+    }
+
+    public function hookDisplayAdminOrderSide($params){
+        
+        return $this->render($this->getModuleTemplatePath() . 'module.html.twig', [
+            'something' => ['some' => 'Some', 'thing' => 'Thing']
+        ]);
+    }
+
+
+    private function getModuleTemplatePath(): string
+    {
+        return sprintf('@Modules/%s/views/templates/admin/', $this->name);
+    }
+
+    private function render(string $template, array $params = []): string
+    {
+        /** @var Twig_Environment $twig */
+        $twig = $this->get('twig');
+
+        return $twig->render($template, $params);
+    }
+
+
 }
