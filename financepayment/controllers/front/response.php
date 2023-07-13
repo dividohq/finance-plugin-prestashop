@@ -39,98 +39,51 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 
     const HANDLED_EVENTS = ['application-status-update'];
 
-    private $responseStatusCode = self::OK;
-    private $responseMessage = "";
+    private $responseStatusCode = self::INTERNAL_SERVER_ERROR;
+    private $responseMessage = "Uh de buh?";
 
     public function postProcess()
     {
         $input = file_get_contents('php://input');
-        $data  = json_decode($input);
-        $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : null;
-        $secret = null;
 
-        if (!empty(Configuration::get('FINANCE_HMAC'))){
-            $secret = $this->createSignature($input, Configuration::get('FINANCE_HMAC'));
-            if(empty($callback_sign)){
-                return $this->setResponse(self::UNAUTHORISED, "Module configuration expects a HMAC. None received.");
-            }
-
-            if ($secret != $callback_sign) {
-                return $this->setResponse(self::UNAUTHORISED, "Webhook hash does not match hash generated from shared secret");
-            }
+        $data = $this->validateWebhook($input);
+        if($data === false){
+            return;
         }
 
-        if(!isset($data->event)){
-            return $this->setResponse(self::BAD_REQUEST, "No webhook event type received");
-        }
-        if(!in_array($data->event, self::HANDLED_EVENTS)){
-            return $this->setResponse(self::OK, sprintf("Request (%s) acknowledged, but not handled", $data->event));
+        $cart = $this->retrieveCart($data);
+        if($cart === false){
+            return;
         }
 
-        if (!isset($data->metadata->merchant_reference)) {
-            return $this->setResponse(self::BAD_REQUEST, "No Cart ID found");
-        }
-        $cart_id = $data->metadata->merchant_reference;
-
-        if (!isset($data->status)) {
-            return $this->setResponse(self::BAD_REQUEST, "No status found");
-        }
-        $status = Configuration::get(sprintf('FINANCE_STATUS_%s',$data->status));
-        if (!$status) {
-            return $this->setResponse(self::OK, "Request acknowledged but status unhandled by module");
-        }
-        
-        $result = Db::getInstance()->getRow(
-            sprintf(
-                "SELECT * FROM `%sdivido_requests` WHERE `cart_id` = '%s'",
-                _DB_PREFIX_,
-                $cart_id
-            )
-        );
-        if (!$result) {
-            return $this->setResponse(self::NOT_FOUND, "Cart not found in storage");
-        }
-
-        $hash = hash('sha256', $result['cart_id'].$result['hash']);
-        if ($hash !== $data->metadata->cart_hash) {
-            return $this->setResponse(self::UNAUTHORISED, "Cart Hash doesn't match expected");
-        }
-
-        $cart = new Cart($cart_id);
-        if (!Validate::isLoadedObject($cart)) {
-            return $this->setResponse(self::INTERNAL_SERVER_ERROR, "Cart could not be loaded");
-        }
-
-        if (!$cart->OrderExists()) {
-            return $this->setResponse(
-                self::INTERNAL_SERVER_ERROR, 
-                sprintf("Order (ID.%s) could not be found", $cart_id)
-            );
+        $request = $this->retrieveRequestFromDb($data);
+        if($request === false){
+            return;
         }
 
         $total = $cart->getOrderTotal();
-        if ($total != $result['total']) {
+        if ($total != $request['total']) {
             $status = Configuration::get('PS_OS_ERROR');
         }
 
-        $order = new Order(Order::getOrderByCartId($cart_id));
-        if ($order->current_state != Configuration::get('FINANCE_AWAITING_STATUS')) {
-            if ($status != $order->current_state) {
-                $this->setCurrentState($order, $status);
-            }
-        } elseif ($status != $order->current_state) {
-            $extra_vars = array('transaction_id' => $data->application);
-            $order->addOrderPayment($result['total'], null, $data->application);
-            $this->setCurrentState($order, $status);
-
-            $this->updateOrder(
-                $cart_id,
-                $status,
-                $extra_vars
-            );
+        $order = new Order(Order::getOrderByCartId($request['cart_id']));
+        if ($status == $order->current_state) {
+            $this->setResponse(self::OK, "Status Unchanged");
+            return;
         }
-
-        $this->setResponse(200, "Status Updated");
+        
+        $this->setResponse(self::OK, "Status Updated");
+        if ($order->current_state === Configuration::get('FINANCE_AWAITING_STATUS')) {
+            
+            $order->addOrderPayment($request['total'], null, $data->application);
+            $this->updateOrder(
+                $request['cart_id'],
+                $status,
+                ['transaction_id' => $data->application]
+            );
+            $this->setResponse(self::CREATED, "Status Updated and Order Created");
+        }
+        $this->setCurrentState($order, $status);
     }
 
     public function setCurrentState($order, $id_order_state, $id_employee = 0)
@@ -662,7 +615,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
      *
      * @param  [type] $payload
      * @param  [type] $secret
-     * @return void
+     * @return string
      */
     protected function createSignature($payload, $secret)
     {
@@ -670,6 +623,89 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $signature = base64_encode($hmac);
 
         return $signature;
+    }
+
+    protected function validateWebhook($input){
+        $data  = json_decode($input);
+        if(!$data){
+            $this->setResponse(self::BAD_REQUEST, "Could not decode json payload of request");
+            return false;
+        }
+
+        // only check HMAC if a secret is configured in the plugin config
+        if (!empty(Configuration::get('FINANCE_HMAC'))){
+            $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : null;
+            if(empty($callback_sign)){
+                $this->setResponse(self::UNAUTHORISED, "Module configuration expects a HMAC. None received.");
+                return false;
+            }
+
+            $secret = $this->createSignature($input, Configuration::get('FINANCE_HMAC'));
+            if ($secret != $callback_sign) {
+                $this->setResponse(self::UNAUTHORISED, "Webhook hash does not match hash generated from shared secret");
+                return false;
+            }
+        }
+
+        if(!isset($data->event)){
+            $this->setResponse(self::BAD_REQUEST, "No webhook event type received");
+            return false;
+        }
+        if(!in_array($data->event, self::HANDLED_EVENTS)){
+            $this->setResponse(self::OK, sprintf("Request (%s) acknowledged, but not handled", $data->event));
+            return false;
+        }
+        return $data;
+    }
+
+    protected function retrieveCart($data){
+        if(!isset($data->metadata->merchant_reference)) {
+            $this->setResponse(self::BAD_REQUEST, "No Cart ID found in payload");
+            return false;
+        }
+
+        $cart = new Cart($data->metadata->merchant_reference);
+        if (!Validate::isLoadedObject($cart)) {
+            $this->setResponse(self::INTERNAL_SERVER_ERROR, "Cart could not be loaded");
+            return false;
+        }
+
+        if (!$cart->OrderExists()) {
+            $this->setResponse(
+                self::INTERNAL_SERVER_ERROR, 
+                sprintf("Order (ID.%s) could not be found", $data->metadata->merchant_reference)
+            );
+            return false;
+        }
+        return $cart;
+    }
+
+    protected function retrieveRequestFromDb($data){
+        
+        $result = Db::getInstance()->getRow(
+            sprintf(
+                "SELECT * FROM `%sdivido_requests` WHERE `cart_id` = '%s'",
+                _DB_PREFIX_,
+                $data->metadata->merchant_reference
+            )
+        );
+        if (!$result) {
+            $this->setResponse(self::NOT_FOUND, "Cart not found in storage");
+            return false;
+        }
+
+        if(!$data->metadata->cart_hash){
+            $this->setResponse(self::UNAUTHORISED, "Cart Hash expected in metadata");
+            return false;
+        }
+
+        $hash = hash('sha256', $result['cart_id'].$result['hash']);
+        if ($hash !== $data->metadata->cart_hash) {
+            $this->setResponse(self::UNAUTHORISED, "Cart Hash doesn't match expected");
+            return false;
+        }
+
+        return $result;
     }
 
     protected function setResponse($status, $message){
