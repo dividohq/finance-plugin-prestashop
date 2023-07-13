@@ -30,6 +30,18 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = true;
 
+    const OK = 200;
+    const CREATED = 201;
+    const BAD_REQUEST = 400;
+    const UNAUTHORISED = 401;
+    const NOT_FOUND = 404;
+    const INTERNAL_SERVER_ERROR = 500;
+
+    const HANDLED_EVENTS = ['application-status-update'];
+
+    private $responseStatusCode = self::OK;
+    private $responseMessage = "";
+
     public function postProcess()
     {
         $input = file_get_contents('php://input');
@@ -37,52 +49,70 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : null;
         $secret = null;
 
-        if (!empty(Configuration::get('FINANCE_HMAC')) && !empty($callback_sign)) {
+        if (!empty(Configuration::get('FINANCE_HMAC'))){
             $secret = $this->createSignature($input, Configuration::get('FINANCE_HMAC'));
+            if(empty($callback_sign)){
+                return $this->setResponse(self::UNAUTHORISED, "Module configuration expects a HMAC. None received.");
+            }
+
             if ($secret != $callback_sign) {
-                echo "Invalid Hash";
-                die;
+                return $this->setResponse(self::UNAUTHORISED, "Webhook hash does not match hash generated from shared secret");
             }
         }
 
-        if (!isset($data->status) || !isset($data->metadata->merchant_reference)) {
-            die;
+        if(!isset($data->event)){
+            return $this->setResponse(self::BAD_REQUEST, "No webhook event type received");
+        }
+        if(!in_array($data->event, self::HANDLED_EVENTS)){
+            return $this->setResponse(self::OK, sprintf("Request (%s) acknowledged, but not handled", $data->event));
         }
 
-        $cart_id   = $data->metadata->merchant_reference;
+        if (!isset($data->metadata->merchant_reference)) {
+            return $this->setResponse(self::BAD_REQUEST, "No Cart ID found");
+        }
+        $cart_id = $data->metadata->merchant_reference;
 
+        if (!isset($data->status)) {
+            return $this->setResponse(self::BAD_REQUEST, "No status found");
+        }
+        $status = Configuration::get(sprintf('FINANCE_STATUS_%s',$data->status));
+        if (!$status) {
+            return $this->setResponse(self::OK, "Request acknowledged but status unhandled by module");
+        }
+        
         $result = Db::getInstance()->getRow(
-            'SELECT * FROM `'._DB_PREFIX_.'divido_requests` WHERE `cart_id` = "'.(int) $cart_id.'"'
+            sprintf(
+                "SELECT * FROM `%sdivido_requests` WHERE `cart_id` = '%s'",
+                _DB_PREFIX_,
+                $cart_id
+            )
         );
-
         if (!$result) {
-            die;
+            return $this->setResponse(self::NOT_FOUND, "Cart not found in storage");
         }
 
         $hash = hash('sha256', $result['cart_id'].$result['hash']);
-
         if ($hash !== $data->metadata->cart_hash) {
-            die;
+            return $this->setResponse(self::UNAUTHORISED, "Cart Hash doesn't match expected");
         }
 
         $cart = new Cart($cart_id);
         if (!Validate::isLoadedObject($cart)) {
-            die;
+            return $this->setResponse(self::INTERNAL_SERVER_ERROR, "Cart could not be loaded");
         }
-        $status = Configuration::get('FINANCE_STATUS_'.$data->status);
 
-        if (!$status) {
-            die;
+        if (!$cart->OrderExists()) {
+            return $this->setResponse(
+                self::INTERNAL_SERVER_ERROR, 
+                sprintf("Order (ID.%s) could not be found", $cart_id)
+            );
         }
 
         $total = $cart->getOrderTotal();
-
         if ($total != $result['total']) {
             $status = Configuration::get('PS_OS_ERROR');
         }
-        if (!$cart->OrderExists()) {
-            die;
-        }
+
         $order = new Order(Order::getOrderByCartId($cart_id));
         if ($order->current_state != Configuration::get('FINANCE_AWAITING_STATUS')) {
             if ($status != $order->current_state) {
@@ -99,7 +129,8 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $extra_vars
             );
         }
-        die;
+
+        $this->setResponse(200, "Status Updated");
     }
 
     public function setCurrentState($order, $id_order_state, $id_employee = 0)
@@ -639,5 +670,20 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $signature = base64_encode($hmac);
 
         return $signature;
+    }
+
+    protected function setResponse($status, $message){
+        $this->responseMessage = $message;
+        $this->responseStatusCode = $status;
+    }
+
+    public function display()
+    {
+        header('Content-Type: application/json');
+        http_response_code($this->responseStatusCode);
+
+        $this->ajaxRender(json_encode([
+            'message' => $this->responseMessage
+        ]));
     }
 }
