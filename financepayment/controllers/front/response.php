@@ -61,6 +61,11 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             return;
         }
 
+        $status = $this->convertStatus($data->status);
+        if($status === false){
+            return;
+        }
+
         $total = $cart->getOrderTotal();
         if ($total != $request['total']) {
             $status = Configuration::get('PS_OS_ERROR');
@@ -72,18 +77,21 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             return;
         }
         
-        $this->setResponse(self::OK, "Status Updated");
         if ($order->current_state === Configuration::get('FINANCE_AWAITING_STATUS')) {
             
             $order->addOrderPayment($request['total'], null, $data->application);
+            $this->setCurrentState($order, $status);
             $this->updateOrder(
                 $request['cart_id'],
                 $status,
                 ['transaction_id' => $data->application]
             );
             $this->setResponse(self::CREATED, "Status Updated and Order Created");
+            return;
         }
+
         $this->setCurrentState($order, $status);
+        $this->setResponse(self::OK, "Status Updated");
     }
 
     public function setCurrentState($order, $id_order_state, $id_employee = 0)
@@ -655,7 +663,20 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             $this->setResponse(self::OK, sprintf("Request (%s) acknowledged, but not handled", $data->event));
             return false;
         }
+        if(!isset($data->status)){
+            $this->setResponse(self::BAD_REQUEST, "No webhook status in payload");
+            return false;
+        }
         return $data;
+    }
+
+    protected function convertStatus($webhookStatus){
+        $prestaStatus = Configuration::get(sprintf('FINANCE_STATUS_%s', $webhookStatus));
+        if(!$prestaStatus){
+            $this->setResponse(self::INTERNAL_SERVER_ERROR, "Could not convert status to Prestashop status");
+            return false;
+        }
+        return $prestaStatus;
     }
 
     protected function retrieveCart($data){
