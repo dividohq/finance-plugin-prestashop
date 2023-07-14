@@ -26,6 +26,9 @@ declare(strict_types=1);
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+/**
+ * The Response Controller handles webhooks sent by Divido
+ */
 class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 {
     const DEBUG_MODE = true;
