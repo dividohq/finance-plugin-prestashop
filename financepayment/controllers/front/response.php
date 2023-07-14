@@ -75,7 +75,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             return;
         }
         
-        if ($order->current_state === Configuration::get('FINANCE_AWAITING_STATUS')) {
+        if ($status === Configuration::get('PS_OS_PAYMENT')) {
             
             $order->addOrderPayment($request['total'], null, $data->application);
             $this->setCurrentState($order, $status);
