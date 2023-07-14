@@ -34,7 +34,6 @@ use \Divido\Exceptions\WebhookException;
  */
 class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 {
-    const DEBUG_MODE = true;
 
     const OK = 200;
     const CREATED = 201;
