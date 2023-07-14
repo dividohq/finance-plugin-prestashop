@@ -664,7 +664,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
     protected function convertStatus($webhookStatus){
         $prestaStatus = Configuration::get(sprintf('FINANCE_STATUS_%s', $webhookStatus));
         if(!$prestaStatus){
-            throw new WebhookException("Could not convert status to Prestashop status", self::INTERNAL_SERVER_ERROR);
+            throw new WebhookException("Status has no Prestashop compliment to convert to", self::OK);
         }
         return $prestaStatus;
     }
