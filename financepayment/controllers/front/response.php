@@ -61,11 +61,14 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             $status = $this->convertStatus($data->status);
 
             $total = $cart->getOrderTotal();
-            if ($total != $request['total']) {
-                $status = Configuration::get('PS_OS_ERROR');
-            }
 
             $order = new Order(Order::getOrderByCartId($request['cart_id']));
+
+            if ($total != $request['total']) {
+                $this->setCurrentState($order, Configuration::get('PS_OS_ERROR'));
+                throw new WebhookException("Order total did not match total stored in db", self::INTERNAL_SERVER_ERROR);
+            }
+
             if ($status == $order->current_state) {
                 throw new WebhookException("Status Unchanged", self::OK);
             }
