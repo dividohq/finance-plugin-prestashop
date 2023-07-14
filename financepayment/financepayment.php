@@ -31,6 +31,7 @@ if (!defined('_PS_VERSION_')) {
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 require_once dirname(__FILE__) . '/classes/divido.class.php';
 require_once dirname(__FILE__) . '/classes/DividoHelper.php';
+require_once dirname(__FILE__) . '/exceptions/WebhookException.php';
 
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\Exceptions\InvalidApiKeyFormatException;

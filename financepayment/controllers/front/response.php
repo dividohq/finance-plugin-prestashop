@@ -1,6 +1,9 @@
 <?php
 
 declare(strict_types=1);
+
+use \Divido\Exceptions\WebhookException;
+
 /**
 * 2007-2018 PrestaShop
 *
@@ -25,7 +28,7 @@ declare(strict_types=1);
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
-
+    
 /**
  * The Response Controller handles webhooks sent by Divido
  */
@@ -49,34 +52,27 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
     {
         $input = file_get_contents('php://input');
 
-        $data = $this->validateWebhook($input);
-        if($data === false){
-            return;
-        }
+        try{
+            $data = $this->validateWebhook($input);
 
-        $cart = $this->retrieveCart($data);
-        if($cart === false){
-            return;
-        }
+            $cart = $this->retrieveCart($data);
 
-        $request = $this->retrieveRequestFromDb($data);
-        if($request === false){
-            return;
-        }
+            $request = $this->retrieveRequestFromDb($data);
 
-        $status = $this->convertStatus($data->status);
-        if($status === false){
-            return;
-        }
+            $status = $this->convertStatus($data->status);
 
-        $total = $cart->getOrderTotal();
-        if ($total != $request['total']) {
-            $status = Configuration::get('PS_OS_ERROR');
-        }
+            $total = $cart->getOrderTotal();
+            if ($total != $request['total']) {
+                $status = Configuration::get('PS_OS_ERROR');
+            }
 
-        $order = new Order(Order::getOrderByCartId($request['cart_id']));
-        if ($status == $order->current_state) {
-            $this->setResponse(self::OK, "Status Unchanged");
+            $order = new Order(Order::getOrderByCartId($request['cart_id']));
+            if ($status == $order->current_state) {
+                throw new WebhookException("Status Unchanged", self::OK);
+            }
+
+        } catch (WebhookException $e){
+            $this->setResponse($e->getCode(), $e->getMessage());
             return;
         }
         
@@ -553,16 +549,15 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $file_attachement = null;
             }
 
-            if (self::DEBUG_MODE) {
-                PrestaShopLogger::addLog(
-                    'PaymentModule::validateOrder - Mail is about to be sent',
-                    1,
-                    null,
-                    'Cart',
-                    (int) $id_cart,
-                    true
-                );
-            }
+            PrestaShopLogger::addLog(
+                'PaymentModule::validateOrder - Mail is about to be sent',
+                1,
+                null,
+                'Cart',
+                (int) $id_cart,
+                true
+            );
+            
 
             if (Validate::isEmail($customer->email)) {
                 Mail::Send(
@@ -639,36 +634,30 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
     protected function validateWebhook($input){
         $data  = json_decode($input);
         if(!$data){
-            $this->setResponse(self::BAD_REQUEST, "Could not decode json payload of request");
-            return false;
+            throw new WebhookException("Could not decode json payload of request", self::BAD_REQUEST);
         }
 
         // only check HMAC if a secret is configured in the plugin config
         if (!empty(Configuration::get('FINANCE_HMAC'))){
             $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : null;
             if(empty($callback_sign)){
-                $this->setResponse(self::UNAUTHORISED, "Module configuration expects a HMAC. None received.");
-                return false;
+                throw new WebhookException("Module configuration expects a HMAC. None received", self::UNAUTHORISED);
             }
 
             $secret = $this->createSignature($input, Configuration::get('FINANCE_HMAC'));
             if ($secret != $callback_sign) {
-                $this->setResponse(self::UNAUTHORISED, "Webhook hash does not match hash generated from shared secret");
-                return false;
+                throw new WebhookException("Webhook hash does not match hash generated from shared secret", self::UNAUTHORISED);
             }
         }
 
         if(!isset($data->event)){
-            $this->setResponse(self::BAD_REQUEST, "No webhook event type received");
-            return false;
+            throw new WebhookException("No webhook event type received", self::BAD_REQUEST);
         }
         if(!in_array($data->event, self::HANDLED_EVENTS)){
-            $this->setResponse(self::OK, sprintf("Request (%s) acknowledged, but not handled", $data->event));
-            return false;
+            throw new WebhookException(sprintf("Request (%s) acknowledged, but not handled", $data->event), self::OK);
         }
         if(!isset($data->status)){
-            $this->setResponse(self::BAD_REQUEST, "No webhook status in payload");
-            return false;
+            throw new WebhookException("No webhook status in payload", self::BAD_REQUEST);
         }
         return $data;
     }
@@ -676,30 +665,26 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
     protected function convertStatus($webhookStatus){
         $prestaStatus = Configuration::get(sprintf('FINANCE_STATUS_%s', $webhookStatus));
         if(!$prestaStatus){
-            $this->setResponse(self::INTERNAL_SERVER_ERROR, "Could not convert status to Prestashop status");
-            return false;
+            throw new WebhookException("Could not convert status to Prestashop status", self::INTERNAL_SERVER_ERROR);
         }
         return $prestaStatus;
     }
 
     protected function retrieveCart($data){
         if(!isset($data->metadata->merchant_reference)) {
-            $this->setResponse(self::BAD_REQUEST, "No Cart ID found in payload");
-            return false;
+            throw new WebhookException("No Cart ID found in payload", self::BAD_REQUEST);
         }
 
         $cart = new Cart($data->metadata->merchant_reference);
         if (!Validate::isLoadedObject($cart)) {
-            $this->setResponse(self::INTERNAL_SERVER_ERROR, "Cart could not be loaded");
-            return false;
+            throw new WebhookException("Cart could not be loaded", self::INTERNAL_SERVER_ERROR);
         }
 
         if (!$cart->OrderExists()) {
-            $this->setResponse(
-                self::INTERNAL_SERVER_ERROR, 
-                sprintf("Order (ID.%s) could not be found", $data->metadata->merchant_reference)
+            throw new WebhookException(
+                sprintf("Order (ID.%s) could not be found", $data->metadata->merchant_reference),
+                self::INTERNAL_SERVER_ERROR
             );
-            return false;
         }
         return $cart;
     }
@@ -714,19 +699,16 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             )
         );
         if (!$result) {
-            $this->setResponse(self::NOT_FOUND, "Cart not found in storage");
-            return false;
+            throw new WebhookException("Cart not found in storage", self::NOT_FOUND);
         }
 
         if(!$data->metadata->cart_hash){
-            $this->setResponse(self::UNAUTHORISED, "Cart Hash expected in metadata");
-            return false;
+            throw new WebhookException("Cart Hash expected in metadata", self::UNAUTHORISED);
         }
 
         $hash = hash('sha256', $result['cart_id'].$result['hash']);
         if ($hash !== $data->metadata->cart_hash) {
-            $this->setResponse(self::UNAUTHORISED, "Cart Hash doesn't match expected");
-            return false;
+            throw new WebhookException("Cart Hash doesn't match expected ($hash)", self::UNAUTHORISED);
         }
 
         return $result;
