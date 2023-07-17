@@ -633,6 +633,16 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         return $signature;
     }
 
+    /**
+     * checks the integrity and validity of the webhook payload
+     *
+     * @param string $input the raw string of the body
+     * @return object the json decoded webhook payload object
+     * @throws WebhookException if json could not be decoded
+     * @throws WebhookException if secret set but no HMAC received in the header
+     * @throws WebhookException if divido HMAC does not match HMAC generated with config shared secret
+     * @throws WebhookException if a required element of the payload is missing
+     */
     protected function validateWebhook($input){
         $data  = json_decode($input);
         if(!$data){
@@ -661,9 +671,22 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         if(!isset($data->status)){
             throw new WebhookException("No webhook status in payload", self::HTTP_RESPONSE_CODE_BAD_REQUEST);
         }
+        if(!isset($data->metadata->cart_hash)){
+            throw new WebhookException("Cart Hash expected in metadata", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
+        }
+        if(!isset($data->metadata->merchant_reference)) {
+            throw new WebhookException("No Cart ID found in payload", self::HTTP_RESPONSE_CODE_BAD_REQUEST);
+        }
         return $data;
     }
 
+    /**
+     * Converts the status of the divido status into the compliment status set in the FinancePayment->install() function
+     *
+     * @param string $webhookStatus the divido status
+     * @return int the prestashop compliment status
+     * @throws WebhookException if compliment status does not exist 
+     */
     protected function convertStatus($webhookStatus){
         $prestaStatus = Configuration::get(sprintf('FINANCE_STATUS_%s', $webhookStatus));
         if(!$prestaStatus){
@@ -672,10 +695,15 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         return $prestaStatus;
     }
 
+    /**
+     * Looks to retrieve the Cart object for the order with the merchant reference in the webhook metadata
+     *
+     * @param object $data
+     * @return Cart
+     * @throws WebhookException if Cart can not be loaded
+     * @throws WebhookException if related Order does not exist for Cart object
+     */
     protected function retrieveCart($data){
-        if(!isset($data->metadata->merchant_reference)) {
-            throw new WebhookException("No Cart ID found in payload", self::HTTP_RESPONSE_CODE_BAD_REQUEST);
-        }
 
         $cart = new Cart($data->metadata->merchant_reference);
         if (!Validate::isLoadedObject($cart)) {
@@ -691,6 +719,14 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         return $cart;
     }
 
+    /**
+     * Retrieves snapshot of order taken at checkout
+     *
+     * @param object $data a json decoded object of the payload
+     * @return array the table row
+     * @throws WebhookException when row not found in db
+     * @throws WebhookException if hash of cart does not match cart hash in webhook payload
+     */
     protected function retrieveRequestFromDb($data){
         
         $result = Db::getInstance()->getRow(
@@ -704,10 +740,6 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             throw new WebhookException("Cart not found in storage", self::HTTP_RESPONSE_CODE_NOT_FOUND);
         }
 
-        if(!$data->metadata->cart_hash){
-            throw new WebhookException("Cart Hash expected in metadata", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
-        }
-
         $cartHash = hash('sha256', $result['cart_id'].$result['hash']);
         if ($cartHash !== $data->metadata->cart_hash) {
             throw new WebhookException("Cart Hash doesn't match expected", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
@@ -716,11 +748,23 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         return $result;
     }
 
+    /**
+     * Sets the response status/message to be returned
+     *
+     * @param int $status
+     * @param string $message
+     * @return void
+     */
     protected function setResponse($status, $message){
         $this->responseMessage = $message;
         $this->responseStatusCode = $status;
     }
 
+    /**
+     * Parent function used to assign rules to display controller output
+     *
+     * @return void
+     */
     public function display()
     {
         header('Content-Type: application/json');
