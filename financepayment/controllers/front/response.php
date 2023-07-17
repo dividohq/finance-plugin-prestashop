@@ -35,16 +35,16 @@ use \Divido\Exceptions\WebhookException;
 class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 {
 
-    const OK = 200;
-    const CREATED = 201;
-    const BAD_REQUEST = 400;
-    const UNAUTHORISED = 401;
-    const NOT_FOUND = 404;
-    const INTERNAL_SERVER_ERROR = 500;
+    const HTTP_RESPONSE_CODE_OK = 200;
+    const HTTP_RESPONSE_CODE_CREATED = 201;
+    const HTTP_RESPONSE_CODE_BAD_REQUEST = 400;
+    const HTTP_RESPONSE_CODE_UNAUTHORISED = 401;
+    const HTTP_RESPONSE_CODE_NOT_FOUND = 404;
+    const HTTP_RESPONSE_CODE_INTERNAL_SERVER_ERROR = 500;
 
     const HANDLED_EVENTS = ['application-status-update'];
 
-    private $responseStatusCode = self::INTERNAL_SERVER_ERROR;
+    private $responseStatusCode = self::HTTP_RESPONSE_CODE_INTERNAL_SERVER_ERROR;
     private $responseMessage = "Uh de buh?";
 
     public function postProcess()
@@ -66,11 +66,11 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 
             if ($total != $request['total']) {
                 $this->setCurrentState($order, Configuration::get('PS_OS_ERROR'));
-                throw new WebhookException("Order total did not match total stored in db", self::INTERNAL_SERVER_ERROR);
+                throw new WebhookException("Order total did not match total stored in db", self::HTTP_RESPONSE_CODE_INTERNAL_SERVER_ERROR);
             }
 
             if ($status == $order->current_state) {
-                throw new WebhookException("Status Unchanged", self::OK);
+                throw new WebhookException("Status Unchanged", self::HTTP_RESPONSE_CODE_OK);
             }
 
         } catch (WebhookException $e){
@@ -87,12 +87,12 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $status,
                 ['transaction_id' => $data->application]
             );
-            $this->setResponse(self::CREATED, "Status Updated and Order Created");
+            $this->setResponse(self::HTTP_RESPONSE_CODE_CREATED, "Status Updated and Order Created");
             return;
         }
 
         $this->setCurrentState($order, $status);
-        $this->setResponse(self::OK, "Status Updated");
+        $this->setResponse(self::HTTP_RESPONSE_CODE_OK, "Status Updated");
     }
 
     public function setCurrentState($order, $id_order_state, $id_employee = 0)
@@ -636,30 +636,30 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
     protected function validateWebhook($input){
         $data  = json_decode($input);
         if(!$data){
-            throw new WebhookException("Could not decode json payload of request", self::BAD_REQUEST);
+            throw new WebhookException("Could not decode json payload of request", self::HTTP_RESPONSE_CODE_BAD_REQUEST);
         }
 
         // only check HMAC if a secret is configured in the plugin config
         if (!empty(Configuration::get('FINANCE_HMAC'))){
             $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : null;
             if(empty($callback_sign)){
-                throw new WebhookException("Module configuration expects a HMAC. None received", self::UNAUTHORISED);
+                throw new WebhookException("Module configuration expects a HMAC. None received", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
             }
 
             $secret = $this->createSignature($input, Configuration::get('FINANCE_HMAC'));
             if ($secret != $callback_sign) {
-                throw new WebhookException("Webhook hash does not match hash generated from shared secret", self::UNAUTHORISED);
+                throw new WebhookException("Webhook hash does not match hash generated from shared secret", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
             }
         }
 
         if(!isset($data->event)){
-            throw new WebhookException("No webhook event type received", self::BAD_REQUEST);
+            throw new WebhookException("No webhook event type received", self::HTTP_RESPONSE_CODE_BAD_REQUEST);
         }
         if(!in_array($data->event, self::HANDLED_EVENTS)){
-            throw new WebhookException(sprintf("Request (%s) acknowledged, but not handled", $data->event), self::OK);
+            throw new WebhookException(sprintf("Request (%s) acknowledged, but not handled", $data->event), self::HTTP_RESPONSE_CODE_OK);
         }
         if(!isset($data->status)){
-            throw new WebhookException("No webhook status in payload", self::BAD_REQUEST);
+            throw new WebhookException("No webhook status in payload", self::HTTP_RESPONSE_CODE_BAD_REQUEST);
         }
         return $data;
     }
@@ -667,25 +667,25 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
     protected function convertStatus($webhookStatus){
         $prestaStatus = Configuration::get(sprintf('FINANCE_STATUS_%s', $webhookStatus));
         if(!$prestaStatus){
-            throw new WebhookException("Status has no Prestashop compliment to convert to", self::OK);
+            throw new WebhookException("Status has no Prestashop compliment to convert to", self::HTTP_RESPONSE_CODE_OK);
         }
         return $prestaStatus;
     }
 
     protected function retrieveCart($data){
         if(!isset($data->metadata->merchant_reference)) {
-            throw new WebhookException("No Cart ID found in payload", self::BAD_REQUEST);
+            throw new WebhookException("No Cart ID found in payload", self::HTTP_RESPONSE_CODE_BAD_REQUEST);
         }
 
         $cart = new Cart($data->metadata->merchant_reference);
         if (!Validate::isLoadedObject($cart)) {
-            throw new WebhookException("Cart could not be loaded", self::INTERNAL_SERVER_ERROR);
+            throw new WebhookException("Cart could not be loaded", self::HTTP_RESPONSE_CODE_INTERNAL_SERVER_ERROR);
         }
 
         if (!$cart->OrderExists()) {
             throw new WebhookException(
                 sprintf("Order (ID.%s) could not be found", $data->metadata->merchant_reference),
-                self::INTERNAL_SERVER_ERROR
+                self::HTTP_RESPONSE_CODE_INTERNAL_SERVER_ERROR
             );
         }
         return $cart;
@@ -701,16 +701,16 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             )
         );
         if (!$result) {
-            throw new WebhookException("Cart not found in storage", self::NOT_FOUND);
+            throw new WebhookException("Cart not found in storage", self::HTTP_RESPONSE_CODE_NOT_FOUND);
         }
 
         if(!$data->metadata->cart_hash){
-            throw new WebhookException("Cart Hash expected in metadata", self::UNAUTHORISED);
+            throw new WebhookException("Cart Hash expected in metadata", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
         }
 
         $hash = hash('sha256', $result['cart_id'].$result['hash']);
         if ($hash !== $data->metadata->cart_hash) {
-            throw new WebhookException("Cart Hash doesn't match expected ($hash)", self::UNAUTHORISED);
+            throw new WebhookException("Cart Hash doesn't match expected ($hash)", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
         }
 
         return $result;
