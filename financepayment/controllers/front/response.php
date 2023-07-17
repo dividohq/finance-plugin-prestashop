@@ -56,15 +56,15 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 
             $cart = $this->retrieveCart($data);
 
-            $request = $this->retrieveRequestFromDb($data);
+            $initialOrder = $this->retrieveRequestFromDb($data);
 
             $status = $this->convertStatus($data->status);
 
             $total = $cart->getOrderTotal();
 
-            $order = new Order(Order::getOrderByCartId($request['cart_id']));
+            $order = new Order(Order::getOrderByCartId($initialOrder['cart_id']));
 
-            if ($total != $request['total']) {
+            if ($total != $initialOrder['total']) {
                 $this->setCurrentState($order, Configuration::get('PS_OS_ERROR'));
                 throw new WebhookException("Order total did not match total stored in db", self::HTTP_RESPONSE_CODE_INTERNAL_SERVER_ERROR);
             }
@@ -80,10 +80,10 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         
         if ($status === Configuration::get('PS_OS_PAYMENT')) {
             
-            $order->addOrderPayment($request['total'], null, $data->application);
+            $order->addOrderPayment($initialOrder['total'], null, $data->application);
             $this->setCurrentState($order, $status);
             $this->updateOrder(
-                $request['cart_id'],
+                $initialOrder['cart_id'],
                 $status,
                 ['transaction_id' => $data->application]
             );
@@ -708,9 +708,9 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             throw new WebhookException("Cart Hash expected in metadata", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
         }
 
-        $hash = hash('sha256', $result['cart_id'].$result['hash']);
-        if ($hash !== $data->metadata->cart_hash) {
-            throw new WebhookException("Cart Hash doesn't match expected ($hash)", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
+        $cartHash = hash('sha256', $result['cart_id'].$result['hash']);
+        if ($cartHash !== $data->metadata->cart_hash) {
+            throw new WebhookException("Cart Hash doesn't match expected", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
         }
 
         return $result;
