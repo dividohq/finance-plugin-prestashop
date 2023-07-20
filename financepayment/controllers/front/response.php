@@ -647,9 +647,13 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
      * @throws WebhookException if a required element of the payload is missing
      */
     private function validateWebhook(string $input):object{
-        $data  = json_decode($input);
-        if(!$data){
-            throw new WebhookException("Could not decode json payload of request", self::HTTP_RESPONSE_CODE_BAD_REQUEST);
+        try{
+            $data  = json_decode($input, false, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $je){
+            throw new WebhookException(
+                sprintf("Could not decode json payload of request: %s - %s", $je->getMessage(), json_last_error_msg()),
+                self::HTTP_RESPONSE_CODE_BAD_REQUEST
+            );
         }
 
         // only check HMAC if a secret is configured in the plugin config
