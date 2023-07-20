@@ -552,7 +552,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             }
 
             PrestaShopLogger::addLog(
-                'PaymentModule::validateOrder - Mail is about to be sent',
+                'FinancePaymentResponseModuleFrontController::updateOrder - Mail is about to be sent',
                 1,
                 null,
                 'Cart',
