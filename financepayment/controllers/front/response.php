@@ -54,9 +54,12 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         try{
             $data = $this->validateWebhook($input);
 
-            $cart = $this->retrieveCart($data);
+            $cart = $this->retrieveCart($data->metadata->merchant_reference);
 
-            $initialOrder = $this->retrieveRequestFromDb($data);
+            $initialOrder = $this->retrieveRequestFromDb(
+                $data->metadata->merchant_reference,
+                $data->metadata->cart_hash
+            );
 
             $status = $this->convertStatus($data->status);
 
@@ -643,7 +646,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
      * @throws WebhookException if divido HMAC does not match HMAC generated with config shared secret
      * @throws WebhookException if a required element of the payload is missing
      */
-    protected function validateWebhook($input){
+    private function validateWebhook(string $input):object{
         $data  = json_decode($input);
         if(!$data){
             throw new WebhookException("Could not decode json payload of request", self::HTTP_RESPONSE_CODE_BAD_REQUEST);
@@ -687,32 +690,32 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
      * @return int the prestashop compliment status
      * @throws WebhookException if compliment status does not exist 
      */
-    protected function convertStatus($webhookStatus){
+    private function convertStatus(string $webhookStatus):int{
         $prestaStatus = Configuration::get(sprintf('FINANCE_STATUS_%s', $webhookStatus));
         if(!$prestaStatus){
             throw new WebhookException("Status has no Prestashop compliment to convert to", self::HTTP_RESPONSE_CODE_OK);
         }
-        return $prestaStatus;
+        return (int) $prestaStatus;
     }
 
     /**
      * Looks to retrieve the Cart object for the order with the merchant reference in the webhook metadata
      *
-     * @param object $data
+     * @param string $merchantReference
      * @return Cart
      * @throws WebhookException if Cart can not be loaded
      * @throws WebhookException if related Order does not exist for Cart object
      */
-    protected function retrieveCart($data){
+    private function retrieveCart(string $merchantReference):Cart{
 
-        $cart = new Cart($data->metadata->merchant_reference);
+        $cart = new Cart($merchantReference);
         if (!Validate::isLoadedObject($cart)) {
             throw new WebhookException("Cart could not be loaded", self::HTTP_RESPONSE_CODE_INTERNAL_SERVER_ERROR);
         }
 
         if (!$cart->OrderExists()) {
             throw new WebhookException(
-                sprintf("Order (ID.%s) could not be found", $data->metadata->merchant_reference),
+                sprintf("Order (ID.%s) could not be found", $merchantReference),
                 self::HTTP_RESPONSE_CODE_INTERNAL_SERVER_ERROR
             );
         }
@@ -722,27 +725,31 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
     /**
      * Retrieves snapshot of order taken at checkout
      *
-     * @param object $data a json decoded object of the payload
+     * @param string $merchantReference The cart ID in the metadata, retrieved on application creation
+     * @param string $webhookCartHash The cart hash in the metadata, assembled on proposal creation
      * @return array the table row
      * @throws WebhookException when row not found in db
      * @throws WebhookException if hash of cart does not match cart hash in webhook payload
      */
-    protected function retrieveRequestFromDb($data){
+    private function retrieveRequestFromDb(
+        string $merchantReference,
+        string $webhookCartHash
+    ):array{
         
         $result = Db::getInstance()->getRow(
             sprintf(
                 "SELECT * FROM `%sdivido_requests` WHERE `cart_id` = '%s'",
                 _DB_PREFIX_,
-                $data->metadata->merchant_reference
+                $merchantReference
             )
         );
         if (!$result) {
             throw new WebhookException("Cart not found in storage", self::HTTP_RESPONSE_CODE_NOT_FOUND);
         }
 
-        $cartHash = hash('sha256', $result['cart_id'].$result['hash']);
-        if ($cartHash !== $data->metadata->cart_hash) {
-            throw new WebhookException("Cart Hash doesn't match expected", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
+        $storedCartHash = hash('sha256', $result['cart_id'].$result['hash']);
+        if ($storedCartHash !== $webhookCartHash) {
+            throw new WebhookException("Cart Hash doesn't match expected ($storedCartHash)", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
         }
 
         return $result;
@@ -755,7 +762,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
      * @param string $message
      * @return void
      */
-    protected function setResponse($status, $message){
+    private function setResponse(int $status, string $message):void{
         $this->responseMessage = $message;
         $this->responseStatusCode = $status;
     }
@@ -765,7 +772,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
      *
      * @return void
      */
-    public function display()
+    public function display():void
     {
         header('Content-Type: application/json');
         http_response_code($this->responseStatusCode);
