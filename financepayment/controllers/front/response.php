@@ -651,7 +651,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 
         // only check HMAC if a secret is configured in the plugin config
         if (!empty(Configuration::get('FINANCE_HMAC'))){
-            $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : null;
+            $callback_sign = $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256'] ?? null;
             if(empty($callback_sign)){
                 throw new WebhookException("Module configuration expects a HMAC. None received", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
             }
