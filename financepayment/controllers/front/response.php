@@ -57,7 +57,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
             $cart = $this->retrieveCart((int) $data->metadata->merchant_reference);
 
             $initialOrder = $this->retrieveRequestFromDb(
-                $data->metadata->merchant_reference,
+                (int) $data->metadata->merchant_reference,
                 $data->metadata->cart_hash
             );
 
@@ -729,20 +729,20 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
     /**
      * Retrieves snapshot of order taken at checkout
      *
-     * @param string $merchantReference The cart ID in the metadata, retrieved on application creation
+     * @param int $merchantReference The cart ID in the metadata, retrieved on application creation
      * @param string $webhookCartHash The cart hash in the metadata, assembled on proposal creation
      * @return array the table row
      * @throws WebhookException when row not found in db
      * @throws WebhookException if hash of cart does not match cart hash in webhook payload
      */
     private function retrieveRequestFromDb(
-        string $merchantReference,
+        int $merchantReference,
         string $webhookCartHash
     ):array{
         
         $result = Db::getInstance()->getRow(
             sprintf(
-                "SELECT * FROM `%sdivido_requests` WHERE `cart_id` = '%s'",
+                "SELECT * FROM `%sdivido_requests` WHERE `cart_id` = %d",
                 _DB_PREFIX_,
                 $merchantReference
             )
