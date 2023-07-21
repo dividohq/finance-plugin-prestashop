@@ -1,6 +1,9 @@
 <?php
 
 declare(strict_types=1);
+
+use \Divido\Exceptions\WebhookException;
+
 /**
 * 2007-2018 PrestaShop
 *
@@ -25,81 +28,74 @@ declare(strict_types=1);
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
-
+    
+/**
+ * The Response Controller handles webhooks sent by Divido
+ */
 class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 {
-    const DEBUG_MODE = true;
+
+    const HTTP_RESPONSE_CODE_OK = 200;
+    const HTTP_RESPONSE_CODE_CREATED = 201;
+    const HTTP_RESPONSE_CODE_BAD_REQUEST = 400;
+    const HTTP_RESPONSE_CODE_UNAUTHORISED = 401;
+    const HTTP_RESPONSE_CODE_NOT_FOUND = 404;
+    const HTTP_RESPONSE_CODE_INTERNAL_SERVER_ERROR = 500;
+
+    const HANDLED_EVENTS = ['application-status-update'];
+
+    private $responseStatusCode = self::HTTP_RESPONSE_CODE_INTERNAL_SERVER_ERROR;
+    private $responseMessage = "Uh de buh?";
 
     public function postProcess()
     {
         $input = file_get_contents('php://input');
-        $data  = json_decode($input);
-        $callback_sign = isset($_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']) ?  $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256']  : null;
-        $secret = null;
 
-        if (!empty(Configuration::get('FINANCE_HMAC')) && !empty($callback_sign)) {
-            $secret = $this->createSignature($input, Configuration::get('FINANCE_HMAC'));
-            if ($secret != $callback_sign) {
-                echo "Invalid Hash";
-                die;
-            }
-        }
+        try{
+            $data = $this->validateWebhook($input);
 
-        if (!isset($data->status) || !isset($data->metadata->merchant_reference)) {
-            die;
-        }
+            $cart = $this->retrieveCart($data->metadata->merchant_reference);
 
-        $cart_id   = $data->metadata->merchant_reference;
-
-        $result = Db::getInstance()->getRow(
-            'SELECT * FROM `'._DB_PREFIX_.'divido_requests` WHERE `cart_id` = "'.(int) $cart_id.'"'
-        );
-
-        if (!$result) {
-            die;
-        }
-
-        $hash = hash('sha256', $result['cart_id'].$result['hash']);
-
-        if ($hash !== $data->metadata->cart_hash) {
-            die;
-        }
-
-        $cart = new Cart($cart_id);
-        if (!Validate::isLoadedObject($cart)) {
-            die;
-        }
-        $status = Configuration::get('FINANCE_STATUS_'.$data->status);
-
-        if (!$status) {
-            die;
-        }
-
-        $total = $cart->getOrderTotal();
-
-        if ($total != $result['total']) {
-            $status = Configuration::get('PS_OS_ERROR');
-        }
-        if (!$cart->OrderExists()) {
-            die;
-        }
-        $order = new Order(Order::getOrderByCartId($cart_id));
-        if ($order->current_state != Configuration::get('FINANCE_AWAITING_STATUS')) {
-            if ($status != $order->current_state) {
-                $this->setCurrentState($order, $status);
-            }
-        } elseif ($status != $order->current_state) {
-            $extra_vars = array('transaction_id' => $data->application);
-            $order->addOrderPayment($result['total'], null, $data->application);
-            $this->setCurrentState($order, $status);
-
-            $this->updateOrder(
-                $cart_id,
-                $status,
-                $extra_vars
+            $initialOrder = $this->retrieveRequestFromDb(
+                $data->metadata->merchant_reference,
+                $data->metadata->cart_hash
             );
+
+            $status = $this->convertStatus($data->status);
+
+            $total = $cart->getOrderTotal();
+
+            $order = new Order(Order::getOrderByCartId($initialOrder['cart_id']));
+
+            if ($total != $initialOrder['total']) {
+                $this->setCurrentState($order, Configuration::get('PS_OS_ERROR'));
+                throw new WebhookException("Order total did not match total stored in db", self::HTTP_RESPONSE_CODE_INTERNAL_SERVER_ERROR);
+            }
+
+            if ($status == $order->current_state) {
+                throw new WebhookException("Status Unchanged", self::HTTP_RESPONSE_CODE_OK);
+            }
+
+        } catch (WebhookException $e){
+            $this->setResponse($e->getCode(), $e->getMessage());
+            return;
         }
-        die;
+        
+        if ($status === Configuration::get('PS_OS_PAYMENT')) {
+            
+            $order->addOrderPayment($initialOrder['total'], null, $data->application);
+            $this->setCurrentState($order, $status);
+            $this->updateOrder(
+                $initialOrder['cart_id'],
+                $status,
+                ['transaction_id' => $data->application]
+            );
+            $this->setResponse(self::HTTP_RESPONSE_CODE_CREATED, "Status Updated and Order Created");
+            return;
+        }
+
+        $this->setCurrentState($order, $status);
+        $this->setResponse(self::HTTP_RESPONSE_CODE_OK, "Status Updated");
     }
 
     public function setCurrentState($order, $id_order_state, $id_employee = 0)
@@ -558,16 +554,15 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
                 $file_attachement = null;
             }
 
-            if (self::DEBUG_MODE) {
-                PrestaShopLogger::addLog(
-                    'PaymentModule::validateOrder - Mail is about to be sent',
-                    1,
-                    null,
-                    'Cart',
-                    (int) $id_cart,
-                    true
-                );
-            }
+            PrestaShopLogger::addLog(
+                'FinancePaymentResponseModuleFrontController::updateOrder - Mail is about to be sent',
+                1,
+                null,
+                'Cart',
+                (int) $id_cart,
+                true
+            );
+            
 
             if (Validate::isEmail($customer->email)) {
                 Mail::Send(
@@ -631,7 +626,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
      *
      * @param  [type] $payload
      * @param  [type] $secret
-     * @return void
+     * @return string
      */
     protected function createSignature($payload, $secret)
     {
@@ -639,5 +634,155 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         $signature = base64_encode($hmac);
 
         return $signature;
+    }
+
+    /**
+     * checks the integrity and validity of the webhook payload
+     *
+     * @param string $input the raw string of the body
+     * @return object the json decoded webhook payload object
+     * @throws WebhookException if json could not be decoded
+     * @throws WebhookException if secret set but no HMAC received in the header
+     * @throws WebhookException if divido HMAC does not match HMAC generated with config shared secret
+     * @throws WebhookException if a required element of the payload is missing
+     */
+    private function validateWebhook(string $input):object{
+        try{
+            $data  = json_decode($input, false, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $je){
+            throw new WebhookException(
+                sprintf("Could not decode json payload of request: %s - %s", $je->getMessage(), json_last_error_msg()),
+                self::HTTP_RESPONSE_CODE_BAD_REQUEST
+            );
+        }
+
+        // only check HMAC if a secret is configured in the plugin config
+        if (!empty(Configuration::get('FINANCE_HMAC'))){
+            $callback_sign = $_SERVER['HTTP_X_DIVIDO_HMAC_SHA256'] ?? null;
+            if(empty($callback_sign)){
+                throw new WebhookException("Module configuration expects a HMAC. None received", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
+            }
+
+            $secret = $this->createSignature($input, Configuration::get('FINANCE_HMAC'));
+            if ($secret != $callback_sign) {
+                throw new WebhookException("Webhook hash does not match hash generated from shared secret", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
+            }
+        }
+
+        if(!isset($data->event)){
+            throw new WebhookException("No webhook event type received", self::HTTP_RESPONSE_CODE_BAD_REQUEST);
+        }
+        if(!in_array($data->event, self::HANDLED_EVENTS)){
+            throw new WebhookException(sprintf("Request (%s) acknowledged, but not handled", $data->event), self::HTTP_RESPONSE_CODE_OK);
+        }
+        if(!isset($data->status)){
+            throw new WebhookException("No webhook status in payload", self::HTTP_RESPONSE_CODE_BAD_REQUEST);
+        }
+        if(!isset($data->metadata->cart_hash)){
+            throw new WebhookException("Cart Hash expected in metadata", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
+        }
+        if(!isset($data->metadata->merchant_reference)) {
+            throw new WebhookException("No Cart ID found in payload", self::HTTP_RESPONSE_CODE_BAD_REQUEST);
+        }
+        return $data;
+    }
+
+    /**
+     * Converts the status of the divido status into the compliment status set in the FinancePayment->install() function
+     *
+     * @param string $webhookStatus the divido status
+     * @return int the prestashop compliment status
+     * @throws WebhookException if compliment status does not exist 
+     */
+    private function convertStatus(string $webhookStatus):int{
+        $prestaStatus = Configuration::get(sprintf('FINANCE_STATUS_%s', $webhookStatus));
+        if(!$prestaStatus){
+            throw new WebhookException("Status has no Prestashop compliment to convert to", self::HTTP_RESPONSE_CODE_OK);
+        }
+        return (int) $prestaStatus;
+    }
+
+    /**
+     * Looks to retrieve the Cart object for the order with the merchant reference in the webhook metadata
+     *
+     * @param string $merchantReference
+     * @return Cart
+     * @throws WebhookException if Cart can not be loaded
+     * @throws WebhookException if related Order does not exist for Cart object
+     */
+    private function retrieveCart(string $merchantReference):Cart{
+
+        $cart = new Cart($merchantReference);
+        if (!Validate::isLoadedObject($cart)) {
+            throw new WebhookException("Cart could not be loaded", self::HTTP_RESPONSE_CODE_INTERNAL_SERVER_ERROR);
+        }
+
+        if (!$cart->OrderExists()) {
+            throw new WebhookException(
+                sprintf("Order (ID.%s) could not be found", $merchantReference),
+                self::HTTP_RESPONSE_CODE_INTERNAL_SERVER_ERROR
+            );
+        }
+        return $cart;
+    }
+
+    /**
+     * Retrieves snapshot of order taken at checkout
+     *
+     * @param string $merchantReference The cart ID in the metadata, retrieved on application creation
+     * @param string $webhookCartHash The cart hash in the metadata, assembled on proposal creation
+     * @return array the table row
+     * @throws WebhookException when row not found in db
+     * @throws WebhookException if hash of cart does not match cart hash in webhook payload
+     */
+    private function retrieveRequestFromDb(
+        string $merchantReference,
+        string $webhookCartHash
+    ):array{
+        
+        $result = Db::getInstance()->getRow(
+            sprintf(
+                "SELECT * FROM `%sdivido_requests` WHERE `cart_id` = '%s'",
+                _DB_PREFIX_,
+                $merchantReference
+            )
+        );
+        if (!$result) {
+            throw new WebhookException("Cart not found in storage", self::HTTP_RESPONSE_CODE_NOT_FOUND);
+        }
+
+        $storedCartHash = hash('sha256', $result['cart_id'].$result['hash']);
+        if ($storedCartHash !== $webhookCartHash) {
+            throw new WebhookException("Cart Hash doesn't match expected", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Sets the response status/message to be returned
+     *
+     * @param int $status
+     * @param string $message
+     * @return void
+     */
+    private function setResponse(int $status, string $message):void{
+        $this->responseMessage = $message;
+        $this->responseStatusCode = $status;
+    }
+
+    /**
+     * Parent function used to assign rules to display controller output
+     *
+     * @return void
+     */
+    public function display():void
+    {
+        header('Content-Type: application/json');
+        http_response_code($this->responseStatusCode);
+
+        $this->ajaxRender(json_encode([
+            'message' => $this->responseMessage
+        ]));
     }
 }
