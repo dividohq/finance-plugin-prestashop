@@ -753,7 +753,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
 
         $storedCartHash = hash('sha256', $result['cart_id'].$result['hash']);
         if ($storedCartHash !== $webhookCartHash) {
-            throw new WebhookException("Cart Hash doesn't match expected ($storedCartHash)", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
+            throw new WebhookException("Cart Hash doesn't match expected", self::HTTP_RESPONSE_CODE_UNAUTHORISED);
         }
 
         return $result;
