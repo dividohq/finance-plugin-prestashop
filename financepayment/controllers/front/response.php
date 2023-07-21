@@ -54,7 +54,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         try{
             $data = $this->validateWebhook($input);
 
-            $cart = $this->retrieveCart($data->metadata->merchant_reference);
+            $cart = $this->retrieveCart((int) $data->metadata->merchant_reference);
 
             $initialOrder = $this->retrieveRequestFromDb(
                 $data->metadata->merchant_reference,
@@ -705,12 +705,12 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
     /**
      * Looks to retrieve the Cart object for the order with the merchant reference in the webhook metadata
      *
-     * @param string $merchantReference
+     * @param int $merchantReference The Prestashop Cart ID (int)
      * @return Cart
      * @throws WebhookException if Cart can not be loaded
      * @throws WebhookException if related Order does not exist for Cart object
      */
-    private function retrieveCart(string $merchantReference):Cart{
+    private function retrieveCart(int $merchantReference):Cart{
 
         $cart = new Cart($merchantReference);
         if (!Validate::isLoadedObject($cart)) {
