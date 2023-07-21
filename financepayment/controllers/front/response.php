@@ -742,7 +742,7 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
         
         $result = Db::getInstance()->getRow(
             sprintf(
-                "SELECT * FROM `%sdivido_requests` WHERE `cart_id` = '%d'",
+                "SELECT * FROM `%sdivido_requests` WHERE `cart_id` = %d",
                 _DB_PREFIX_,
                 $merchantReference
             )
