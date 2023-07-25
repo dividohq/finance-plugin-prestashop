@@ -691,15 +691,15 @@ class FinancePaymentResponseModuleFrontController extends ModuleFrontController
      * Converts the status of the divido status into the compliment status set in the FinancePayment->install() function
      *
      * @param string $webhookStatus the divido status
-     * @return int the prestashop compliment status
+     * @return mixed the prestashop compliment status
      * @throws WebhookException if compliment status does not exist 
      */
-    private function convertStatus(string $webhookStatus):int{
+    private function convertStatus(string $webhookStatus):mixed{
         $prestaStatus = Configuration::get(sprintf('FINANCE_STATUS_%s', $webhookStatus));
         if(!$prestaStatus){
             throw new WebhookException("Status has no Prestashop compliment to convert to", self::HTTP_RESPONSE_CODE_OK);
         }
-        return (int) $prestaStatus;
+        return $prestaStatus;
     }
 
     /**
