@@ -37,12 +37,32 @@ $(document).ready(
         if ($('select[name="FINANCE_display"]').length > 0) {
             updateProductPlans();
         }
+
+        $("#reasonModal").dialog({
+            dialogClass: 'reason',
+            closeText: "close",
+            autoOpen: false,
+            resizable: false,
+            height: "auto",
+            modal: true,
+            buttons: {
+                "Do something": function(){
+                    $(this).dialog("close");
+                },
+                "Do something else": function(){
+                    $(this).dialog("close");
+                }
+            }
+        });
     }
+
 );
 
 $(document).on('change', 'input[name="FINANCE_ALL_PLAN_SELECTION"]', updatePlansDiv);
 $(document).on('change', 'select[name="FINANCE_PRODUCTS_OPTIONS"]', updateProductOptions);
 $(document).on('change', 'select[name="FINANCE_display"]', updateProductPlans);
+
+$(document).on('click', '.update-status', checkForReason);
 
 function updatePlansDiv() {
     val = $('input[name="FINANCE_ALL_PLAN_SELECTION"]:checked').val();
@@ -70,4 +90,93 @@ function updateProductPlans() {
     } else {
         $('.finance_plans_wrapper').slideUp();
     }
+}
+
+function checkForReason(event){
+    event.preventDefault();
+
+    var newOrderStatus = $("#update_order_status_new_order_status_id").val();
+    var reasonUrl = $("#reasonUri").val();
+    var orderId = $("#orderId").val();
+
+    $.ajax({
+        url: reasonUrl,
+        method: 'GET',
+        data: {
+            newOrderStatus: newOrderStatus,
+            orderId: orderId
+        }
+    }).done(function(data){
+        console.log(data);
+        
+        if(!data.action){
+            submitStatus(newOrderStatus);
+            return;
+        }
+        
+        $("#reasonModal").parent().addClass('reason-modal-container');
+        $("#reasonModal .body").html(data.message);
+        if(data.reasons != null){
+            var reasonSelect = document.createElement("select")
+            reasonSelect.classList.add('custom-select');
+            for(reason in data.reasons) {
+                let option = document.createElement("option");
+                option.text = data.reasons[reason]
+                option.value = reason
+                reasonSelect.add(option);
+            }
+            $("#reasonModal .body").append(reasonSelect);
+        }
+
+        let buttons = [
+            {
+                text: data.action+" (without notifying lender)",
+                click: function(){
+                    submitStatus(newOrderStatus);
+                }
+            }
+        ];
+        if(data.notify){
+            buttons.push({
+                text: data.action+" and notify lender",
+                click: function(){
+                    var updateUrl = $("#updateUri").val();
+                    $.ajax({
+                        url: updateUrl,
+                        type: 'PATCH',
+                        method: 'PATCH',
+                        data: {
+                            action: data.action,
+                            orderId: orderId,
+                            applicationId: data.application_id
+                        }
+                    }).done(function(response){
+                        console.log(response);
+                        if(response.success){
+                            submitStatus(newOrderStatus);
+                        } else {
+                            $("#reasonModal .body")
+                                .html("<p>"+response.message+"</p>");
+                            $( "#reasonModal" )
+                                .dialog("option", "buttons", []);
+                        }
+                    });
+                }
+            });
+        }
+        
+        $( "#reasonModal" )
+            .dialog("option", "buttons", buttons)
+            .dialog("open");
+
+        $(".reason-modal-container button")
+            .addClass('btn btn-primary');
+    })
+
+    function submitStatus(status){
+        var submitForm = document.getElementsByName('update_order_status')[0];
+        $("#update_order_status_new_order_status_id").val(status);
+        submitForm.submit();
+    }
+    
 }
