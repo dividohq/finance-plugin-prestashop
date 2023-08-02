@@ -121,6 +121,16 @@ class FinancePayment extends PaymentModule
 
     }
 
+    protected function generateAdminURIs()
+    {
+            $router = PrestaShop\PrestaShop\Adapter\SymfonyContainer::getInstance()->get('router');
+
+            return [
+                'reason' => $router->generate('reason'),
+                'update' => $router->generate('update')
+            ];
+    }
+
     /**
      * @return bool
      * @throws PrestaShopDatabaseException
@@ -1352,9 +1362,9 @@ class FinancePayment extends PaymentModule
     }
 
     public function hookDisplayAdminOrderSide($params){
-        
-        return $this->render($this->getModuleTemplatePath() . 'module.html.twig', [
-            'something' => ['some' => 'Some', 'thing' => 'Thing']
+        return $this->render($this->getModuleTemplatePath() . 'reason.html.twig', [
+            'uri' => $this->generateAdminURIs(),
+            'orderId' => $params['id_order']
         ]);
     }
 
@@ -1371,6 +1381,5 @@ class FinancePayment extends PaymentModule
 
         return $twig->render($template, $params);
     }
-
 
 }
