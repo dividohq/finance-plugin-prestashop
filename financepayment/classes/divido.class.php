@@ -30,15 +30,16 @@ namespace Divido\Proxy;
 
 use Configuration;
 use Db;
+use Exception;
 use Divido\MerchantSDK\Client;
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException;
 use Divido\MerchantSDK\Wrappers\HttpWrapper;
-class EnvironmentUnhealthyException extends \Exception
+class EnvironmentUnhealthyException extends Exception
 {
 }
 
-class EnvironmentUrlException extends \Exception
+class EnvironmentUrlException extends Exception
 {
 }
 
@@ -277,5 +278,44 @@ class FinanceApi
         $query = "select * from `"._DB_PREFIX_."finance_product` where id_product = '".(int) $id_product."'";
 
         return Db::getInstance()->getRow($query);
+    }
+
+    public static function getDividoOrderPayment(\Order $order):\OrderPayment{
+        $payments = $order->getOrderPayments();
+
+        foreach($payments as $payment){
+            if($payment->payment_method === 'Powered By Divido' && $payment->transaction_id != ''){
+                return $payment;
+            }
+        } 
+
+        throw new Exception(
+            sprintf(
+                "A related payment for the order (%s) could not be found in the database. Subsquently, we are unable to automatically notify the lender of a status change", 
+                $order->reference
+            )
+        );
+        
+    }
+
+    public static function getApplication($applicationId):array{
+        $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
+        $api_key = Configuration::get('FINANCE_API_KEY');
+
+        $sdk = Merchant_SDK::getSDK($environment_url, $api_key);
+
+        $response = $sdk->applications()->getSingleApplication($applicationId);
+
+        if($response->getStatusCode() !== 200){
+            throw new Exception(
+                "Could not retrieve application", 
+                $response->getStatusCode()
+            );
+        }
+        
+        $applicationArr = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+
+        return $applicationArr['data'];
+        
     }
 }
