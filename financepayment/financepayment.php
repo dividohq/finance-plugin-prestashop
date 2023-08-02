@@ -963,6 +963,7 @@ class FinancePayment extends PaymentModule
     public function hookActionAdminControllerSetMedia()
     {
         $this->context->controller->addJS($this->_path.'views/js/financeAdmin.js');
+        $this->context->controller->addCSS($this->_path.'views/css/financeAdmin.css');
     }
 
     /**

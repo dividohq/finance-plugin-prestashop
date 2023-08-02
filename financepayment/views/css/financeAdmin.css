@@ -1,0 +1,21 @@
+#reasonModal .body{
+    margin: 15px 0;
+}
+
+.reason-modal-container{
+    background-color: white;
+    padding: 15px;
+    border: 1px solid #dbe6e9;
+    border-radius: 5px;
+    box-shadow: 0 0 4px 0 rgba(0,0,0,.06);
+    z-index: 1000;
+    min-width: 50%;
+}
+
+.reason-modal-container .ui-dialog-titlebar-close{
+    float: right;
+}
+
+.reason-modal-container .ui-dialog-buttonset button{
+    margin-right: 15px;
+}
