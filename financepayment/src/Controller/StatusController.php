@@ -52,25 +52,25 @@ class StatusController extends FrameworkBundleAdminController
                 $return['action'] = 'continue';
                 $currency = $this->getOrderCurrencySymbol($order);
                 $application = $this->getApplicationFromOrder($order);
-                //TODO: admend: won't necessarily find application if cancelling 
+                //TODO: amend: won't necessarily find application if cancelling 
                 $return['application_id'] = $application['id'];
                 $return['reasons'] = self::REASONS[$application['lender']['app_name']] ?? null;
             
                 switch($newOrderStatus){
                     case Configuration::get('FINANCE_CANCELLATION_STATUS'):
-                        $cancelable = $application['amounts']['cancelable_amount']/100;
+                        $return['amount'] = $application['amounts']['cancelable_amount']/100;
                         $return['message'] = sprintf(
                             "<p>Are you sure you want to cancel this order?<p>
                             <p>The de-facto cancelable amount for this application is %s%s.</p>
-                        ", $currency, $cancelable);
+                        ", $currency, $return['amount']);
                         $return['action'] = self::ACTIONS['cancel'];
                         break;
                     case Configuration::get('FINANCE_REFUND_STATUS'):
-                        $refundable = $application['amounts']['refundable_amount']/100;
+                        $return['amount'] = $application['amounts']['refundable_amount']/100;
                         $return['message'] = sprintf("
                             <p>Are you sure you want to refund this order?</p>
                             <p>The de-facto amount refundable for this application is %s%s. Any refund attempt exceeding this will be processed as a full refund for %s%s</p>
-                        ", $currency, $refundable, $currency, $refundable);
+                        ", $currency, $return['amount'], $currency, $return['amount']);
                         $return['action'] = self::ACTIONS['refund']; 
                         break;
                 }
@@ -91,31 +91,79 @@ class StatusController extends FrameworkBundleAdminController
     public function updateAction(){
         $action = Tools::getValue('action');
         $orderId = Tools::getValue('orderId');
+        $newPrestaStatus = Tools::getValue('status');
         $applicationId = Tools::getValue('applicationId');
+        $amount = Tools::getValue('amount');
+        $reason = (Tools::getValue('reason') === false) ? null : Tools::getValue('reason');
 
-        return $this->json([
+        $return = [
             'success' => false,
-            'message' => 'This is just a test',
+            'message' => 'Nothing Happened',
+            'action' => $action,
+            'reason' => $reason,
+            'amount' => $amount,
+            'order_id' => $orderId,
             'application_id' => $applicationId
-        ]);
-        /*
-        switch($action){
-            case self::ACTIONS['cancel']:
-                //cancel order
-                $response = FinanceApi::cancelApplication($applicationId);
-                break;
-            case self::ACTIONS['refund']:
-                //refund order
-                $response = FinanceApi::refundApplication($applicationId);
-                break;
-            default:
-                // send error that action unrecognised
+        ];
+        
+        try{
+            $order = $this->getOrderFromId($orderId);
+
+            switch($action){
+                case self::ACTIONS['cancel']:
+                    //cancel order
+                    $response = FinanceApi::cancelApplication($applicationId, $orderId, $amount, $reason);
+                    $return = array_merge($return, [
+                        'success' => true,
+                        'message' => sprintf(
+                            'The lender has been notified of the cancellation request (Cancellation ID. %s)',
+                            $response['id']
+                        ),
+                        'cancellation_id' => $response['id']
+                    ]);
+                    break;
+                case self::ACTIONS['refund']:
+                    //refund order
+                    $response = FinanceApi::refundApplication($applicationId, $orderId, $amount, $reason);
+                    $return = array_merge($return, [
+                        'success' => true,
+                        'message' => sprintf(
+                            'The lender has been notified of the refund request (Refund ID. %s',
+                            $response['id']
+                        ),
+                        'refund_id' => $response['id']
+                    ]);
+                    break;
+                default:
+                    $return = array_merge($return, [
+                        'success' => false,
+                        'message' => sprintf(
+                            'There is nothing to perform for this action (%s)',
+                            $action
+                        )
+                    ]);
+                    break;
+            }
+
+            $order->setCurrentState($newPrestaStatus);
+
+        } catch (\Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException $e){
+            $return = array_merge($return, [
+                'success' => false,
+                'message' => sprintf("Can not notify lender: %s.", $e->getMessage())
+            ]);
+        } catch (\Exception $e) {
+            $return = array_merge($return, [
+                'success' => false,
+                'message' => sprintf(
+                    "An error occured whilst attempting to notify the lender: %s", 
+                    $e->getMessage()
+                )
+            ]);
         }
 
-        // handle response
-
         return $this->json($return);
-        */
+        
     }
 
     public function getOrderFromId($orderId){
