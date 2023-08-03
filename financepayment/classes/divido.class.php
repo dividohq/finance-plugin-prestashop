@@ -281,24 +281,6 @@ class FinanceApi
         return Db::getInstance()->getRow($query);
     }
 
-    public static function getDividoOrderPayment(\Order $order):\OrderPayment{
-        $payments = $order->getOrderPayments();
-
-        foreach($payments as $payment){
-            if($payment->payment_method === 'Powered By Divido' && $payment->transaction_id != ''){
-                return $payment;
-            }
-        } 
-
-        throw new Exception(
-            sprintf(
-                "A related payment for the order (%s) could not be found in the database. Subsquently, we are unable to automatically notify the lender of a status change", 
-                $order->reference
-            )
-        );
-        
-    }
-
     public static function getApplication($applicationId):array{
         $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
         $api_key = Configuration::get('FINANCE_API_KEY');

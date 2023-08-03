@@ -183,12 +183,36 @@ class StatusController extends FrameworkBundleAdminController
 
     public function getApplicationFromOrder(\Order $order){
         
-        $payment = FinanceApi::getDividoOrderPayment($order);
+        $payment = $this->getFirstDividoOrderPayment($order);
+
+        if($payment === null){
+            throw new DividoOrderPaymentException("Can not find relevent payment related to this order");
+        }
 
         $applicationId = $payment->transaction_id;
 
         $application = FinanceApi::getApplication($applicationId);
 
         return $application;
+    }
+
+    /**
+     * Fetches the first Order Payment related to Divido
+     * Would throw an error if more than one is in the db,
+     * but there's a bug in the order creation currently which creates two Payments
+     *
+     * @param \Order $order
+     * @return \OrderPayment|null
+     */
+    public function getFirstDividoOrderPayment(\Order $order):?\OrderPayment{
+        $payments = $order->getOrderPayments();
+
+        foreach($payments as $payment){
+            if($payment->payment_method === 'Powered By Divido' && $payment->transaction_id != ''){
+                //TODO: retrieve payment method name from a const
+                return $payment;
+            }
+        }
+        return null;
     }
 }
