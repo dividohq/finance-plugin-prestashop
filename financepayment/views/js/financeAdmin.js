@@ -143,8 +143,7 @@ function checkForReason(event){
                     var updateUrl = $("#updateUri").val();
                     $.ajax({
                         url: updateUrl,
-                        type: 'PATCH',
-                        method: 'PATCH',
+                        type: 'POST',
                         data: {
                             action: data.action,
                             orderId: orderId,
