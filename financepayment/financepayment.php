@@ -1068,9 +1068,9 @@ class FinancePayment extends PaymentModule
 
                 return true;
             } catch (Exception $e) {
-                return $e->message;
+                PrestaShopLogger::addLog('Finance Activation Error: '.$e->getMessage(), 1, null, 'Order', (int) $id_order, true);
+                return $e->getMessage();
             }
-            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int) $id_order, true);
         }
     }
 
