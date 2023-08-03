@@ -77,8 +77,6 @@ class Merchant_SDK
 }
 class FinanceApi
 {
-    const EXPECTED_CANCELLATION_STATUS = 'AWAITING_CANCELLATION';
-    const EXPECTED_REFUND_STATUS = 'AWAITING_REFUND';
 
     public function checkEnviromentHealth()
     {
@@ -388,15 +386,7 @@ class FinanceApi
             $refund
         );
 
-        $refundArr = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
-
-        if($response->getStatusCode() !== self::EXPECTED_REFUND_STATUS){
-            throw new Exception(
-                sprintf("Could not cancel: %s", $refundArr['message']),
-                $response->getStatusCode()
-            );
-        }
-        
+        $refundArr = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR); 
 
         return $refundArr['data'];
     }
