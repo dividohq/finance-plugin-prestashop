@@ -1071,24 +1071,6 @@ class FinancePayment extends PaymentModule
                 return $e->message;
             }
             PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int) $id_order, true);
-        } elseif ($orderStatus->id == Configuration::get('FINANCE_CANCELLATION_STATUS') && $orderPaymanet) {
-            try {
-                $this->setCancelled($orderPaymanet['transaction_id'], $total_price, $id_order);
-
-                return true;
-            } catch (Exception $e) {
-                return $e->message;
-            }
-            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int) $id_order, true);
-        } elseif ($orderStatus->id == Configuration::get('FINANCE_REFUND_STATUS') && $orderPaymanet) {
-            try {
-                $this->setRefunded($orderPaymanet['transaction_id'], $total_price, $id_order);
-
-                return true;
-            } catch (Exception $e) {
-                return $e->message;
-            }
-            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int) $id_order, true);
         }
     }
 
@@ -1208,74 +1190,6 @@ class FinancePayment extends PaymentModule
         $activation_response_body = $response->getBody()->getContents();
 
         return $activation_response_body;
-    }
-
-    /**
-     * @param $application_id
-     * @param $order_total
-     * @param $order_id
-     * @return string
-     */
-    public function setCancelled(
-        $application_id,
-        $order_total,
-        $order_id
-    ) {
-
-        // First get the application you wish to create an activation for.
-        $api_key   = Configuration::get('FINANCE_API_KEY');
-        $application = ( new \Divido\MerchantSDK\Models\Application() )
-        ->withId($application_id);
-        $items       = [
-            [
-                'name'     => "Order id: $order_id",
-                'quantity' => 1,
-                'price'    => $order_total * 100,
-            ],
-        ];
-        // Create a new application activation model.
-        $applicationCancel = ( new \Divido\MerchantSDK\Models\ApplicationCancellation() )
-            ->withOrderItems($items);
-        // Create a new activation for the application.
-        $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
-        $response = $sdk->applicationCancellations()->createApplicationCancellation($application, $applicationCancel);
-        $cancellation_response_body = $response->getBody()->getContents();
-
-        return $cancellation_response_body;
-    }
-
-    /**
-     * @param $application_id
-     * @param $order_total
-     * @param $order_id
-     * @return string
-     */
-    public function setRefunded(
-        $application_id,
-        $order_total,
-        $order_id
-    ) {
-        // First get the application you wish to create an activation for.
-        $api_key   = Configuration::get('FINANCE_API_KEY');
-        $application = ( new \Divido\MerchantSDK\Models\Application() )
-        ->withId($application_id);
-        $items       = [
-            [
-                'name'     => "Order id: $order_id",
-                'quantity' => 1,
-                'price'    => $order_total * 100,
-            ],
-        ];
-        // Create a new application activation model.
-        $applicationRefund = ( new \Divido\MerchantSDK\Models\ApplicationRefund() )
-            ->withOrderItems($items);
-        // Create a new activation for the application.
-
-        $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
-        $response = $sdk->applicationRefunds()->createApplicationRefund($application, $applicationRefund);
-        $cancellation_response_body = $response->getBody()->getContents();
-
-        return $cancellation_response_body;
     }
 
     /**
