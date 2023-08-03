@@ -117,7 +117,8 @@ function checkForReason(event){
         $("#reasonModal").parent().addClass('reason-modal-container');
         $("#reasonModal .body").html(data.message);
         if(data.reasons != null){
-            var reasonSelect = document.createElement("select")
+            const reasonSelect = document.createElement("select");
+            reasonSelect.setAttribute('id', 'pbdReason')
             reasonSelect.classList.add('custom-select');
             for(reason in data.reasons) {
                 let option = document.createElement("option");
@@ -128,14 +129,14 @@ function checkForReason(event){
             $("#reasonModal .body").append(reasonSelect);
         }
 
-        let buttons = [
-            {
-                text: data.action+" (without notifying lender)",
-                click: function(){
-                    submitStatus(newOrderStatus);
-                }
+        const continueBtn = {
+            text: data.action+" (without notifying lender)",
+            click: function(){
+                submitStatus(newOrderStatus);
             }
-        ];
+        };
+
+        let buttons = [continueBtn];
         if(data.notify){
             buttons.push({
                 text: data.action+" and notify lender",
@@ -147,35 +148,44 @@ function checkForReason(event){
                         data: {
                             action: data.action,
                             orderId: orderId,
-                            applicationId: data.application_id
+                            status: newOrderStatus,
+                            applicationId: data.application_id,
+                            amount: data.amount,
+                            reason: (document.getElementById('pbdReason'))
+                                ? document.getElementById('pbdReason').val()
+                                : null
                         }
                     }).done(function(response){
                         console.log(response);
-                        if(response.success){
-                            submitStatus(newOrderStatus);
-                        } else {
-                            $("#reasonModal .body")
-                                .html("<p>"+response.message+"</p>");
-                            $( "#reasonModal" )
-                                .dialog("option", "buttons", []);
+                        $("#reasonModal .body")
+                            .html("<p>"+response.message+"</p>");
+                        
+                        let newBtns = [];
+                        if(response.success === false){
+                            newBtns.push(continueBtn);
                         }
+                        setModalButtons(newBtns);
                     });
                 }
             });
         }
         
-        $( "#reasonModal" )
-            .dialog("option", "buttons", buttons)
-            .dialog("open");
-
-        $(".reason-modal-container button")
-            .addClass('btn btn-primary');
+        setModalButtons(buttons);
     })
 
     function submitStatus(status){
         var submitForm = document.getElementsByName('update_order_status')[0];
         $("#update_order_status_new_order_status_id").val(status);
         submitForm.submit();
+    }
+
+    function setModalButtons(buttons){
+        $( "#reasonModal" )
+        .dialog("option", "buttons", buttons)
+        .dialog("open");
+
+        $(".reason-modal-container button")
+            .addClass('btn btn-primary');
     }
     
 }
