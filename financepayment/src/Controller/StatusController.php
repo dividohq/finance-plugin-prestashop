@@ -9,6 +9,7 @@ use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Divido\Proxy\FinanceApi;
 use Configuration;
 use Tools;
+use Divido\Exceptions\DividoOrderPaymentException;
 
 class StatusController extends FrameworkBundleAdminController
 {
@@ -26,6 +27,11 @@ class StatusController extends FrameworkBundleAdminController
             "LOAN_AMENDED" => "Loan Amended",
             "NOT_GOING_AHEAD" => "Not Going Ahead",
             "NO_CUSTOMER_INFORMATION" => "No Customer Information"
+        ],
+        "divido" => [
+            "ALTERNATIVE_PAYMENT_METHOD_USED" => "Alternative Payment Method Used",
+            "GOODS_FAULTY" => "Goods Faulty",
+            "GOODS_NOT_RECEIVED" => "Goods Not Received"
         ]
     ];
 
@@ -37,8 +43,8 @@ class StatusController extends FrameworkBundleAdminController
         $return = [
             'message' => 'Unactionable event',
             'reasons' => null,
-            'notify' => true,
-            'action' => true
+            'notify' => false,
+            'action' => false
         ];
 
         try{
@@ -52,7 +58,7 @@ class StatusController extends FrameworkBundleAdminController
                 $return['action'] = 'continue';
                 $currency = $this->getOrderCurrencySymbol($order);
                 $application = $this->getApplicationFromOrder($order);
-                //TODO: amend: won't necessarily find application if cancelling 
+
                 $return['application_id'] = $application['id'];
                 $return['reasons'] = self::REASONS[$application['lender']['app_name']] ?? null;
             
@@ -77,13 +83,15 @@ class StatusController extends FrameworkBundleAdminController
 
                 $return['notify'] = true;
             }
-
+        } catch (DividoOrderPaymentException $e){
+            $return['message'] = '<p>The customer has not proceeded through the application yet, so you are unable to notify the lender.</p>';
         } catch (\Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException $e){
             $return['message'] = '<p>It appears you may be using a different API Key to the one used to create this application. Please revert to that API key if you wish to notify the lender of this status change</p>';
         } catch(\JsonException $e){
-            $return['message'] = '<p>There was an error reading this application.</p>';
+            $return['message'] = '<p>There was an error reading the related application.</p>';
         } catch(\Exception $e){
-            $return['message'] = sprintf("<p>%s</p>", $e->getMessage());
+            $return['message'] = sprintf("<p>An unexpected error has occured: %s</p>", $e->getMessage());
+            $return['action'] = false;
         }
         return $this->json($return);
     }
