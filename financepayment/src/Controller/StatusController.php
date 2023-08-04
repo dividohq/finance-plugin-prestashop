@@ -60,19 +60,19 @@ class StatusController extends FrameworkBundleAdminController
             
                 switch($newOrderStatus){
                     case Configuration::get('FINANCE_CANCELLATION_STATUS'):
-                        $return['amount'] = $application['amounts']['cancelable_amount']/100;
+                        $return['amount'] = $application['amounts']['cancelable_amount'];
                         $return['message'] = sprintf(
                             "<p>Are you sure you want to cancel this order?<p>
                             <p>The de-facto cancelable amount for this application is %s%s.</p>
-                        ", $currency, $return['amount']);
+                        ", $currency, number_format($return['amount']/100,2));
                         $return['action'] = self::ACTIONS['cancel'];
                         break;
                     case Configuration::get('FINANCE_REFUND_STATUS'):
-                        $return['amount'] = $application['amounts']['refundable_amount']/100;
+                        $return['amount'] = $application['amounts']['refundable_amount'];
                         $return['message'] = sprintf("
                             <p>Are you sure you want to refund this order?</p>
                             <p>The de-facto amount refundable for this application is %s%s. Any refund attempt exceeding this will be processed as a full refund for %s%s</p>
-                        ", $currency, $return['amount'], $currency, $return['amount']);
+                        ", $currency, number_format($return['amount']/100,2), $currency, number_format($return['amount']/100,2));
                         $return['action'] = self::ACTIONS['refund']; 
                         break;
                 }
