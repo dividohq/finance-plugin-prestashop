@@ -27,11 +27,6 @@ class StatusController extends FrameworkBundleAdminController
             "LOAN_AMENDED" => "Loan Amended",
             "NOT_GOING_AHEAD" => "Not Going Ahead",
             "NO_CUSTOMER_INFORMATION" => "No Customer Information"
-        ],
-        "divido" => [
-            "ALTERNATIVE_PAYMENT_METHOD_USED" => "Alternative Payment Method Used",
-            "GOODS_FAULTY" => "Goods Faulty",
-            "GOODS_NOT_RECEIVED" => "Goods Not Received"
         ]
     ];
 
@@ -60,6 +55,7 @@ class StatusController extends FrameworkBundleAdminController
                 $application = $this->getApplicationFromOrder($order);
 
                 $return['application_id'] = $application['id'];
+                $return['lender'] = $application['lender']['app_name'];
                 $return['reasons'] = self::REASONS[$application['lender']['app_name']] ?? null;
             
                 switch($newOrderStatus){
@@ -87,6 +83,7 @@ class StatusController extends FrameworkBundleAdminController
             $return['message'] = '<p>The customer has not proceeded through the application yet, so you are unable to notify the lender.</p>';
         } catch (\Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException $e){
             $return['message'] = '<p>It appears you may be using a different API Key to the one used to create this application. Please revert to that API key if you wish to notify the lender of this status change</p>';
+            \PrestaShopLogger::addLog(sprintf("Bad response from Divido: %s", $e->getMessage()));
         } catch(\JsonException $e){
             $return['message'] = '<p>There was an error reading the related application.</p>';
         } catch(\Exception $e){
@@ -156,6 +153,7 @@ class StatusController extends FrameworkBundleAdminController
             $order->setCurrentState($newPrestaStatus);
 
         } catch (\Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException $e){
+            \PrestaShopLogger::addLog(sprintf("Bad response from Divido: %s", $e->getMessage()));
             $return = array_merge($return, [
                 'success' => false,
                 'message' => sprintf("Can not notify lender: %s.", $e->getMessage())

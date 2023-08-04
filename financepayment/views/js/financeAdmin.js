@@ -152,7 +152,7 @@ function checkForReason(event){
                             applicationId: data.application_id,
                             amount: data.amount,
                             reason: (document.getElementById('pbdReason'))
-                                ? document.getElementById('pbdReason').val()
+                                ? $('#pbdReason').val()
                                 : null
                         }
                     }).done(function(response){
