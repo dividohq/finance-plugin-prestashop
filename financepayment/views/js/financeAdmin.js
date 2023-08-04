@@ -62,7 +62,8 @@ $(document).on('change', 'input[name="FINANCE_ALL_PLAN_SELECTION"]', updatePlans
 $(document).on('change', 'select[name="FINANCE_PRODUCTS_OPTIONS"]', updateProductOptions);
 $(document).on('change', 'select[name="FINANCE_display"]', updateProductPlans);
 
-$(document).on('click', '.update-status', checkForReason);
+$(document).on('click', '.update-status', checkForReasonFromOrderBody);
+$(document).on('click', '#update_order_status_action_btn', checkForReasonFromTab);
 
 function updatePlansDiv() {
     val = $('input[name="FINANCE_ALL_PLAN_SELECTION"]:checked').val();
@@ -92,10 +93,24 @@ function updateProductPlans() {
     }
 }
 
-function checkForReason(event){
+function checkForReasonFromTab(event){
     event.preventDefault();
 
-    var newOrderStatus = $("#update_order_status_new_order_status_id").val();
+    const newOrderStatus = $("#update_order_status_action_input").val();
+
+    checkForReason(newOrderStatus);
+}
+
+function checkForReasonFromOrderBody(event){
+    event.preventDefault();
+
+    const newOrderStatus = $("#update_order_status_new_order_status_id").val();
+
+    checkForReason(newOrderStatus);
+}
+
+function checkForReason(newOrderStatus){
+    
     var reasonUrl = $("#reasonUri").val();
     var orderId = $("#orderId").val();
 
