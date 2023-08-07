@@ -63,7 +63,7 @@ $(document).on('change', 'select[name="FINANCE_PRODUCTS_OPTIONS"]', updateProduc
 $(document).on('change', 'select[name="FINANCE_display"]', updateProductPlans);
 
 $(document).on('click', '.update-status', checkForReasonFromOrderBody);
-$(document).on('click', '#update_order_status_action_btn', checkForReasonFromTab);
+$(document).on('click', '.choice-type button', warn);
 
 function updatePlansDiv() {
     val = $('input[name="FINANCE_ALL_PLAN_SELECTION"]:checked').val();
@@ -91,6 +91,20 @@ function updateProductPlans() {
     } else {
         $('.finance_plans_wrapper').slideUp();
     }
+}
+
+function warn(e){
+    e.preventDefault();
+
+    const greatGrandParent = e.target.parentElement.parentElement.parentElement;
+    for(const child of greatGrandParent.children){
+        if(child.classList.contains('column-payment')){
+            if(child.innerHTML.trim() == "Powered By Divido"){
+                alert("Please note, you will not be able to automatically notify the lender if cancelling/refunding an order from this page. Please use the Order page to change the status");
+            }
+        }
+    }
+    
 }
 
 function checkForReasonFromTab(event){
