@@ -3,10 +3,12 @@
 
 namespace Prestashop\Module\Financepayment\Controller;
 
+require_once dirname(__FILE__) . '/../../financepayment.php';
 require_once dirname(__FILE__) . '/../../classes/divido.class.php';
 
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Divido\Proxy\FinanceApi;
+use FinancePayment;
 use Configuration;
 use Tools;
 use Divido\Exceptions\DividoOrderPaymentException;
@@ -46,7 +48,7 @@ class StatusController extends FrameworkBundleAdminController
             $order = $this->getOrderFromId($orderId);
             
             if(
-                $order->payment === $this->trans('Powered By Divido', 'Module.financepayment.Admin', []) &&
+                $order->payment === FinancePayment::DISPLAY_NAME &&
                 ($newOrderStatus == Configuration::get('FINANCE_CANCELLATION_STATUS') || 
                 $newOrderStatus == Configuration::get('FINANCE_REFUND_STATUS'))
             ){
@@ -214,8 +216,7 @@ class StatusController extends FrameworkBundleAdminController
         $payments = $order->getOrderPayments();
 
         foreach($payments as $payment){
-            if($payment->payment_method === 'Powered By Divido' && $payment->transaction_id != ''){
-                //TODO: retrieve payment method name from a const
+            if($payment->payment_method === FinancePayment::DISPLAY_NAME && $payment->transaction_id != ''){
                 return $payment;
             }
         }

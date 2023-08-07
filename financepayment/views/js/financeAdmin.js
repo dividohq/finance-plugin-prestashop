@@ -99,7 +99,7 @@ function warn(e){
     const greatGrandParent = e.target.parentElement.parentElement.parentElement;
     for(const child of greatGrandParent.children){
         if(child.classList.contains('column-payment')){
-            if(child.innerHTML.trim() == "Powered By Divido"){
+            if(child.innerHTML.trim() == pbdDisplayName){
                 alert("Please note, you will not be able to automatically notify the lender if cancelling/refunding an order from this page. Please use the Order page to change the status");
             }
         }

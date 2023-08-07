@@ -95,10 +95,12 @@ class FinancePayment extends PaymentModule
     const LOGO_RESIZE_HEIGHT = 30;
     const LOGO_PADDING = 2;
     const CHECKOUT_LOGO = 'checkout.png';
+    const MODULE_NAME = 'financepayment';
+    const DISPLAY_NAME = 'Powered By Divido';
 
     public function __construct()
     {
-        $this->name = 'financepayment';
+        $this->name = self::MODULE_NAME;
         $this->tab = 'payments_gateways';
         $this->version = DividoHelper::getPluginVersion();
         $this->author = 'Divido Financial Services Ltd';
@@ -109,7 +111,7 @@ class FinancePayment extends PaymentModule
 
         parent::__construct();
 
-        $this->displayName = $this->l('Powered By Divido');
+        $this->displayName = self::DISPLAY_NAME;
         $this->checkoutTitleDefault = $this->l('Pay in instalments');
         $this->checkoutDescriptionDefault = $this->l('Break your purchase down into smaller payments');
         $this->confirmUninstall = $this->l('uninstall_alert');
@@ -236,6 +238,7 @@ class FinancePayment extends PaymentModule
             'actionOrderStatusUpdate',
             'paymentReturn',
             'displayAdminOrderSide',
+            'displayAdminAfterHeader',
             'actionGetAdminOrderButtons'
         ];
 
@@ -1280,6 +1283,13 @@ class FinancePayment extends PaymentModule
         return $this->render($this->getModuleTemplatePath() . 'reason.html.twig', [
             'uri' => $this->generateAdminURIs(),
             'orderId' => $params['id_order']
+        ]);
+    }
+
+    public function hookDisplayAdminAfterHeader($params)
+    {
+        return $this->render($this->getModuleTemplatePath() . 'displayName.html.twig', [
+            'displayName' => $this->displayName
         ]);
     }
 
