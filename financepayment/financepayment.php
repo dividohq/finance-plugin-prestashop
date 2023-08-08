@@ -1289,7 +1289,8 @@ class FinancePayment extends PaymentModule
     public function hookDisplayAdminAfterHeader($params)
     {
         return $this->render($this->getModuleTemplatePath() . 'displayName.html.twig', [
-            'displayName' => $this->displayName
+            'displayName' => $this->displayName,
+            'updateWarning' => $this->l("Please note, you will not be able to automatically notify the lender if cancelling/refunding an order from this page. Please use the Order page to change the status")
         ]);
     }
 

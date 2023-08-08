@@ -32,6 +32,22 @@ class StatusController extends FrameworkBundleAdminController
         ]
     ];
 
+    const FEEDBACK = [
+        'cancel_confirmation' => 'Are you sure you want to cancel this order?',
+        'cancellable_amount' => 'The de-facto amount that can be cancelled by the lender for this application is %s',
+        'refund_confirmation' => 'Are you sure you want to refund this order?',
+        'refundable_amount' => 'The de-facto amount refundable for this application is %s. Any refund attempt exceeding this will be processed as a full refund for %s',
+        'order_payment_exception' => 'The customer has not proceeded through the application yet, so you are unable to notify the lender',
+        'merchant_api_bad_response_exception' => 'It appears you may be using a different API Key to the one used to create this application. Please revert to that API key if you wish to notify the lender of this status change',
+        'unexpected_error' => 'An unexpected error has occurred',
+        'cancel_success' => 'The lender has been notified of the cancellation request (Cancellation ID. %s)',
+        'refund_success' => 'The lender has been notified of the refund request (Refund ID. %s)',
+        'unrecognised_action' => 'There is nothing to perform for this action (%s)',
+        'update_unexpected_error' => 'An error occurred whilst attempting to notify the lender',
+        'order_id_exception' => 'Could not find order with ID',
+        'divido_order_payment_exception' => 'The invoice related to this order could not be found'
+    ];
+
     public function reasonAction()
     {
         $newOrderStatus = Tools::getValue('newOrderStatus');
@@ -64,17 +80,28 @@ class StatusController extends FrameworkBundleAdminController
                     case Configuration::get('FINANCE_CANCELLATION_STATUS'):
                         $return['amount'] = $application['amounts']['cancelable_amount'];
                         $return['message'] = sprintf(
-                            "<p>Are you sure you want to cancel this order?<p>
-                            <p>The de-facto cancelable amount for this application is %s%s.</p>
-                        ", $currency, number_format($return['amount']/100,2));
+                            "<p>%s<p>
+                            <p>%s</p>",
+                            $this->_t(self::FEEDBACK['cancel_confirmation']),
+                            sprintf(
+                                $this->_t(self::FEEDBACK['cancellable_amount']),
+                                sprintf("%s%s", $currency, number_format($return['amount']/100,2))
+                            )
+                        );
                         $return['action'] = self::ACTIONS['cancel'];
                         break;
                     case Configuration::get('FINANCE_REFUND_STATUS'):
                         $return['amount'] = $application['amounts']['refundable_amount'];
                         $return['message'] = sprintf("
-                            <p>Are you sure you want to refund this order?</p>
-                            <p>The de-facto amount refundable for this application is %s%s. Any refund attempt exceeding this will be processed as a full refund for %s%s</p>
-                        ", $currency, number_format($return['amount']/100,2), $currency, number_format($return['amount']/100,2));
+                            <p>%s</p>
+                            <p>%s</p>", 
+                            $this->_t(self::FEEDBACK['refund_confirmation']),
+                            sprintf(
+                                $this->_t(self::FEEDBACK['refundable_amount']),
+                                sprintf("%s%s", $currency, number_format($return['amount']/100,2)), 
+                                sprintf("%s%s", $currency, number_format($return['amount']/100,2))
+                            )
+                        );
                         $return['action'] = self::ACTIONS['refund']; 
                         break;
                 }
@@ -82,14 +109,21 @@ class StatusController extends FrameworkBundleAdminController
                 $return['notify'] = true;
             }
         } catch (DividoOrderPaymentException $e){
-            $return['message'] = '<p>The customer has not proceeded through the application yet, so you are unable to notify the lender.</p>';
+            $return['message'] = $this->_t(self::FEEDBACK['order_payment_exception']);
         } catch (\Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException $e){
-            $return['message'] = '<p>It appears you may be using a different API Key to the one used to create this application. Please revert to that API key if you wish to notify the lender of this status change</p>';
-            \PrestaShopLogger::addLog(sprintf("Bad response from Divido: %s", $e->getMessage()));
+            $return['message'] = $this->_t(self::FEEDBACK['merchant_api_bad_response_exception']);
+            \PrestaShopLogger::addLog(sprintf("%s: %s", self::FEEDBACK['merchant_api_exception'], $e->getMessage()));
         } catch(\JsonException $e){
-            $return['message'] = '<p>There was an error reading the related application.</p>';
+            $return['message'] = $this->_t(self::FEEDBACK['merchant_api_bad_response_exception']);
+            \PrestaShopLogger::addLog(
+                sprintf(
+                    "Received a JsonException when trying to process the API respone: %s - %s", 
+                    $e->getMessage(), 
+                    json_last_error_msg()
+                )
+            );
         } catch(\Exception $e){
-            $return['message'] = sprintf("<p>An unexpected error has occured: %s</p>", $e->getMessage());
+            $return['message'] = sprintf("%s: %s", $this->_t(self::FEEDBACK['unexpected_error']), $e->getMessage());
             $return['action'] = false;
         }
         return $this->json($return);
@@ -123,7 +157,7 @@ class StatusController extends FrameworkBundleAdminController
                     $return = array_merge($return, [
                         'success' => true,
                         'message' => sprintf(
-                            'The lender has been notified of the cancellation request (Cancellation ID. %s)',
+                            $this->_t(self::FEEDBACK['cancel_success']),
                             $response['id']
                         ),
                         'cancellation_id' => $response['id']
@@ -135,7 +169,7 @@ class StatusController extends FrameworkBundleAdminController
                     $return = array_merge($return, [
                         'success' => true,
                         'message' => sprintf(
-                            'The lender has been notified of the refund request (Refund ID. %s',
+                            $this->_t(self::FEEDBACK['refund_success']),
                             $response['id']
                         ),
                         'refund_id' => $response['id']
@@ -145,7 +179,7 @@ class StatusController extends FrameworkBundleAdminController
                     $return = array_merge($return, [
                         'success' => false,
                         'message' => sprintf(
-                            'There is nothing to perform for this action (%s)',
+                            $this->_t(self::FEEDBACK['unrecognised_action']),
                             $action
                         )
                     ]);
@@ -158,13 +192,18 @@ class StatusController extends FrameworkBundleAdminController
             \PrestaShopLogger::addLog(sprintf("Bad response from Divido: %s", $e->getMessage()));
             $return = array_merge($return, [
                 'success' => false,
-                'message' => sprintf("Can not notify lender: %s.", $e->getMessage())
+                'message' => sprintf(
+                    "%s: %s", 
+                    $this->_t(self::FEEDBACK['update_unexpected_error']), 
+                    $e->getMessage()
+                )
             ]);
         } catch (\Exception $e) {
             $return = array_merge($return, [
                 'success' => false,
                 'message' => sprintf(
-                    "An error occured whilst attempting to notify the lender: %s", 
+                    "%s: %s",
+                    $this->_t(self::FEEDBACK['update_unexpected_error']),
                     $e->getMessage()
                 )
             ]);
@@ -177,7 +216,7 @@ class StatusController extends FrameworkBundleAdminController
     public function getOrderFromId($orderId){
         $order = new \Order((int) $orderId);
         if(!($order)){
-            throw new \Exception(sprintf("Could not find order with ID %s", $orderId));
+            throw new \Exception(sprintf("%s %s", $this->_t(self::FEEDBACK['order_id_exception']), $orderId));
         }
         
         return $order;
@@ -194,7 +233,9 @@ class StatusController extends FrameworkBundleAdminController
         $payment = $this->getFirstDividoOrderPayment($order);
 
         if($payment === null){
-            throw new DividoOrderPaymentException("Can not find relevent payment related to this order");
+            throw new DividoOrderPaymentException(
+                $this->_t(self::FEEDBACK['divido_order_payment_exception'])
+            );
         }
 
         $applicationId = $payment->transaction_id;
@@ -221,5 +262,9 @@ class StatusController extends FrameworkBundleAdminController
             }
         }
         return null;
+    }
+
+    private function _t(string $default):string{
+        return $this->trans($default, 'Modules.Financepayment.Admin', []);
     }
 }

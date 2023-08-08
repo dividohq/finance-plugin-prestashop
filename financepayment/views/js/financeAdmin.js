@@ -39,20 +39,21 @@ $(document).ready(
         }
 
         $("#reasonModal").dialog({
-            dialogClass: 'reason',
+            dialogClass: 'pbd-modal',
             closeText: "close",
             autoOpen: false,
             resizable: false,
             height: "auto",
+            modal: true
+        });
+
+        $("#pbdWarningModal").dialog({
+            dialogClass: 'pbd-modal',
+            closeText: "okay",
+            autoOpen: false,
+            resizable: false,
+            height: "auto",
             modal: true,
-            buttons: {
-                "Do something": function(){
-                    $(this).dialog("close");
-                },
-                "Do something else": function(){
-                    $(this).dialog("close");
-                }
-            }
         });
     }
 
@@ -100,7 +101,9 @@ function warn(e){
     for(const child of greatGrandParent.children){
         if(child.classList.contains('column-payment')){
             if(child.innerHTML.trim() == pbdDisplayName){
-                alert("Please note, you will not be able to automatically notify the lender if cancelling/refunding an order from this page. Please use the Order page to change the status");
+                $("#pbdWarningModal").parent().addClass('pbd-modal-container');
+                $(".pbd-modal-container button").addClass('btn btn-primary');
+                $("#pbdWarningModal").dialog("open");
             }
         }
     }
@@ -143,7 +146,7 @@ function checkForReason(newOrderStatus){
             return;
         }
         
-        $("#reasonModal").parent().addClass('reason-modal-container');
+        $("#reasonModal").parent().addClass('pbd-modal-container');
         $("#reasonModal .body").html(data.message);
         if(data.reasons != null){
             const reasonSelect = document.createElement("select");
@@ -193,13 +196,15 @@ function checkForReason(newOrderStatus){
                         if(response.success === false){
                             newBtns.push(continueBtn);
                         }
-                        setModalButtons(newBtns);
+                        setModalButtons($("#reasonModal"), newBtns);
+                        $("#reasonModal").dialog("open");
                     });
                 }
             });
         }
         
-        setModalButtons(buttons);
+        setModalButtons($("#reasonModal"), buttons);
+        $("#reasonModal").dialog("open");
     })
 
     function submitStatus(status){
@@ -208,12 +213,10 @@ function checkForReason(newOrderStatus){
         submitForm.submit();
     }
 
-    function setModalButtons(buttons){
-        $( "#reasonModal" )
-        .dialog("option", "buttons", buttons)
-        .dialog("open");
+    function setModalButtons(modal, buttons){
+        modal.dialog("option", "buttons", buttons)
 
-        $(".reason-modal-container button")
+        $(".pbd-modal-container button")
             .addClass('btn btn-primary');
     }
     

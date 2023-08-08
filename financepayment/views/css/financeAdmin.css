@@ -1,8 +1,8 @@
-#reasonModal .body{
+.pdb-modal .body{
     margin: 15px 0;
 }
 
-.reason-modal-container{
+.pbd-modal-container{
     background-color: white;
     padding: 15px;
     border: 1px solid #dbe6e9;
@@ -12,10 +12,10 @@
     min-width: 50%;
 }
 
-.reason-modal-container .ui-dialog-titlebar-close{
+.pbd-modal-container .ui-dialog-titlebar-close{
     float: right;
 }
 
-.reason-modal-container .ui-dialog-buttonset button{
+.pbd-modal-container .ui-dialog-buttonset button{
     margin-right: 15px;
 }
