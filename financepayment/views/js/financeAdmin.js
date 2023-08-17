@@ -95,7 +95,6 @@ function updateProductPlans() {
 }
 
 function warn(e){
-    e.preventDefault();
 
     const greatGrandParent = e.target.parentElement.parentElement.parentElement;
     for(const child of greatGrandParent.children){
