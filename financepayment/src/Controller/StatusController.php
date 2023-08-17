@@ -32,22 +32,6 @@ class StatusController extends FrameworkBundleAdminController
         ]
     ];
 
-    const FEEDBACK = [
-        'cancel_confirmation' => 'Are you sure you want to cancel this order?',
-        'cancellable_amount' => 'The de-facto amount that can be cancelled by the lender for this application is %s',
-        'refund_confirmation' => 'Are you sure you want to refund this order?',
-        'refundable_amount' => 'The de-facto amount refundable for this application is %s. Any refund attempt exceeding this will be processed as a full refund for %s',
-        'order_payment_exception' => 'The customer has not proceeded through the application yet, so you are unable to notify the lender',
-        'merchant_api_bad_response_exception' => 'It appears you may be using a different API Key to the one used to create this application. Please revert to that API key if you wish to notify the lender of this status change',
-        'unexpected_error' => 'An unexpected error has occurred',
-        'cancel_success' => 'The lender has been notified of the cancellation request (Cancellation ID. %s)',
-        'refund_success' => 'The lender has been notified of the refund request (Refund ID. %s)',
-        'unrecognised_action' => 'There is nothing to perform for this action (%s)',
-        'update_unexpected_error' => 'An error occurred whilst attempting to notify the lender',
-        'order_id_exception' => 'Could not find order with ID',
-        'divido_order_payment_exception' => 'The invoice related to this order could not be found'
-    ];
-
     public function reasonAction()
     {
         $newOrderStatus = Tools::getValue('newOrderStatus');
@@ -82,9 +66,9 @@ class StatusController extends FrameworkBundleAdminController
                         $return['message'] = sprintf(
                             "<p>%s<p>
                             <p>%s</p>",
-                            $this->_t(self::FEEDBACK['cancel_confirmation']),
+                            $this->_t('cancel_confirmation_prompt'),
                             sprintf(
-                                $this->_t(self::FEEDBACK['cancellable_amount']),
+                                $this->_t('cancel_amount_warning_msg'),
                                 sprintf("%s%s", $currency, number_format($return['amount']/100,2))
                             )
                         );
@@ -95,9 +79,9 @@ class StatusController extends FrameworkBundleAdminController
                         $return['message'] = sprintf("
                             <p>%s</p>
                             <p>%s</p>", 
-                            $this->_t(self::FEEDBACK['refund_confirmation']),
+                            $this->_t('refund_confirmation_prompt'),
                             sprintf(
-                                $this->_t(self::FEEDBACK['refundable_amount']),
+                                $this->_t('refund_amount_warning_msg'),
                                 sprintf("%s%s", $currency, number_format($return['amount']/100,2)), 
                                 sprintf("%s%s", $currency, number_format($return['amount']/100,2))
                             )
@@ -109,12 +93,12 @@ class StatusController extends FrameworkBundleAdminController
                 $return['notify'] = true;
             }
         } catch (DividoOrderPaymentException $e){
-            $return['message'] = $this->_t(self::FEEDBACK['order_payment_exception']);
+            $return['message'] = $this->_t('journey_incomplete_warning_msg');
         } catch (\Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException $e){
-            $return['message'] = $this->_t(self::FEEDBACK['merchant_api_bad_response_exception']);
-            \PrestaShopLogger::addLog(sprintf("%s: %s", self::FEEDBACK['merchant_api_exception'], $e->getMessage()));
+            $return['message'] = $this->_t('update_api_key_error_msg');
+            \PrestaShopLogger::addLog(sprintf("Merchant API Exception: %s", $e->getMessage()));
         } catch(\JsonException $e){
-            $return['message'] = $this->_t(self::FEEDBACK['merchant_api_bad_response_exception']);
+            $return['message'] = $this->_t('unexpected_error_msg');
             \PrestaShopLogger::addLog(
                 sprintf(
                     "Received a JsonException when trying to process the API respone: %s - %s", 
@@ -123,7 +107,7 @@ class StatusController extends FrameworkBundleAdminController
                 )
             );
         } catch(\Exception $e){
-            $return['message'] = sprintf("%s: %s", $this->_t(self::FEEDBACK['unexpected_error']), $e->getMessage());
+            $return['message'] = sprintf("%s: %s", $this->_t('unexpected_error_msg'), $e->getMessage());
             $return['action'] = false;
         }
         return $this->json($return);
@@ -157,7 +141,7 @@ class StatusController extends FrameworkBundleAdminController
                     $return = array_merge($return, [
                         'success' => true,
                         'message' => sprintf(
-                            $this->_t(self::FEEDBACK['cancel_success']),
+                            $this->_t('cancel_success_msg'),
                             $response['id']
                         ),
                         'cancellation_id' => $response['id']
@@ -169,7 +153,7 @@ class StatusController extends FrameworkBundleAdminController
                     $return = array_merge($return, [
                         'success' => true,
                         'message' => sprintf(
-                            $this->_t(self::FEEDBACK['refund_success']),
+                            $this->_t('refund_success_msg'),
                             $response['id']
                         ),
                         'refund_id' => $response['id']
@@ -179,7 +163,7 @@ class StatusController extends FrameworkBundleAdminController
                     $return = array_merge($return, [
                         'success' => false,
                         'message' => sprintf(
-                            $this->_t(self::FEEDBACK['unrecognised_action']),
+                            $this->_t('unrecognised_action_error_msg'),
                             $action
                         )
                     ]);
@@ -194,7 +178,7 @@ class StatusController extends FrameworkBundleAdminController
                 'success' => false,
                 'message' => sprintf(
                     "%s: %s", 
-                    $this->_t(self::FEEDBACK['update_unexpected_error']), 
+                    $this->_t('update_generic_error_msg'), 
                     $e->getMessage()
                 )
             ]);
@@ -203,7 +187,7 @@ class StatusController extends FrameworkBundleAdminController
                 'success' => false,
                 'message' => sprintf(
                     "%s: %s",
-                    $this->_t(self::FEEDBACK['update_unexpected_error']),
+                    $this->_t('update_generic_error_msg'),
                     $e->getMessage()
                 )
             ]);
@@ -216,7 +200,7 @@ class StatusController extends FrameworkBundleAdminController
     public function getOrderFromId($orderId){
         $order = new \Order((int) $orderId);
         if(!($order)){
-            throw new \Exception(sprintf("%s %s", $this->_t(self::FEEDBACK['order_id_exception']), $orderId));
+            throw new \Exception(sprintf("%s %s", $this->_t('order_id_error_msg'), $orderId));
         }
         
         return $order;
@@ -234,7 +218,7 @@ class StatusController extends FrameworkBundleAdminController
 
         if($payment === null){
             throw new DividoOrderPaymentException(
-                $this->_t(self::FEEDBACK['divido_order_payment_exception'])
+                $this->_t('invoice_unfound_error_msg')
             );
         }
 
@@ -264,7 +248,7 @@ class StatusController extends FrameworkBundleAdminController
         return null;
     }
 
-    private function _t(string $default):string{
-        return $this->trans($default, 'Modules.Financepayment.Admin', []);
+    private function _t(string $key):string{
+        return $this->trans($key, 'Modules.Financepayment', []);
     }
 }
