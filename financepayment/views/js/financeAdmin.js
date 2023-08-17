@@ -64,6 +64,7 @@ $(document).on('change', 'select[name="FINANCE_PRODUCTS_OPTIONS"]', updateProduc
 $(document).on('change', 'select[name="FINANCE_display"]', updateProductPlans);
 
 $(document).on('click', '.update-status', checkForReasonFromOrderBody);
+$(document).on('click', '#update_order_status_action_btn', checkForReasonFromTab);
 $(document).on('click', '.choice-type button', warn);
 
 function updatePlansDiv() {
