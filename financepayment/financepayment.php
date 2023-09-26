@@ -95,10 +95,12 @@ class FinancePayment extends PaymentModule
     const LOGO_RESIZE_HEIGHT = 30;
     const LOGO_PADDING = 2;
     const CHECKOUT_LOGO = 'checkout.png';
+    const MODULE_NAME = 'financepayment';
+    const DISPLAY_NAME = 'Powered By Divido';
 
     public function __construct()
     {
-        $this->name = 'financepayment';
+        $this->name = self::MODULE_NAME;
         $this->tab = 'payments_gateways';
         $this->version = DividoHelper::getPluginVersion();
         $this->author = 'Divido Financial Services Ltd';
@@ -109,7 +111,7 @@ class FinancePayment extends PaymentModule
 
         parent::__construct();
 
-        $this->displayName = $this->l('Powered By Divido');
+        $this->displayName = self::DISPLAY_NAME;
         $this->checkoutTitleDefault = $this->l('Pay in instalments');
         $this->checkoutDescriptionDefault = $this->l('Break your purchase down into smaller payments');
         $this->confirmUninstall = $this->l('uninstall_alert');
@@ -119,6 +121,16 @@ class FinancePayment extends PaymentModule
 
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
 
+    }
+
+    protected function generateAdminURIs()
+    {
+            $router = PrestaShop\PrestaShop\Adapter\SymfonyContainer::getInstance()->get('router');
+
+            return [
+                'reason' => $router->generate('reason'),
+                'update' => $router->generate('update')
+            ];
     }
 
     /**
@@ -191,16 +203,7 @@ class FinancePayment extends PaymentModule
 
         include_once dirname(__FILE__).'/sql/install.php';
 
-        if (!parent::install()
-            || !$this->registerHook('payment')
-            || !$this->registerHook('header')
-            || !$this->registerHook('actionAdminControllerSetMedia')
-            || !$this->registerHook('displayProductPriceBlock')
-            || !$this->registerHook('displayAdminProductsExtra')
-            || !$this->registerHook('actionProductUpdate')
-            || !$this->registerHook('actionOrderStatusUpdate')
-            || !$this->registerHook('paymentReturn')
-        ) {
+        if (!parent::install() || !$this->registerHooks()) {
             return false;
         }
         $status = array();
@@ -224,6 +227,23 @@ class FinancePayment extends PaymentModule
         return true;
     }
 
+    private function registerHooks(){
+        $hooks = [
+            'payment',
+            'header',
+            'actionAdminControllerSetMedia',
+            'displayProductPriceBlock',
+            'displayAdminProductsExtra',
+            'actionProductUpdate',
+            'actionOrderStatusUpdate',
+            'paymentReturn',
+            'displayAdminOrderSide',
+            'displayAdminAfterHeader',
+            'actionGetAdminOrderButtons'
+        ];
+
+        return (bool) $this->registerHook($hooks);
+    }
     /**
      * @param $name
      * @param $color
@@ -946,6 +966,7 @@ class FinancePayment extends PaymentModule
     public function hookActionAdminControllerSetMedia()
     {
         $this->context->controller->addJS($this->_path.'views/js/financeAdmin.js');
+        $this->context->controller->addCSS($this->_path.'views/css/financeAdmin.css');
     }
 
     /**
@@ -1050,27 +1071,9 @@ class FinancePayment extends PaymentModule
 
                 return true;
             } catch (Exception $e) {
-                return $e->message;
+                PrestaShopLogger::addLog('Finance Activation Error: '.$e->getMessage(), 1, null, 'Order', (int) $id_order, true);
+                return $e->getMessage();
             }
-            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int) $id_order, true);
-        } elseif ($orderStatus->id == Configuration::get('FINANCE_CANCELLATION_STATUS') && $orderPaymanet) {
-            try {
-                $this->setCancelled($orderPaymanet['transaction_id'], $total_price, $id_order);
-
-                return true;
-            } catch (Exception $e) {
-                return $e->message;
-            }
-            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int) $id_order, true);
-        } elseif ($orderStatus->id == Configuration::get('FINANCE_REFUND_STATUS') && $orderPaymanet) {
-            try {
-                $this->setRefunded($orderPaymanet['transaction_id'], $total_price, $id_order);
-
-                return true;
-            } catch (Exception $e) {
-                return $e->message;
-            }
-            PrestaShopLogger::addLog('Finance Activation Error: '.$e->message, 1, null, 'Order', (int) $id_order, true);
         }
     }
 
@@ -1193,74 +1196,6 @@ class FinancePayment extends PaymentModule
     }
 
     /**
-     * @param $application_id
-     * @param $order_total
-     * @param $order_id
-     * @return string
-     */
-    public function setCancelled(
-        $application_id,
-        $order_total,
-        $order_id
-    ) {
-
-        // First get the application you wish to create an activation for.
-        $api_key   = Configuration::get('FINANCE_API_KEY');
-        $application = ( new \Divido\MerchantSDK\Models\Application() )
-        ->withId($application_id);
-        $items       = [
-            [
-                'name'     => "Order id: $order_id",
-                'quantity' => 1,
-                'price'    => $order_total * 100,
-            ],
-        ];
-        // Create a new application activation model.
-        $applicationCancel = ( new \Divido\MerchantSDK\Models\ApplicationCancellation() )
-            ->withOrderItems($items);
-        // Create a new activation for the application.
-        $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
-        $response = $sdk->applicationCancellations()->createApplicationCancellation($application, $applicationCancel);
-        $cancellation_response_body = $response->getBody()->getContents();
-
-        return $cancellation_response_body;
-    }
-
-    /**
-     * @param $application_id
-     * @param $order_total
-     * @param $order_id
-     * @return string
-     */
-    public function setRefunded(
-        $application_id,
-        $order_total,
-        $order_id
-    ) {
-        // First get the application you wish to create an activation for.
-        $api_key   = Configuration::get('FINANCE_API_KEY');
-        $application = ( new \Divido\MerchantSDK\Models\Application() )
-        ->withId($application_id);
-        $items       = [
-            [
-                'name'     => "Order id: $order_id",
-                'quantity' => 1,
-                'price'    => $order_total * 100,
-            ],
-        ];
-        // Create a new application activation model.
-        $applicationRefund = ( new \Divido\MerchantSDK\Models\ApplicationRefund() )
-            ->withOrderItems($items);
-        // Create a new activation for the application.
-
-        $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
-        $response = $sdk->applicationRefunds()->createApplicationRefund($application, $applicationRefund);
-        $cancellation_response_body = $response->getBody()->getContents();
-
-        return $cancellation_response_body;
-    }
-
-    /**
      * Retrieve all plans applicable to all/some of the items
      * in the cart, according to the merchant config settings
      *
@@ -1325,4 +1260,54 @@ class FinancePayment extends PaymentModule
         }
         return $filename;
     }
+
+    public function hookActionGetAdminOrderButtons($params)
+    {
+        $order = new Order($params['id_order']);
+
+        /** @var \Symfony\Bundle\FrameworkBundle\Routing\Router $router */
+        $router = $this->get('router');
+
+        /** @var \PrestaShopBundle\Controller\Admin\Sell\Order\ActionsBarButtonsCollection $bar */
+        $bar = $params['actions_bar_buttons_collection'];
+
+        $viewCustomerUrl = $router->generate('admin_customers_view', ['customerId'=> (int)$order->id_customer]);
+        $bar->add(
+            new \PrestaShopBundle\Controller\Admin\Sell\Order\ActionsBarButton(
+                'btn-secondary', ['href' => $viewCustomerUrl], 'Notify Lender...'
+            )
+        );
+    }
+
+    public function hookDisplayAdminOrderSide($params){
+        return $this->render($this->getModuleTemplatePath() . 'reason.html.twig', [
+            'uri' => $this->generateAdminURIs(),
+            'orderId' => $params['id_order']
+        ]);
+    }
+
+    public function hookDisplayAdminAfterHeader($params)
+    {
+        if($params['smarty']->tpl_vars['title']->value === 'Orders'){
+            return $this->render($this->getModuleTemplatePath() . 'displayName.html.twig', [
+                'displayName' => $this->displayName,
+                'updateWarning' => $this->l('status_update_notification_warning_msg')
+            ]);
+        }
+    }
+
+
+    private function getModuleTemplatePath(): string
+    {
+        return sprintf('@Modules/%s/views/templates/admin/', $this->name);
+    }
+
+    private function render(string $template, array $params = []): string
+    {
+        /** @var Twig_Environment $twig */
+        $twig = $this->get('twig');
+
+        return $twig->render($template, $params);
+    }
+
 }

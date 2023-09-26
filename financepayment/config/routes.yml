@@ -1,0 +1,10 @@
+reason:
+  path: financepayment/status/reason
+  methods: [GET]
+  defaults:
+    _controller: 'Prestashop\Module\Financepayment\Controller\StatusController::reasonAction'
+update:
+  path: financepayment/status/update
+  methods: [POST]
+  defaults:
+    _controller: 'Prestashop\Module\Financepayment\Controller\StatusController::updateAction'

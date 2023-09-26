@@ -1,6 +1,5 @@
 {
     "config": {
-        "prepend-autoloader": false,
         "allow-plugins": {
             "php-http/discovery": true
         }
@@ -9,5 +8,15 @@
         "php": ">=5",
         "divido/merchant-sdk":"^3.0.1",
         "php-http/message-factory": "^1.1"
+    },
+    "autoload": {
+        "psr-4": {
+          "Prestashop\\Module\\Financepayment\\Controller\\": "src/Controller/",
+          "Divido\\Exceptions\\": "exceptions/"
+        },
+        "config": {
+            "prepend-autoloader": false
+        },
+        "type": "prestashop-module"
     }
 }

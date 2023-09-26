@@ -30,15 +30,16 @@ namespace Divido\Proxy;
 
 use Configuration;
 use Db;
+use Exception;
 use Divido\MerchantSDK\Client;
 use Divido\MerchantSDK\Environment;
 use Divido\MerchantSDK\Exceptions\MerchantApiBadResponseException;
 use Divido\MerchantSDK\Wrappers\HttpWrapper;
-class EnvironmentUnhealthyException extends \Exception
+class EnvironmentUnhealthyException extends Exception
 {
 }
 
-class EnvironmentUrlException extends \Exception
+class EnvironmentUrlException extends Exception
 {
 }
 
@@ -76,6 +77,7 @@ class Merchant_SDK
 }
 class FinanceApi
 {
+
     public function checkEnviromentHealth()
     {
         $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
@@ -277,5 +279,97 @@ class FinanceApi
         $query = "select * from `"._DB_PREFIX_."finance_product` where id_product = '".(int) $id_product."'";
 
         return Db::getInstance()->getRow($query);
+    }
+
+    public static function getApplication($applicationId):array{
+        $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
+        $api_key = Configuration::get('FINANCE_API_KEY');
+
+        $sdk = Merchant_SDK::getSDK($environment_url, $api_key);
+
+        $response = $sdk->applications()->getSingleApplication($applicationId);
+
+        if($response->getStatusCode() !== 200){
+            throw new Exception(
+                "Could not retrieve application", 
+                $response->getStatusCode()
+            );
+        }
+        
+        $applicationArr = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+        return $applicationArr['data'];
+        
+    }
+
+    public static function cancelApplication(string $applicationId, string $orderId, int $amount, string $reason=null):array{
+        $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
+        $api_key = Configuration::get('FINANCE_API_KEY');
+
+        $sdk = Merchant_SDK::getSDK($environment_url, $api_key);
+
+        $application = (new \Divido\MerchantSDK\Models\Application())
+            ->withId($applicationId);
+
+        $items = [
+            [
+                'name'     => "Prestashop Cancellation",
+                'quantity' => 1,
+                'price'    => $amount,
+            ],
+        ];
+
+        $cancellation = (new \Divido\MerchantSDK\Models\ApplicationCancellation())
+            ->withOrderItems($items)
+            ->withReference($orderId);
+
+        if($reason !== null){
+            $cancellation = $cancellation->withReason($reason);
+        }
+        
+        $response = $sdk->applicationCancellations()->createApplicationCancellation(
+            $application, 
+            $cancellation
+        );
+
+        $cancelArr = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+        $cancelArr['data']['debug']['code'] = $response->getStatusCode();
+        return $cancelArr['data'];
+    }
+    
+    public static function refundApplication(string $applicationId, string $orderId, int $amount, string $reason=null):array{
+        $environment_url = Configuration::get('FINANCE_ENVIRONMENT_URL');
+        $api_key = Configuration::get('FINANCE_API_KEY');
+
+        $sdk = Merchant_SDK::getSDK($environment_url, $api_key);
+
+        $application = (new \Divido\MerchantSDK\Models\Application())
+            ->withId($applicationId);
+
+        $items = [
+            [
+                'name'     => "Prestashop Refund",
+                'quantity' => 1,
+                'price'    => $amount,
+            ],
+        ];
+
+        $refund = (new \Divido\MerchantSDK\Models\ApplicationRefund())
+            ->withOrderItems($items)
+            ->withReference($orderId);
+
+        if(isset($reason)){
+            $refund = $refund->withReason($reason);
+        }
+        
+        $response = $sdk->applicationRefunds()->createApplicationRefund(
+            $application, 
+            $refund
+        );
+
+        $refundArr = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR); 
+
+        return $refundArr['data'];
     }
 }
