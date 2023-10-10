@@ -106,10 +106,13 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $deposit = (int) Tools::getValue('deposit');
         $finance = Tools::getValue('finance');
         $cart = $this->context->cart;
-
         $customer = new Customer($cart->id_customer);
-        $address = new Address($cart->id_address_invoice);
-        $country = Country::getIsoById($address->id_country);
+
+        $billingAddress = new Address($cart->id_address_invoice);
+        $billingCountry = Country::getIsoById($billingAddress->id_country);
+
+        $shippingAddress = new Address($cart->id_address_delivery);
+        $shippingCountry = Country::getIsoById($shippingAddress->id_country);
 
         if (gettype($this->context->language)==="integer") {
             $language = Language::getIsoById($this->context->language);
@@ -178,23 +181,29 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
         $applicant = array(
             array(
-                'firstName'   => $customer->firstname,
-                'lastName'    => $customer->lastname,
-                'email'       => $customer->email,
-                'addresses'   => array(
+                'firstName' => $customer->firstname,
+                'lastName' => $customer->lastname,
+                'email' => $customer->email,
+                'addresses' => array(
                     array(
-                        'postcode' => $address->postcode,
-                        'text'     => $address->address1 . " " . $address->city,
+                        'postcode' => $billingAddress->postcode,
+                        'country' => $billingCountry,
+                        'text' => sprintf("%s %s", $billingAddress->address1, $billingAddress->city)
                     )
+                ),
+                'shippingAddress' => array(
+                    'postcode' => $shippingAddress->postcode,
+                    'country' => $shippingCountry,
+                    'text' => sprintf("%s %s", $shippingAddress->address1, $shippingAddress->city)
                 )
             )
         );
-        if(empty($address->phone)){
-            $applicant[0]['phoneNumber'] = $address->phone;
+        if(empty($billingAddress->phone)){
+            $applicant[0]['phoneNumber'] = $billingAddress->phone;
         }
 
         $application               = ( new \Divido\MerchantSDK\Models\Application() )
-        ->withCountryId($country)
+        ->withCountryId($billingCountry)
         ->withCurrencyId($currency)
         ->withFinancePlanId($finance)
         ->withApplicants(
@@ -222,7 +231,8 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             )
         );
         //Note: If creating an application on a merchant with a shared secret, you will have to pass in a valid hmac
-
+var_dump($application->getJsonPayload());
+die();
         $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
 
         $response = $sdk->applications()->createApplication(
