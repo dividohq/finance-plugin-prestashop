@@ -202,37 +202,35 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
             $applicant[0]['phoneNumber'] = $billingAddress->phone;
         }
 
-        $application               = ( new \Divido\MerchantSDK\Models\Application() )
-        ->withCountryId($billingCountry)
-        ->withCurrencyId($currency)
-        ->withFinancePlanId($finance)
-        ->withApplicants(
-            $applicant
-        )
-        ->withOrderItems($products)
-        ->withDepositAmount($deposit)
-        ->withFinalisationRequired(false)
-        ->withMerchantReference((string) $cart_id)
-        ->withUrls(
-            array (
-                'merchant_redirect_url' => $redirect_url,
-                'merchant_checkout_url' => $checkout_url,
-                'merchant_response_url' => $response_url,
+        $application = ( new \Divido\MerchantSDK\Models\Application() )
+            ->withCountryId($billingCountry)
+            ->withCurrencyId($currency)
+            ->withFinancePlanId($finance)
+            ->withApplicants(
+                $applicant
             )
-        )
-        ->withMetadata(
-            array (
-                'cart_hash'    => $hash,
-                'ecom_platform' => 'prestashop',
-                'ecom_platform_version' => _PS_VERSION_,
-                'ecom_base_url'   => htmlspecialchars_decode($checkout_url),
-                'plugin_version'  => DividoHelper::getPluginVersion(),
-                'merchant_reference' => $cart_id
+            ->withOrderItems($products)
+            ->withDepositAmount($deposit)
+            ->withFinalisationRequired(false)
+            ->withMerchantReference((string) $cart_id)
+            ->withUrls(
+                array (
+                    'merchant_redirect_url' => $redirect_url,
+                    'merchant_checkout_url' => $checkout_url,
+                    'merchant_response_url' => $response_url,
+                )
             )
-        );
+            ->withMetadata(
+                array (
+                    'cart_hash'    => $hash,
+                    'ecom_platform' => 'prestashop',
+                    'ecom_platform_version' => _PS_VERSION_,
+                    'ecom_base_url'   => htmlspecialchars_decode($checkout_url),
+                    'plugin_version'  => DividoHelper::getPluginVersion(),
+                    'merchant_reference' => $cart_id
+                )
+            );
         //Note: If creating an application on a merchant with a shared secret, you will have to pass in a valid hmac
-var_dump($application->getJsonPayload());
-die();
         $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
 
         $response = $sdk->applications()->createApplication(
@@ -242,25 +240,25 @@ die();
         );
 
         try {
-                $application_response_body = $response->getBody()->getContents();
-                $decode                    = json_decode($application_response_body);
-                $result_redirect           = $decode->data->urls->application_url;
-                $data = array(
-                    'status' => true,
-                    'url'    => $result_redirect,
-                );
-                    $customer = new Customer($cart->id_customer);
-                    $this->validatOrder(
-                        $cart_id,
-                        Configuration::get('FINANCE_AWAITING_STATUS'),
-                        $sub_total,
-                        $this->module->displayName,
-                        null,
-                        array('transaction_id' => $decode->data->id),
-                        (int) $cart->id_currency,
-                        false,
-                        $customer->secure_key
-                    );
+            $application_response_body = $response->getBody()->getContents();
+            $decode                    = json_decode($application_response_body);
+            $result_redirect           = $decode->data->urls->application_url;
+            $data = array(
+                'status' => true,
+                'url'    => $result_redirect,
+            );
+            $customer = new Customer($cart->id_customer);
+            $this->validatOrder(
+                $cart_id,
+                Configuration::get('FINANCE_AWAITING_STATUS'),
+                $sub_total,
+                $this->module->displayName,
+                null,
+                array('transaction_id' => $decode->data->id),
+                (int) $cart->id_currency,
+                false,
+                $customer->secure_key
+            );
         } catch (Exception $e) {
             $data = array(
                 'status'  => false,
