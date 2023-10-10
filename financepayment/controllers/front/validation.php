@@ -103,16 +103,26 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
     {
         $this->context = Context::getContext();
         $api_key   = Configuration::get('FINANCE_API_KEY');
-        $deposit = (int) Tools::getValue('deposit');
+        $deposit = (int) Tools::getValue('deposit') ?? 0;
         $finance = Tools::getValue('finance');
         $cart = $this->context->cart;
         $customer = new Customer($cart->id_customer);
 
         $billingAddress = new Address($cart->id_address_invoice);
         $billingCountry = Country::getIsoById($billingAddress->id_country);
+        $billingAddressTextArr = [$billingAddress->address1];
+        if(!empty($billingAddress->address2)){
+            $billingAddressTextArr[] = $billingAddress->address2;
+        }
+        $billingAddressTextArr[] = $billingAddress->city;
 
         $shippingAddress = new Address($cart->id_address_delivery);
         $shippingCountry = Country::getIsoById($shippingAddress->id_country);
+        $shippingAddressTextArr = [$shippingAddress->address1];
+        if(!empty($shippingAddress->address2)){
+            $shippingAddressTextArr[] = $shippingAddress->address2;
+        }
+        $shippingAddressTextArr[] = $shippingAddress->city;
 
         if (gettype($this->context->language)==="integer") {
             $language = Language::getIsoById($this->context->language);
@@ -188,17 +198,18 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     array(
                         'postcode' => $billingAddress->postcode,
                         'country' => $billingCountry,
-                        'text' => sprintf("%s %s", $billingAddress->address1, $billingAddress->city)
+                        'text' => implode(", ", $billingAddressTextArr)
+                             
                     )
                 ),
                 'shippingAddress' => array(
                     'postcode' => $shippingAddress->postcode,
                     'country' => $shippingCountry,
-                    'text' => sprintf("%s %s", $shippingAddress->address1, $shippingAddress->city)
+                    'text' => implode(", ", $shippingAddressTextArr)
                 )
             )
         );
-        if(empty($billingAddress->phone)){
+        if(!empty($billingAddress->phone)){
             $applicant[0]['phoneNumber'] = $billingAddress->phone;
         }
 
