@@ -127,12 +127,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
         $cart_id = $cart->id;
 
-        $firstname = $customer->firstname;
-        $lastname = $customer->lastname;
-        $email = $customer->email;
-        $postcode  = $address->postcode;
-        $phone = $address->phone;
-
         $products  = array();
         foreach ($cart->getProducts() as $product) {
             $reference = (empty($product['reference'])) ? $product['id_product'] : $product['reference'];
@@ -184,19 +178,19 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
         $applicant = array(
             array(
-                'firstName'   => $firstname,
-                'lastName'    => $lastname,
-                'email'       => $email,
+                'firstName'   => $customer->firstname,
+                'lastName'    => $customer->lastname,
+                'email'       => $customer->email,
                 'addresses'   => array(
                     array(
-                        'postcode' => $postcode,
-                        'text'     => $postcode . " " . $address->address1 . " " . $address->city,
-                    ),
-                ),
-            ),
+                        'postcode' => $address->postcode,
+                        'text'     => $address->address1 . " " . $address->city,
+                    )
+                )
+            )
         );
-        if(empty($phone)){
-            $applicant[0]['phoneNumber'] = $phone;
+        if(empty($address->phone)){
+            $applicant[0]['phoneNumber'] = $address->phone;
         }
 
         $application               = ( new \Divido\MerchantSDK\Models\Application() )
