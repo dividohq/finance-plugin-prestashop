@@ -110,19 +110,19 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
         $billingAddress = new Address($cart->id_address_invoice);
         $billingCountry = Country::getIsoById($billingAddress->id_country);
-        $billingAddressTextArr = [$billingAddress->address1];
-        if(!empty($billingAddress->address2)){
-            $billingAddressTextArr[] = $billingAddress->address2;
-        }
-        $billingAddressTextArr[] = $billingAddress->city;
+        $billingAddressTextArr = [
+            $billingAddress->address1,
+            $billingAddress->address2,
+            $billingAddress->city
+        ];
 
         $shippingAddress = new Address($cart->id_address_delivery);
         $shippingCountry = Country::getIsoById($shippingAddress->id_country);
-        $shippingAddressTextArr = [$shippingAddress->address1];
-        if(!empty($shippingAddress->address2)){
-            $shippingAddressTextArr[] = $shippingAddress->address2;
-        }
-        $shippingAddressTextArr[] = $shippingAddress->city;
+        $shippingAddressTextArr = [
+            $shippingAddress->address1,
+            $shippingAddress->address2,
+            $shippingAddress->city
+        ];
 
         if (gettype($this->context->language)==="integer") {
             $language = Language::getIsoById($this->context->language);
@@ -198,14 +198,13 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                     array(
                         'postcode' => $billingAddress->postcode,
                         'country' => $billingCountry,
-                        'text' => implode(", ", $billingAddressTextArr)
-                             
+                        'text' => implode(", ", array_filter($billingAddressTextArr))
                     )
                 ),
                 'shippingAddress' => array(
                     'postcode' => $shippingAddress->postcode,
                     'country' => $shippingCountry,
-                    'text' => implode(", ", $shippingAddressTextArr)
+                    'text' => implode(", ", array_filter($shippingAddressTextArr))
                 )
             )
         );
