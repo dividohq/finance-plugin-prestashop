@@ -103,13 +103,16 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
     {
         $this->context = Context::getContext();
         $api_key   = Configuration::get('FINANCE_API_KEY');
-        $deposit = (int) Tools::getValue('deposit');
+        $deposit = (int) Tools::getValue('deposit') ?? 0;
         $finance = Tools::getValue('finance');
         $cart = $this->context->cart;
-
         $customer = new Customer($cart->id_customer);
-        $address = new Address($cart->id_address_invoice);
-        $country = Country::getIsoById($address->id_country);
+
+        $billingAddress = new Address($cart->id_address_invoice);
+        $billingAddressArr = $this->parsePrestashopAddress($billingAddress);
+
+        $shippingAddress = new Address($cart->id_address_delivery);
+        $shippingAddressArr = $this->parsePrestashopAddress($shippingAddress);
 
         if (gettype($this->context->language)==="integer") {
             $language = Language::getIsoById($this->context->language);
@@ -126,12 +129,6 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $currency = $currencyObj->iso_code;
 
         $cart_id = $cart->id;
-
-        $firstname = $customer->firstname;
-        $lastname = $customer->lastname;
-        $email = $customer->email;
-        $postcode  = $address->postcode;
-        $phone = $address->phone;
 
         $products  = array();
         foreach ($cart->getProducts() as $product) {
@@ -182,67 +179,48 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
 
         $this->saveHash($cart_id, $salt, $sub_total);
 
-        if(empty($phone)){
-            $applicant = array(
-                array(
-                    'firstName'   => $firstname,
-                    'lastName'    => $lastname,
-                    'email'       => $email,
-                    'addresses'   => array(
-                        array(
-                            'postcode' => $postcode,
-                            'text'     => $postcode . " " . $address->address1 . " " . $address->city,
-                        ),
-                    ),
-                ),
-            );
-        } else {
-            $applicant = array(
-                array(
-                    'firstName'   => $firstname,
-                    'lastName'    => $lastname,
-                    'phoneNumber' => $phone,
-                    'email'       => $email,
-                    'addresses'   => array(
-                        array(
-                            'postcode' => $postcode,
-                            'text'     => $postcode . " " . $address->address1 . " " . $address->city,
-                        ),
-                    ),
-                ),
-            );
-        }
-
-        $application               = ( new \Divido\MerchantSDK\Models\Application() )
-        ->withCountryId($country)
-        ->withCurrencyId($currency)
-        ->withFinancePlanId($finance)
-        ->withApplicants(
-            $applicant
-        )
-        ->withOrderItems($products)
-        ->withDepositAmount($deposit)
-        ->withFinalisationRequired(false)
-        ->withMerchantReference((string) $cart_id)
-        ->withUrls(
-            array (
-                'merchant_redirect_url' => $redirect_url,
-                'merchant_checkout_url' => $checkout_url,
-                'merchant_response_url' => $response_url,
-            )
-        )
-        ->withMetadata(
-            array (
-                'cart_hash'    => $hash,
-                'ecom_platform' => 'prestashop',
-                'ecom_platform_version' => _PS_VERSION_,
-                'ecom_base_url'   => htmlspecialchars_decode($checkout_url),
-                'plugin_version'  => DividoHelper::getPluginVersion(),
-                'merchant_reference' => $cart_id
+        $applicant = array(
+            array(
+                'firstName' => $customer->firstname,
+                'lastName' => $customer->lastname,
+                'email' => $customer->email,
+                'addresses' => array($billingAddressArr),
+                'shippingAddress' => $shippingAddressArr
             )
         );
-        //Note: If creating an application on a merchant with a shared secret, you will have to pass in a valid hmac
+        if(!empty($billingAddress->phone)){
+            $applicant[0]['phoneNumber'] = $billingAddress->phone;
+        }
 
+        $application = ( new \Divido\MerchantSDK\Models\Application() )
+            ->withCountryId($billingAddressArr['country'])
+            ->withCurrencyId($currency)
+            ->withFinancePlanId($finance)
+            ->withApplicants(
+                $applicant
+            )
+            ->withOrderItems($products)
+            ->withDepositAmount($deposit)
+            ->withFinalisationRequired(false)
+            ->withMerchantReference((string) $cart_id)
+            ->withUrls(
+                array (
+                    'merchant_redirect_url' => $redirect_url,
+                    'merchant_checkout_url' => $checkout_url,
+                    'merchant_response_url' => $response_url,
+                )
+            )
+            ->withMetadata(
+                array (
+                    'cart_hash'    => $hash,
+                    'ecom_platform' => 'prestashop',
+                    'ecom_platform_version' => _PS_VERSION_,
+                    'ecom_base_url'   => htmlspecialchars_decode($checkout_url),
+                    'plugin_version'  => DividoHelper::getPluginVersion(),
+                    'merchant_reference' => $cart_id
+                )
+            );
+        //Note: If creating an application on a merchant with a shared secret, you will have to pass in a valid hmac
         $sdk = Merchant_SDK::getSDK(Configuration::get('FINANCE_ENVIRONMENT_URL'), $api_key);
 
         $response = $sdk->applications()->createApplication(
@@ -252,25 +230,25 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         );
 
         try {
-                $application_response_body = $response->getBody()->getContents();
-                $decode                    = json_decode($application_response_body);
-                $result_redirect           = $decode->data->urls->application_url;
-                $data = array(
-                    'status' => true,
-                    'url'    => $result_redirect,
-                );
-                    $customer = new Customer($cart->id_customer);
-                    $this->validatOrder(
-                        $cart_id,
-                        Configuration::get('FINANCE_AWAITING_STATUS'),
-                        $sub_total,
-                        $this->module->displayName,
-                        null,
-                        array('transaction_id' => $decode->data->id),
-                        (int) $cart->id_currency,
-                        false,
-                        $customer->secure_key
-                    );
+            $application_response_body = $response->getBody()->getContents();
+            $decode                    = json_decode($application_response_body);
+            $result_redirect           = $decode->data->urls->application_url;
+            $data = array(
+                'status' => true,
+                'url'    => $result_redirect,
+            );
+            $customer = new Customer($cart->id_customer);
+            $this->validatOrder(
+                $cart_id,
+                Configuration::get('FINANCE_AWAITING_STATUS'),
+                $sub_total,
+                $this->module->displayName,
+                null,
+                array('transaction_id' => $decode->data->id),
+                (int) $cart->id_currency,
+                false,
+                $customer->secure_key
+            );
         } catch (Exception $e) {
             $data = array(
                 'status'  => false,
@@ -297,6 +275,24 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         } else {
             Db::getInstance()->insert('divido_requests', $data);
         }
+    }
+
+    public function parsePrestashopAddress(Address $address){
+        $countryIso = Country::getIsoById($address->id_country);
+        $addressTextArr = array_filter([
+            $address->address1,
+            $address->address2,
+            $address->city
+        ]);
+        $addressArr = array(
+            'postcode' => $address->postcode,
+            'country' => $countryIso,
+            'text' => implode(", ", $addressTextArr)
+        );
+        if(!empty($address->company)){
+            $addressArr['co'] = $address->company;
+        }
+        return $addressArr;
     }
 
     public function validatOrder(
