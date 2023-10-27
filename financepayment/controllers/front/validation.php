@@ -109,20 +109,10 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         $customer = new Customer($cart->id_customer);
 
         $billingAddress = new Address($cart->id_address_invoice);
-        $billingCountry = Country::getIsoById($billingAddress->id_country);
-        $billingAddressTextArr = [
-            $billingAddress->address1,
-            $billingAddress->address2,
-            $billingAddress->city
-        ];
+        $billingAddressArr = $this->parsePrestashopAddress($billingAddress);
 
         $shippingAddress = new Address($cart->id_address_delivery);
-        $shippingCountry = Country::getIsoById($shippingAddress->id_country);
-        $shippingAddressTextArr = [
-            $shippingAddress->address1,
-            $shippingAddress->address2,
-            $shippingAddress->city
-        ];
+        $shippingAddressArr = $this->parsePrestashopAddress($shippingAddress);
 
         if (gettype($this->context->language)==="integer") {
             $language = Language::getIsoById($this->context->language);
@@ -194,18 +184,8 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
                 'firstName' => $customer->firstname,
                 'lastName' => $customer->lastname,
                 'email' => $customer->email,
-                'addresses' => array(
-                    array(
-                        'postcode' => $billingAddress->postcode,
-                        'country' => $billingCountry,
-                        'text' => implode(", ", array_filter($billingAddressTextArr))
-                    )
-                ),
-                'shippingAddress' => array(
-                    'postcode' => $shippingAddress->postcode,
-                    'country' => $shippingCountry,
-                    'text' => implode(", ", array_filter($shippingAddressTextArr))
-                )
+                'addresses' => array($billingAddressArr),
+                'shippingAddress' => $shippingAddressArr
             )
         );
         if(!empty($billingAddress->phone)){
@@ -213,7 +193,7 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         }
 
         $application = ( new \Divido\MerchantSDK\Models\Application() )
-            ->withCountryId($billingCountry)
+            ->withCountryId($billingAddressArr['country'])
             ->withCurrencyId($currency)
             ->withFinancePlanId($finance)
             ->withApplicants(
@@ -295,6 +275,24 @@ class FinancePaymentValidationModuleFrontController extends ModuleFrontControlle
         } else {
             Db::getInstance()->insert('divido_requests', $data);
         }
+    }
+
+    public function parsePrestashopAddress(Address $address){
+        $countryIso = Country::getIsoById($address->id_country);
+        $addressTextArr = array_filter([
+            $address->address1,
+            $address->address2,
+            $address->city
+        ]);
+        $addressArr = array(
+            'postcode' => $address->postcode,
+            'country' => $countryIso,
+            'text' => implode(", ", $addressTextArr)
+        );
+        if(!empty($address->company)){
+            $addressArr['co'] = $address->company;
+        }
+        return $addressArr;
     }
 
     public function validatOrder(
