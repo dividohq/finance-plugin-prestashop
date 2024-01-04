@@ -140,6 +140,18 @@ class FinancePayment extends PaymentModule
      */
     public function install()
     {
+        $status = array();
+        $status['module_name'] = $this->name;
+        $status['send_email'] = false;
+        $status['invoice'] = false;
+        $status['unremovable'] = true;
+        $status['paid'] = false;
+        $state = $this->addState($this->l('awaiting_finance_response'), '#0404B4', $status);
+        Configuration::updateValue('FINANCE_AWAITING_STATUS', $state);
+
+        $state = $this->addState(ucfirst($this->l('referred')), '#0404B4', $status);
+        Configuration::updateValue('FINANCE_REFERRED_STATUS', $state);
+
         Configuration::updateValue('FINANCE_ENVIRONMENT_URL', null);
         Configuration::updateValue('FINANCE_API_KEY', null);
         Configuration::updateValue('FINANCE_ENVIRONMENT', null);
@@ -166,9 +178,13 @@ class FinancePayment extends PaymentModule
                 case 'ACCEPTED':
                 case 'DEPOSIT-PAID':
                 case 'ACTION-LENDER':
+                    $status = Configuration::get('PS_OS_PREPARATION');
+
+                    break;
+
                 case 'DEFERRED':
                 case 'REFERRED':
-                    $status = Configuration::get('PS_OS_PREPARATION');
+                    $status = Configuration::get('FINANCE_REFERRED_STATUS');
 
                     break;
 
@@ -206,17 +222,6 @@ class FinancePayment extends PaymentModule
         if (!parent::install() || !$this->registerHooks()) {
             return false;
         }
-        $status = array();
-        $status['module_name'] = $this->name;
-        $status['send_email'] = false;
-        $status['invoice'] = false;
-        $status['unremovable'] = true;
-        $status['paid'] = false;
-        $state = $this->addState($this->l('awaiting_finance_response'), '#0404B4', $status);
-        Configuration::updateValue('FINANCE_AWAITING_STATUS', $state);
-
-        $state = $this->addState(ucfirst($this->l('referred')), '#0404B4', $status);
-        Configuration::updateValue('FINANCE_REFERRED_STATUS', $state);
 
         /*------------------Handle hooks according to version-------------------*/
         if ($this->ps_below_7 && !$this->registerHook('payment')) {
