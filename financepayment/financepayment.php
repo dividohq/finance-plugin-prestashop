@@ -140,12 +140,14 @@ class FinancePayment extends PaymentModule
      */
     public function install()
     {
-        $status = array();
-        $status['module_name'] = $this->name;
-        $status['send_email'] = false;
-        $status['invoice'] = false;
-        $status['unremovable'] = true;
-        $status['paid'] = false;
+        $status = array(
+            'module_name' => $this->name,
+            'send_email' => false,
+            'invoice' => false,
+            'unremovable' => true,
+            'paid' => false
+        );
+        
         $state = $this->addState($this->l('awaiting_finance_response'), '#0404B4', $status);
         Configuration::updateValue('FINANCE_AWAITING_STATUS', $state);
 
