@@ -85,6 +85,7 @@ $_MODULE['<{financepayment}prestashop>financepayment_927bf69170e5eb352b671958245
 $_MODULE['<{financepayment}prestashop>financepayment_0a7924096d217a8482c878cfa9292d56'] = 'Ocurrió un error al intentar notificar al prestamista';
 $_MODULE['<{financepayment}prestashop>financepayment_2132c8cc1dae6078a3a381bc072c831d'] = 'No se pudo encontrar el pedido con ID';
 $_MODULE['<{financepayment}prestashop>financepayment_2773355d54974dac2829797c622764d0'] = 'No se pudo encontrar la factura relacionada con este pedido.';
+$_MODULE['<{financepayment}prestashop>financepayment_952801d9e615d57fd6600e3bb3db2717'] = 'referido';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Tu carrito parece estar vacío';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Error';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Confirmar';

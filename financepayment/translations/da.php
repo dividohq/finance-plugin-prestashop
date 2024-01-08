@@ -85,6 +85,7 @@ $_MODULE['<{financepayment}prestashop>financepayment_927bf69170e5eb352b671958245
 $_MODULE['<{financepayment}prestashop>financepayment_0a7924096d217a8482c878cfa9292d56'] = 'Der opstod en fejl under forsøget på at underrette långiveren';
 $_MODULE['<{financepayment}prestashop>financepayment_2132c8cc1dae6078a3a381bc072c831d'] = 'Kunne ikke finde ordre med ID';
 $_MODULE['<{financepayment}prestashop>financepayment_2773355d54974dac2829797c622764d0'] = 'Fakturaen relateret til denne ordre kunne ikke findes';
+$_MODULE['<{financepayment}prestashop>financepayment_952801d9e615d57fd6600e3bb3db2717'] = 'henvist';
 $_MODULE['<{financepayment}prestashop>payment_execution_6a88abffa95f951cdf12db5456ba23c2'] = 'Din kurv ser ud til at være tom';
 $_MODULE['<{financepayment}prestashop>payment_execution_75d8c6fe3d14cb7257e5ce9a5d3f8491'] = 'Fejl';
 $_MODULE['<{financepayment}prestashop>payment_execution_973a684991d48c2119c99f099ee14f86'] = 'Bekræfte';
